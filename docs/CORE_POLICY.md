@@ -77,3 +77,21 @@ Environment overrides:
 | ไม่รู้ effective Environment ของฝั่งรับ | — | ใช้ Artifact เป็น safe default (compatible เสมอ) |
 
 แต่ละ role ถาม override ของตัวเอง **แค่ครั้งแรกที่เริ่มทำงานในโปรเจกต์นี้** ไม่ถามซ้ำทุก session — รายละเอียดการถามและ Handoff Check อยู่ใน `ai/SA_PROJECT_INSTRUCTIONS.md`, `LEAD_PROJECT_INSTRUCTIONS.md`, `QA_PROJECT_INSTRUCTIONS.md`, `SEC_PROJECT_INSTRUCTIONS.md` (Option A เท่านั้น) §Environment override + §Handoff Environment Check
+
+---
+
+## 6. Routing Principle — เมื่อไหร่ผ่าน PO, เมื่อไหร่ตรง
+
+ระบบมี 2 รูปแบบ routing ที่ดูเหมือนไม่สมมาตร แต่ตั้งใจออกแบบตามจังหวะงาน:
+
+**Planning-phase handoff → ผ่าน PO เสมอ** (ความถี่ต่ำ ต้องการ oversight)
+- SA → PO → Lead (Solution Doc, ADR)
+- SEC Phase A → ผ่าน PO (Solution Doc security review, ก่อนเริ่ม implement)
+- เหตุผล: ช่วงวางแผนเกิดครั้งเดียวต่อ feature, PO เป็น single distribution channel ที่เห็นภาพรวมทั้งหมด เหมาะสำหรับจุดที่ต้องมี checkpoint ระดับ business
+
+**Execution-phase interaction → ตรงระหว่าง operational roles** (ความถี่สูง ต้องการความเร็ว)
+- Lead ↔ SA escalation (L-STEP 1.5)
+- Lead ↔ SEC Phase B (PR-level code review)
+- เหตุผล: ช่วง implement เกิดถี่ (ทุก task, ทุก PR) ถ้าผ่าน PO ทุกรอบจะกลายเป็นคอขวด — Lead กับ role ปฏิบัติการอื่นเป็นคนทำงานจริงในจังหวะนี้ ไม่จำเป็นต้องมี PO เป็นตัวกลางทุกครั้ง
+
+**กฎสรุป:** ยิ่งความถี่ของ interaction สูง (เกิดหลายรอบต่อ feature) ยิ่งควรตัดผ่าน PO ออก ยิ่งความถี่ต่ำ (เกิดครั้งเดียวต่อ feature) ยิ่งควรผ่าน PO เพื่อรักษา oversight — ไม่ใช่กฎตายตัวรายบุคคล role

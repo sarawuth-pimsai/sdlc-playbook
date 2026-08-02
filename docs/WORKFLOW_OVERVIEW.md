@@ -118,7 +118,7 @@ sequenceDiagram
     Note over SA: STEP 1.5 — Tier Triage (บังคับเสมอ ข้ามไม่ได้)\nตัดสิน Tier 1 / 2 / 3
     SA->>PO: Triage Summary (Tier 1)\nหรือ Solution Doc + ADRs + STACK_CONTEXT.md (Tier 2/3)
 
-    opt Tier 3 เท่านั้น (ทุก Option)
+    opt Tier 3 เท่านั้น (ทุก Option) — planning-phase, ผ่าน PO
         PO->>SEC: Solution Doc
         SEC->>PO: Security Requirements
     end
@@ -134,21 +134,28 @@ sequenceDiagram
 
     loop ทุก task
         Dev->>Dev: implement → update TASK_LOG (Lane + Assigned Dev)
+        opt Tier 3 เท่านั้น — execution-phase, ตรง Lead↔SEC ไม่ผ่าน PO
+            Lead->>SEC: changed files + task prompt (Phase B)
+            SEC->>Lead: Security_Review_[TaskID].md
+        end
     end
 
+    Note over QA: A-STEP 0 — เช็ค Tier ก่อนเริ่มเสมอ
     Dev->>QA: Deploy Notification\n(หลัง deploy SIT/Staging)
 
-    loop SIT Testing
+    loop SIT Testing — Tier 1: Lightweight Check / Tier 2-3: Full Test Cases
         QA->>Dev: Bug Report
         Dev->>QA: Fix + redeploy
     end
 
-    QA->>Lead: Test Report\n(sign-off)
+    QA->>Lead: Test Report\n(Tier 1: Smoke Test / Tier 2-3: Full Suite, sign-off)
     Note over Lead: Deploy Staging
     QA->>Lead: Phase B sign-off
     Note over Lead: Deploy Production
     QA->>Lead: Phase C smoke check ✓
 ```
+
+> Routing pattern (ทำไม Phase A ผ่าน PO แต่ Phase B ตรง Lead↔SEC) → ดูหลักการเต็มที่ [CORE_POLICY.md](CORE_POLICY.md) §6
 
 ---
 
@@ -164,7 +171,7 @@ flowchart TD
     SA_T -->|Tier 2 — Standard| T2["Solution Doc เต็ม"]
     SA_T -->|"Tier 3 — Full\n(หรือ business-risk flag ≥ 1)"| T3["Solution Doc เต็ม + SEC บังคับ"]
 
-    T3 --> SEC["SEC review\n→ Security Requirements"]
+    T3 --> SEC["SEC Phase A review\n→ Security Requirements\n(ผ่าน PO)"]
 
     T1 --> Lead_E{"Lead — Escalation Check\n(L-STEP 1.5)"}
     T2 --> Lead_E
@@ -175,10 +182,18 @@ flowchart TD
     Lead_E -->|scope ตรงตามเอกสาร| Lane["Lead — Parallel Lane Assignment\n(L-STEP 2.5)"]
 
     Lane --> Dev["Dev — implement ทีละ lane/task"]
-    Dev --> QA["QA — SIT → Staging → Production"]
+    Dev -.->|Tier 3 เท่านั้น| SEC_B["SEC Phase B review\nตรง Lead↔SEC (ไม่ผ่าน PO)"]
+
+    Dev --> QA_T{"QA — A-STEP 0\nเช็ค Tier ก่อนเริ่มเสมอ"}
+    QA_T -->|Tier 1| QA1["Lightweight Check (SIT)\n+ Smoke Test (Staging)"]
+    QA_T -->|Tier 2/3| QA23["Full Test Suite\nSIT → Staging → Production"]
+
+    QA1 -->|พบ risk เกินคาด| QESC["QA Escalation Request\nQA → Lead"]
+    QESC --> Lead_E
 
     style SA_T fill:#e97316,color:#fff
     style Lead_E fill:#3b82f6,color:#fff
+    style QA_T fill:#10b981,color:#fff
 ```
 
 **หมายเหตุ:**
@@ -186,6 +201,9 @@ flowchart TD
 - PO ไม่ตัดสิน tier — ทำได้แค่ flag business-risk keyword เป็น context ให้ SA
 - Lead escalate ตรงไป SA เมื่อพบ scope เกินขอบเขต Triage Summary/Solution Doc เดิม (ไม่ผ่าน PO)
 - Parallel Lane Assignment แยกงานเป็น lane ตาม domain สำหรับ task ที่ไม่มี dependency/file overlap กัน — solo ที่ไม่มี dev คนที่สองข้าม step นี้ได้
+- QA อ่าน `Tier:` จาก Solution Doc/Triage Summary header ที่ A-STEP 0 เสมอ — Tier 1 ใช้ Lightweight Check + Smoke Test แทนชุดเต็ม, Tier 2/3 ไม่เปลี่ยนอะไรเลย
+- QA Tier Escalation ผูกกับ Lead's Escalation Check เดิม (L-STEP 1.5) ไม่ใช่กลไกแยกลอย
+- Planning-phase (ผ่าน PO) vs execution-phase (ตรงระหว่าง role ปฏิบัติการ) เป็นหลักการเดียวกันทั่วระบบ — ดู [CORE_POLICY.md](CORE_POLICY.md) §6
 
 ---
 

@@ -210,7 +210,7 @@ After SA selects an option, draft the full Solution Doc using this structure:
 ```markdown
 # Solution Doc — [Feature name]
 
-Version: 1.0 | Date: [date] | Author: SA | Status: Draft
+Version: 1.0 | Date: [date] | Author: SA | Status: Draft | Tier: 2 หรือ 3
 
 ## 1. Overview
 

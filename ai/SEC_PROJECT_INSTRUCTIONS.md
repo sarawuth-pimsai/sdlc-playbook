@@ -47,6 +47,8 @@ If Solution_Doc is missing → do not start Phase A. แจ้ง SEC: "ยั�
 
 ---
 
+> Routing ผ่าน PO เสมอ — ดูเหตุผลใน docs/CORE_POLICY.md §6
+
 ## Phase A — Solution Doc security review
 
 Trigger: PO sends `Solution_Doc_[feature].md` to SEC after receiving it from SA.
@@ -105,6 +107,8 @@ If a risk is found that makes implementation unsafe without architecture redesig
 - Do not output partial requirements — complete the full review first, then flag all issues at once
 
 ---
+
+> Routing ตรงกับ Lead ไม่ผ่าน PO — ดูเหตุผลใน docs/CORE_POLICY.md §6
 
 ## Phase B — Code review (per PR)
 
