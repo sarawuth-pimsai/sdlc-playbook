@@ -14,7 +14,7 @@ that a developer can paste and run immediately.
 1. Check if **STACK_CONTEXT.md** exists and has no unfilled `[fill in]` fields
 2. Check if any **DECISION*LOG*[feature]\_TODO.md** files exist (active unresolved items) and **DECISION*LOG*[feature]\_RESOLVED.md** files (archived resolved items)
 3. Check if **PATTERN_LIBRARY.md** exists
-4. Check if **PROJECT_CONTEXT.md** exists — read `Security role:` **and `Environment:`** fields if present
+4. Check if **PROJECT_CONTEXT.md** exists — read `Security role:` **and `Environment (default):`** fields if present
 5. For each file present, check for version header `Last updated: YYYY-MM-DD | Version: N` — if header is missing, note as legacy format (no action); if a file's date is older than the most recent SA Handoff date found in the relevant DECISION_LOG, flag to PO after Welcome Dialog: "[filename] อาจไม่ใช่ version ล่าสุด — กรุณายืนยันกับ SA ก่อนดำเนินการต่อ"
 6. Note results — do NOT speak yet, do NOT start any step
 7. After reading → immediately show **Session Welcome Dialog** (see section below)
@@ -733,9 +733,9 @@ Use this pattern when Claude needs to ask the PO something during STEP 1 (BLOCKE
 8. At the end of every session that added decisions or confirmed STEP 4, remind PO: **"กรุณา download DECISION*LOG*[feature]_TODO.md (ถ้ายังมี TODO คงเหลือ) และ DECISION_LOG_[feature]\_RESOLVED.md (ถ้ามี resolved items ใหม่) แล้ว upload กลับเข้า Claude Project — ถ้าใช้ conversation thread เดิมต่อ ไม่ต้อง upload ซ้ำ"**
 9. Re-upload rule: **\_TODO file** เท่านั้นที่ต้อง re-upload ทุก session ที่เปิด conversation ใหม่และยังมี TODO คงเหลือ — **\_RESOLVED file** re-upload เฉพาะเมื่อมี resolved items ใหม่เพิ่ม
 10. PROJECT_CONTEXT.md ต้อง upload เข้า Project ครั้งแรกหลังสร้าง และ re-upload ถ้ามีการเปลี่ยนแปลง settings — Claude ใช้ไฟล์นี้จำ security role, environment, และ project settings ข้าม session
-11. **Environment-aware output:** อ่าน `Environment:` จาก PROJECT_CONTEXT.md ทุก session — ถ้ายังไม่มีค่า ให้ถาม PO ครั้งเดียวก่อน SA Handoff แล้ว save ทันที
-    - `Environment: cli` → ใช้ Write tool save ไฟล์ลง disk ทันทีทุกครั้งที่ generate artifact พร้อมแจ้ง path
-    - `Environment: claude.ai` → สร้าง Artifact พร้อม Download button ทุกครั้งที่ generate artifact
+11. **Environment-aware output:** อ่าน `Environment (default):` จาก PROJECT_CONTEXT.md ทุก session — ถ้ายังไม่มีค่า ให้ถาม PO ครั้งเดียวก่อน SA Handoff แล้ว save ทันที (PO ใช้ default นี้เอง ไม่มี override แยก — ดู `docs/CORE_POLICY.md` §5)
+    - `Environment (default): cli` → ใช้ Write tool save ไฟล์ลง disk ทันทีทุกครั้งที่ generate artifact พร้อมแจ้ง path
+    - `Environment (default): claude.ai` → สร้าง Artifact พร้อม Download button ทุกครั้งที่ generate artifact
 12. **QA business rule questions → PO โดยตรง:** QA ไม่ต้องผ่าน Lead เมื่อถามเรื่อง business rules (required/optional fields, allowed behaviors, scope) — PO ตอบ → Claude append DECISION_LOG_RESOLVED ทันที → อัปเดต Lead Handoff เป็น version ใหม่ (ดู QA Clarification Flow)
 13. **One conversation per feature:** ใช้ conversation thread เดียวต่อหนึ่ง feature ตลอดอายุของ feature นั้น — เมื่อ PO กลับมาทำงาน feature เดิม ให้กลับเข้า conversation thread เดิม ไม่ต้องเปิด conversation ใหม่ ถ้ากลับมาใน thread เดิม Claude เห็น decision history จาก conversation แล้ว ให้แสดง summary สั้น ๆ ว่า "feature [name] — อยู่ที่ STEP [N], TODO ที่ยังค้าง: [list]" แล้วถาม PO ว่าต้องการทำอะไรต่อ — เปิด conversation ใหม่เฉพาะเมื่อเริ่ม feature ใหม่เท่านั้น
 
@@ -752,7 +752,7 @@ Use this pattern when Claude needs to ask the PO something during STEP 1 (BLOCKE
 
 > "โปรเจกต์นี้มี Security Engineer ในทีมไหมครับ? (ใช่ / ไม่มี)"
 
-ถ้า `Environment:` ยังไม่มีค่าใน PROJECT_CONTEXT.md → ถามพร้อมกันได้เลย:
+ถ้า `Environment (default):` ยังไม่มีค่าใน PROJECT_CONTEXT.md → ถามพร้อมกันได้เลย:
 
 > "กำลังใช้งานบน claude.ai หรือ Claude Code (CLI) ครับ?"
 
@@ -766,13 +766,18 @@ Use this pattern when Claude needs to ask the PO something during STEP 1 (BLOCKE
 ## Project settings
 
 Security role: yes / no
-Environment: cli / claude.ai
+Environment (default): cli / claude.ai
+Environment overrides:
+  SA: [ไม่ระบุ = ใช้ default]
+  Lead: [ไม่ระบุ = ใช้ default]
+  Dev: cli
+  QA: [ไม่ระบุ = ใช้ default]
+  SEC: [ไม่ระบุ = ใช้ default]   # เฉพาะ Option A (Security role: yes)
 ```
 
-- `Environment: cli` → ใช้ Write tool save ไฟล์ลง disk ทันที พร้อมแจ้ง path ใน chat
-- `Environment: claude.ai` → สร้าง Artifact พร้อม Download button
+`Environment (default)` คือค่าตั้งต้นของโปรเจกต์ที่ PO ตอบตรงนี้ — role อื่น (SA/Lead/QA) จะถามตัวเองอีกครั้งตอนเริ่ม session แรกว่าจะใช้ default นี้หรือ override เป็นอย่างอื่น (ดู `docs/CORE_POLICY.md` §5) PO ไม่ต้องถามแทน role อื่น
 
-จากนั้น output PROJECT_CONTEXT.md ตาม Environment rule ด้านบน (จะได้ไม่ต้องถามซ้ำใน session ถัดไป)
+จากนั้น output PROJECT_CONTEXT.md ตาม Environment rule (ดู `docs/CORE_POLICY.md` §5 สำหรับ pairwise output logic เต็ม)
 
 **ผลของคำตอบ:**
 

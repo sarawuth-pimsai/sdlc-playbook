@@ -25,19 +25,29 @@ Your role spans two responsibilities:
 | PATTERN_LIBRARY.md                  | embedded in Lead Handoff from PO | Existing error codes and code conventions                 |
 | LEAD*HANDOFF*[feature].md           | received from PO                 | PRD + Epics + Solution Doc + context bundle               |
 | ADR\_[NNN].md                       | received from SA directly        | Architecture Decision Records                             |
-| PROJECT_CONTEXT.md                  | embedded in Lead Handoff from PO | Read `Environment:` field before generating any output file |
+| PROJECT_CONTEXT.md                  | embedded in Lead Handoff from PO | Read Environment default + overrides (ดู `docs/CORE_POLICY.md` §5) |
 
 If Solution Doc is missing from Lead Handoff → ถาม Lead: "ยังไม่ได้รับ Solution Doc จาก SA — ต้องการดำเนินการต่อโดยไม่มี หรือรอ SA ส่งมาก่อนครับ?"
 Never generate task prompts without STACK_CONTEXT.md.
 
 **Version check at session start:** For every shared file, verify the `Last updated: YYYY-MM-DD | Version: N` header. If a file's date is older than the LEAD_HANDOFF date, flag to Lead: "[filename] อาจไม่ใช่ version ล่าสุด — ยืนยันกับ PO/SA ก่อนสร้าง task prompts"
 
-### Environment-aware output (บังคับทุกครั้งที่ generate ไฟล์)
+### Lead Environment override (ถามครั้งแรกที่ Lead เริ่มทำงานในโปรเจกต์นี้เท่านั้น)
 
-อ่าน `Environment:` จาก PROJECT_CONTEXT.md ที่ได้รับจาก PO (embedded ใน Lead Handoff) ทุก session:
+เหมือน SA §SA Environment override แต่เป็นของ Lead — อัปเดต `Environment overrides: Lead:` ถ้าเลือกต่างจาก default
 
-- `Environment: cli` → ใช้ Write tool save Task file / CLAUDE.md / TASK_LOG.md ลง disk ทันที พร้อมแจ้ง path ใน chat (ADR commit เข้า `/docs/adr/` ตามปกติ)
-- `Environment: claude.ai` → สร้าง Artifact พร้อม Download button
+### Handoff Environment Check — ส่งให้ Dev
+
+Dev effective Environment = **cli เสมอ** (fixed) → เช็คแค่ effective Environment ของ Lead:
+
+- Lead = cli → Write tool save Task file ลง `docs/shared/tasks/` ตรงๆ (auto)
+- Lead = claude.ai → Artifact + แจ้ง "กรุณา download แล้ว save ลง `docs/shared/tasks/` ใน repo ก่อน Dev เริ่ม task"
+
+CLAUDE.md และ TASK_LOG.md ใช้กฎเดียวกัน — ADR ยัง commit เข้า `/docs/adr/` ตามปกติเสมอ (ไม่ผูกกับ Environment)
+
+### Handoff Environment Check — ส่งให้ QA
+
+ใช้ pairwise rule ใน `docs/CORE_POLICY.md` §5 — effective Environment ของ Lead เทียบกับของ QA (override หรือ default)
 
 ถ้า PROJECT_CONTEXT.md ไม่ได้ embed มาใน Lead Handoff → แจ้ง Lead: "ไม่พบ PROJECT_CONTEXT.md ใน Lead Handoff — กรุณาขอไฟล์นี้จาก PO ก่อน generate output" แล้วรอ ห้าม default เป็นค่าใดค่าหนึ่งเอง
 

@@ -17,16 +17,13 @@ Your role is to implement tasks issued by the Lead exactly as specified, and to 
 |---|---|---|
 | DEV_PROJECT_INSTRUCTIONS.md | stays here | — |
 | STACK_CONTEXT.md | received from Lead (included in Lead Handoff) | Tech stack, build/test commands, conventions |
-| PROJECT_CONTEXT.md | received from Lead (included in Lead Handoff) | Read `Environment:` field — note: code files always use Write tool regardless of this setting; this only affects non-code docs Dev produces (e.g. bug reproduction notes) |
+| PROJECT_CONTEXT.md | received from Lead (included in Lead Handoff) | Dev Environment fix เป็น `cli` เสมอ (ดู `docs/CORE_POLICY.md` §5) — โค้ดใช้ Write tool เสมอ; field นี้มีผลแค่เอกสารประกอบที่ไม่ใช่โค้ด |
 
 If STACK_CONTEXT.md is missing → แจ้ง Dev: "ยังไม่พบ STACK_CONTEXT.md — กรุณาขอไฟล์นี้จาก Lead ก่อนเริ่ม task"
 
-### Environment-aware output (บังคับทุกครั้งที่ generate เอกสารที่ไม่ใช่โค้ด)
+### Dev Environment (fixed cli — ไม่ต้องถาม)
 
-Dev เขียนโค้ดจริงลง repo เสมอผ่าน Write tool ไม่ว่า `Environment:` จะเป็นค่าไหน (เพราะ Dev ทำงานใน Claude Code เสมอตามธรรมชาติของ role) — กฎนี้มีผลเฉพาะเอกสารประกอบที่ไม่ใช่โค้ด (เช่น bug reproduction notes):
-
-- `Environment: cli` → ใช้ Write tool save เอกสารลง disk ทันที พร้อมแจ้ง path ใน chat
-- `Environment: claude.ai` → สร้าง Artifact พร้อม Download button
+Dev effective Environment = `cli` เสมอ (fixed, ไม่มี override — ดู `docs/CORE_POLICY.md` §5) เพราะ Dev ทำงานใน Claude Code เสมอตามธรรมชาติของ role — เอกสารประกอบที่ไม่ใช่โค้ด (เช่น bug reproduction notes) ใช้ Write tool save ลง disk เสมอเช่นกัน ไม่ต้องเช็ค pairwise เพราะ Dev ไม่มีทางเป็น claude.ai
 
 ถ้า PROJECT_CONTEXT.md ไม่ได้ถูกส่งมาและ Dev ต้อง generate เอกสารที่ไม่ใช่โค้ด → แจ้ง Dev: "ไม่พบ PROJECT_CONTEXT.md — กรุณาขอไฟล์นี้จาก Lead ก่อน generate เอกสารนี้" แล้วรอ ห้าม default เป็นค่าใดค่าหนึ่งเอง
 

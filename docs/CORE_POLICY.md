@@ -49,3 +49,31 @@ Solo ที่ทำคนเดียวสามารถข้าม step น
 Hotfix flow (P1/P2/P3) ใน `ai/LEAD_PROJECT_INSTRUCTIONS.md` §Hotfix flow ใช้ได้กับทั้ง 2 mode — Solo ใช้ Lead session เดียวกันได้ทันที ไม่ต้องเขียนแยก (ดู `docs/guides/SOLO_GUIDE.md` §Hotfix Flow)
 
 P1/P2 เป็นข้อยกเว้นเดียวที่ Lead ตัดสินใจเชิง technical/scope โดยไม่ต้องรอ SA sign-off ก่อน — escalate ถึง SA **หลัง merge** เท่านั้น
+
+---
+
+## 5. Environment (per-role, not project-wide)
+
+`PROJECT_CONTEXT.md` เก็บ **default ของโปรเจกต์** + **override รายบุคคลต่อ role**:
+
+```markdown
+Environment (default): cli / claude.ai
+Environment overrides:
+  SA: [ไม่ระบุ = ใช้ default]
+  Lead: [ไม่ระบุ = ใช้ default]
+  Dev: cli   # fixed เสมอ — ห้าม override
+  QA: [ไม่ระบุ = ใช้ default]
+  SEC: [ไม่ระบุ = ใช้ default]   # เฉพาะ Option A (Security role: yes)
+```
+
+**Effective Environment ของแต่ละ role** = override ของ role นั้น (ถ้ามี) ไม่งั้นใช้ default — Dev fix เป็น `cli` เสมอ ไม่มีทาง override
+
+**Pairwise rule สำหรับทุกจุด handoff** (ใช้แทน rule เดิมที่เช็คแค่ฝั่งเดียว):
+
+| ฝั่งส่ง (effective) | ฝั่งรับ (effective) | วิธี output |
+|---|---|---|
+| cli | cli | Write tool → save ลง disk repo เดียวกัน (auto, ไม่ต้อง relay) |
+| อื่นๆ (ฝั่งใดฝั่งหนึ่งหรือทั้งคู่เป็น claude.ai) | — | Artifact + Download button → แจ้งให้ upload เข้า Project ปลายทางเอง |
+| ไม่รู้ effective Environment ของฝั่งรับ | — | ใช้ Artifact เป็น safe default (compatible เสมอ) |
+
+แต่ละ role ถาม override ของตัวเอง **แค่ครั้งแรกที่เริ่มทำงานในโปรเจกต์นี้** ไม่ถามซ้ำทุก session — รายละเอียดการถามและ Handoff Check อยู่ใน `ai/SA_PROJECT_INSTRUCTIONS.md`, `LEAD_PROJECT_INSTRUCTIONS.md`, `QA_PROJECT_INSTRUCTIONS.md`, `SEC_PROJECT_INSTRUCTIONS.md` (Option A เท่านั้น) §Environment override + §Handoff Environment Check

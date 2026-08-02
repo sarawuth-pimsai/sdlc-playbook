@@ -151,13 +151,19 @@ my-project/
 ## Project settings
 
 Security role: yes / no
-Environment: cli / claude.ai
+Environment (default): cli / claude.ai
+Environment overrides:
+  SA: [ไม่ระบุ = ใช้ default]
+  Lead: [ไม่ระบุ = ใช้ default]
+  Dev: cli   # fixed เสมอ — ห้าม override
+  QA: [ไม่ระบุ = ใช้ default]
+  SEC: [ไม่ระบุ = ใช้ default]   # เฉพาะ Option A (Security role: yes)
 ```
 
 - `Security role: yes` → Option A: SEC Engineer ใช้งานใน workflow
 - `Security role: no` → Option B: security checkpoints ฝังใน roles อื่นแล้ว
-- `Environment: cli` → Claude ใช้ Write tool save ไฟล์ลง disk ทันทีทุกครั้งที่ generate artifact
-- `Environment: claude.ai` → Claude สร้าง Artifact พร้อม Download button
+- `Environment (default)` คือค่าตั้งต้นของโปรเจกต์ — แต่ละ role (SA/Lead/QA/SEC) override เป็นช่องทางอื่นได้ตอนเริ่ม session แรกของตัวเอง ส่วน Dev fix เป็น `cli` เสมอ ไม่มีทาง override
+- Handoff แต่ละจุดเช็คแบบ pairwise (ทั้งฝั่งส่งและฝั่งรับ) ว่าจะ save ลง disk ตรงๆ หรือสร้าง Artifact — รายละเอียดเต็มดู [docs/CORE_POLICY.md](docs/CORE_POLICY.md) §5
 
 ### ขั้นตอนที่ 4 — SA สร้าง STACK_CONTEXT.md
 

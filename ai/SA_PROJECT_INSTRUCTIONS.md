@@ -22,7 +22,7 @@ that the Lead can use to break tasks.
 | DECISION*LOG*[feature]\_RESOLVED.md | PO owns                                   | Received from PO via SA Handoff — resolved decisions archive (upload here) |
 | PATTERN_LIBRARY.md                  | PO owns                                   | Received from PO via SA Handoff — upload here                              |
 | SOLUTION_PATTERNS.md                | **SA owns** — created and maintained here | SA creates after each accepted feature                                     |
-| PROJECT_CONTEXT.md                  | PO owns                                   | Received from PO via SA Handoff — read `Environment:` field before generating any output file |
+| PROJECT_CONTEXT.md                  | PO owns                                   | Received from PO via SA Handoff — read Environment default + overrides (ดู `docs/CORE_POLICY.md` §5) |
 
 If any of these files are missing, tell SA which file is missing and what to do:
 
@@ -45,12 +45,17 @@ At session start, cross-check the date in each file against the previous session
 
 ---
 
-### Environment-aware output (บังคับทุกครั้งที่ generate ไฟล์)
+### SA Environment override (ถามครั้งแรกที่ SA เริ่มทำงานในโปรเจกต์นี้เท่านั้น)
 
-อ่าน `Environment:` จาก PROJECT_CONTEXT.md ที่ได้รับจาก PO ทุก session:
+ถ้า `Environment overrides: SA:` ยังไม่มีค่าใน PROJECT_CONTEXT.md → ถาม SA ครั้งเดียว:
 
-- `Environment: cli` → ใช้ Write tool save Solution Doc / ADR / Triage Summary / SOLUTION_PATTERNS.md ลง disk ทันที พร้อมแจ้ง path ใน chat
-- `Environment: claude.ai` → สร้าง Artifact พร้อม Download button
+> "โปรเจกต์นี้ default เป็น [Environment default] — SA จะทำงานตามนี้ หรือใช้ช่องทางอื่น (cli/claude.ai)?"
+
+ถ้าเลือกต่างจาก default → อัปเดต `Environment overrides: SA:` แล้วส่งกลับ PO เก็บเป็น version ใหม่ ถ้าเลือกตาม default ไม่ต้องเขียนอะไรเพิ่ม
+
+### Handoff Environment Check (ก่อน generate Solution Doc / Triage Summary / ADR ส่งกลับ PO)
+
+ใช้ pairwise rule ใน `docs/CORE_POLICY.md` §5 — effective Environment ของ SA (override หรือ default) เทียบกับของ PO (default ของโปรเจกต์) แล้วเลือก Write tool (ทั้งคู่ cli) หรือ Artifact (กรณีอื่น)
 
 ถ้า PROJECT_CONTEXT.md ไม่ได้แนบมาใน SA Handoff → แจ้ง SA: "ไม่พบ PROJECT_CONTEXT.md — กรุณาขอไฟล์นี้จาก PO ก่อน generate output" แล้วรอ ห้าม default เป็นค่าใดค่าหนึ่งเอง
 
