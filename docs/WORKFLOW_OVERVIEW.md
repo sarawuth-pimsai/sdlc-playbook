@@ -112,25 +112,28 @@ sequenceDiagram
     actor Dev as Developer
     actor QA as QA Engineer
 
-    Note over PO: STEP 1–2: วิเคราะห์ PRD → สร้าง Epics
+    Note over PO: STEP 1–2: วิเคราะห์ PRD → scan business-risk keywords → สร้าง Epics
 
-    PO->>SA: SA Handoff\n(PRD + Decision Log + Pattern Library)
-    SA->>PO: Solution Doc + ADRs + STACK_CONTEXT.md
+    PO->>SA: SA Handoff\n(PRD + business-risk flags + Decision Log + Pattern Library)
+    Note over SA: STEP 1.5 — Tier Triage (บังคับเสมอ ข้ามไม่ได้)\nตัดสิน Tier 1 / 2 / 3
+    SA->>PO: Triage Summary (Tier 1)\nหรือ Solution Doc + ADRs + STACK_CONTEXT.md (Tier 2/3)
 
-    opt Option A เท่านั้น
+    opt Tier 3 เท่านั้น (ทุก Option)
         PO->>SEC: Solution Doc
         SEC->>PO: Security Requirements
     end
 
-    Note over PO: STEP 3–4: ตรวจ stack + สร้าง Lead Handoff
-    PO->>Lead: Lead Handoff\n(PRD + Solution Doc + Epics + Stack)
+    Note over PO: STEP 3–4: ตรวจ stack (hard block ถ้ายังไม่ได้รับจาก SA) + สร้าง Lead Handoff
+    PO->>Lead: Lead Handoff\n(PRD + Tier + Triage Summary/Solution Doc + Epics + Stack)
 
-    Note over Lead: L-STEP 1–4: cross-check → task breakdown
+    Note over Lead: L-STEP 1–1.5: cross-check → Escalation Check
+    Lead-->>SA: Escalation Request (ถ้า scope เกินเอกสารเดิม — ไม่ผ่าน PO)
+    Note over Lead: L-STEP 2–2.5: task breakdown → Dependency Graph + Parallel Lane
     Lead->>QA: PRD + task files\n(Phase A setup)
-    Lead->>Dev: Task_[ID].md\n(ทีละ task)
+    Lead->>Dev: Task_[ID].md\n(ทีละ task ตาม lane)
 
     loop ทุก task
-        Dev->>Dev: implement → update TASK_LOG
+        Dev->>Dev: implement → update TASK_LOG (Lane + Assigned Dev)
     end
 
     Dev->>QA: Deploy Notification\n(หลัง deploy SIT/Staging)
@@ -146,6 +149,43 @@ sequenceDiagram
     Note over Lead: Deploy Production
     QA->>Lead: Phase C smoke check ✓
 ```
+
+---
+
+## 4a. Tier & Escalation Overview
+
+**ใช้ได้ทั้ง Solo และ Enterprise mode** — policy เดียวกันทุกตัวอักษร ต่างกันแค่ mechanics การส่งต่อ (Solo = คนเดียวสลับ session, Enterprise = คนละ role จริง) ดู [CORE_POLICY.md](CORE_POLICY.md)
+
+```mermaid
+flowchart TD
+    PO["PO\nวิเคราะห์ PRD + scan business-risk keywords"] --> SA_T{"SA — Tier Triage\n(STEP 1.5, บังคับเสมอ — ข้ามไม่ได้)"}
+
+    SA_T -->|Tier 1 — Micro| T1["Triage Summary สั้น\n(ไม่มี Solution Doc เต็ม)"]
+    SA_T -->|Tier 2 — Standard| T2["Solution Doc เต็ม"]
+    SA_T -->|"Tier 3 — Full\n(หรือ business-risk flag ≥ 1)"| T3["Solution Doc เต็ม + SEC บังคับ"]
+
+    T3 --> SEC["SEC review\n→ Security Requirements"]
+
+    T1 --> Lead_E{"Lead — Escalation Check\n(L-STEP 1.5)"}
+    T2 --> Lead_E
+    SEC --> Lead_E
+
+    Lead_E -->|scope เกินจริง| ESC["Escalation Request\nLead → SA โดยตรง (ไม่ผ่าน PO)"]
+    ESC --> SA_T
+    Lead_E -->|scope ตรงตามเอกสาร| Lane["Lead — Parallel Lane Assignment\n(L-STEP 2.5)"]
+
+    Lane --> Dev["Dev — implement ทีละ lane/task"]
+    Dev --> QA["QA — SIT → Staging → Production"]
+
+    style SA_T fill:#e97316,color:#fff
+    style Lead_E fill:#3b82f6,color:#fff
+```
+
+**หมายเหตุ:**
+- SA Tier Triage ข้ามไม่ได้ในทุกกรณี — แม้ solo dev คนเดียวก็ต้องผ่าน SA session (ดู [SOLO_GUIDE.md](guides/SOLO_GUIDE.md))
+- PO ไม่ตัดสิน tier — ทำได้แค่ flag business-risk keyword เป็น context ให้ SA
+- Lead escalate ตรงไป SA เมื่อพบ scope เกินขอบเขต Triage Summary/Solution Doc เดิม (ไม่ผ่าน PO)
+- Parallel Lane Assignment แยกงานเป็น lane ตาม domain สำหรับ task ที่ไม่มี dependency/file overlap กัน — solo ที่ไม่มี dev คนที่สองข้าม step นี้ได้
 
 ---
 
@@ -270,20 +310,27 @@ flowchart LR
 
 ## 7. Solo Developer — Minimum Flow
 
+**SA Tier Triage ข้ามไม่ได้แม้ทำคนเดียว** — Minimum tier ของ solo ยังคงผ่าน SA session เสมอ เพียงแต่ใช้ SA STEP 1.5 Tier Triage แบบสั้น (10-15 นาที) แทน Solution Doc เต็ม ดู [CORE_POLICY.md](CORE_POLICY.md) §1
+
 ```mermaid
 flowchart LR
-    S1["เปิด Claude Code\nพิมพ์ /po"] -->|"gen LEAD_HANDOFF.md\nบันทึกไว้"| S2
-    S2["session ใหม่\nพิมพ์ /lead"] -->|"gen Task_[ID].md\nบันทึกไว้"| S3
-    S3["session ใหม่\n(CLAUDE.md auto-load)"] -->|"paste task content\nimplement"| S4
-    S4["อัปเดต TASK_LOG.md\nทำ task ถัดไป"] -->|"task หมดแล้ว"| DONE
+    S1["เปิด Claude Code\nพิมพ์ /po"] -->|"gen SA_HANDOFF.md\nบันทึกไว้"| S2
+    S2["session ใหม่\nพิมพ์ /sa — Tier Triage"] -->|"gen Triage_Summary.md\n(Tier 1) บันทึกไว้"| S3
+    S3["session ใหม่\nพิมพ์ /po ต่อ"] -->|"gen LEAD_HANDOFF.md\nบันทึกไว้"| S4
+    S4["session ใหม่\nพิมพ์ /lead"] -->|"gen Task_[ID].md\nบันทึกไว้"| S5
+    S5["session ใหม่\n(CLAUDE.md auto-load)"] -->|"paste task content\nimplement"| S6
+    S6["อัปเดต TASK_LOG.md\nทำ task ถัดไป"] -->|"task หมดแล้ว"| DONE
 
     S1:::role
     S2:::role
     S3:::role
+    S4:::role
+    S5:::role
     DONE([✅ Feature เสร็จ])
 
     classDef role fill:#3b82f6,color:#fff
     style DONE fill:#22c55e,color:#fff
 ```
 
+> ถ้า SA ตัดสินว่าเป็น Tier 2/3 → feature นั้นใช้เวลามากกว่านี้ตามปกติของ Solution Doc เต็ม (ไม่ใช่ Minimum flow อีกต่อไป)
 > ดูรายละเอียดเพิ่มเติมที่ [docs/guides/SOLO_GUIDE.md](guides/SOLO_GUIDE.md)

@@ -67,6 +67,17 @@ Claude อ่าน Lead Handoff และ extract:
 
 ถ้า open items ยังไม่ resolve → Claude ถาม Lead: block task generation หรือใช้ placeholder?
 
+### L-STEP 1.5 — Tier Escalation Check
+
+ก่อนแตก task ตรวจว่า Triage Summary/Solution Doc ที่ได้รับครอบคลุมสิ่งที่ Lead เห็นจริงในโค้ด/requirement หรือไม่
+
+**Block ทันทีถ้าเจอ:**
+- Task ต้องเปลี่ยน data schema ที่เอกสารเดิมไม่ได้พูดถึง
+- Task ต้องเพิ่ม external dependency ใหม่ที่ไม่มีใน Feature Brief เดิม
+- Feature เป็น Tier 1 แต่ Lead เห็นว่ากระทบมากกว่านั้นจริง
+
+เมื่อ trigger → ส่ง **Escalation Request ตรงไปหา SA** (ไม่ผ่าน PO) แล้วรอคำตอบก่อนไปต่อ — Lead ห้ามตัดสินใจเชิงสถาปัตยกรรมแทน SA ยกเว้น Hotfix Flow P1/P2 (ดู §Hotfix Flow และ [CORE_POLICY.md](../CORE_POLICY.md) §2)
+
 ### L-STEP 2 — Break เป็น Epics และ Tasks
 
 Claude เสนอ task board — กฎของแต่ละ task:
@@ -80,6 +91,19 @@ Claude แสดง task board preview → Lead review → confirm ก่อน�
 - Task dependency order ไม่ชัดเจน
 - Task scope > 3 story points (แนะนำ split)
 - SA constraint ขัดกับ PRD requirement
+
+### L-STEP 2.5 — Dependency Graph + Lane Assignment
+
+หลัง task board confirm แล้ว Claude สร้าง Dependency Graph จาก `Depends on`/`Blocks` แล้วเช็ค file overlap ระหว่างทุกคู่ task:
+
+- Task แตะไฟล์เดียวกัน → **บังคับ sequence เสมอ** แม้ไม่มี dependency ประกาศไว้
+- Task ไม่แตะไฟล์ซ้ำ + ไม่มี dependency → **แยก lane อิสระ** รันขนานกันได้
+
+**Lane ตั้งชื่อตาม domain** (เช่น `lane-auth`, `lane-api-gateway`) — ไม่ผูกกับชื่อคน เพราะคนรับ lane เปลี่ยนได้
+
+Claude แสดง Dependency Graph + lane assignment → Lead review → confirm ก่อนไป L-STEP 3
+
+ดูรายละเอียดใน `ai/LEAD_PROJECT_INSTRUCTIONS.md` §L-STEP 2.5 และ [CORE_POLICY.md](../CORE_POLICY.md) §3
 
 ### L-STEP 3 — Generate Claude Code Prompts
 
@@ -199,3 +223,6 @@ Lead ส่ง Issue Report ตรงถึง SA ได้ (ไม่ต้อ�
 - [ ] Done criteria ทุกข้อ verifiable (ด้วย command จริง ไม่ใช่ "code looks right")
 - [ ] `CLAUDE.md` committed เข้า repo root แล้ว
 - [ ] ส่ง task prompts ทีละไฟล์ตาม dependency order
+- [ ] ทุก task มี Lane assigned ใน Parallel metadata block
+- [ ] Task ที่แตะไฟล์ร่วมกันถูกทำเป็น sequence แล้ว — ไม่มีสอง task ในไฟล์เดียวกันที่ยัง mark เป็น parallel
+- [ ] Assigned Dev ระบุครบทุก lane (หรือ "unassigned")

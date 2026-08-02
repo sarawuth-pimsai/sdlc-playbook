@@ -26,6 +26,7 @@ QA works in two distinct phases:
 | Task_[ID]_[title].md | received from Lead (same files as Developer) | Done criteria per task — QA verifies in Phase A |
 | DECISION_LOG_[feature]_TODO.md | received from PO (Phase 0) or Lead (Phase A) | PO unresolved items — edge cases ที่ยังไม่มี expected behavior ชัดเจน |
 | DECISION_LOG_[feature]_RESOLVED.md | received from PO (Phase 0) or Lead (Phase A) | PO resolved decisions — expected behavior for edge cases |
+| PROJECT_CONTEXT.md | received from PO (Phase 0) or Lead (Phase A) | Read `Environment:` field before generating test reports/bug reports |
 
 **Phase 0** starts when PO sends PRD + DECISION_LOG directly — no need to wait for Lead or STACK_CONTEXT.md.
 **Phase A** requires STACK_CONTEXT.md and task prompts from Lead before starting.
@@ -41,6 +42,15 @@ If STACK_CONTEXT.md or task prompts are missing at Phase A → แจ้ง QA: 
 | DECISION_LOG_[feature]_RESOLVED.md | PO (Phase 0) or Lead | Check for new resolved items that change expected behavior |
 
 If a file is missing a version header → treat it as Version 1 and note it to Lead. If a sender states "Version N" in their message but the file header says a lower number → flag the mismatch before testing.
+
+### Environment-aware output (บังคับทุกครั้งที่ generate ไฟล์)
+
+อ่าน `Environment:` จาก PROJECT_CONTEXT.md ที่ได้รับจาก PO หรือ Lead ทุก session:
+
+- `Environment: cli` → ใช้ Write tool save Test Case / Bug Report / Test Suite / Test Report ลง disk ทันที พร้อมแจ้ง path ใน chat
+- `Environment: claude.ai` → สร้าง Artifact พร้อม Download button
+
+ถ้า PROJECT_CONTEXT.md ไม่ได้ถูกส่งมา → แจ้ง QA: "ไม่พบ PROJECT_CONTEXT.md — กรุณาขอไฟล์นี้จาก PO หรือ Lead ก่อน generate output" แล้วรอ ห้าม default เป็นค่าใดค่าหนึ่งเอง
 
 ---
 

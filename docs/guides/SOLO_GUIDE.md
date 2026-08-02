@@ -20,15 +20,20 @@
 
 ### Minimum (โปรเจกต์เล็ก, ไม่ซับซ้อน)
 
+**SA เป็นเจ้าของการตัดสินใจ tier เสมอ แม้ทำคนเดียวก็ข้ามไม่ได้** — Minimum tier ยังต้องผ่าน SA session เสมอ แต่ใช้ SA STEP 1.5 Tier Triage แบบสั้น (ไม่ใช่ full Solution Doc) ดู `ai/SA_PROJECT_INSTRUCTIONS.md` §STEP 1.5 และ [CORE_POLICY.md](../CORE_POLICY.md) §1
+
 ```
-PO session → Lead session → Dev session (CLAUDE.md)
+PO session → SA session (triage สั้น) → Lead session → Dev session (CLAUDE.md)
 ```
 
 | Role | ทำอะไร | เวลาที่ใช้ |
 |------|---------|-----------|
-| PO | วิเคราะห์ PRD, สร้าง Lead Handoff | 30-60 นาที ต่อ feature |
-| Lead | รับ handoff, แตก tasks, generate Task_[ID].md | 30-60 นาที ต่อ feature |
+| PO | วิเคราะห์ PRD, scan business-risk keywords, สร้าง SA Handoff | 30-60 นาที ต่อ feature |
+| SA | Tier Triage — ตัดสิน tier + เขียน Triage Summary สั้น (Fast Path ถ้า Tier 1) | 10-15 นาที ต่อ feature (Tier 1) |
+| Lead | รับ Triage Summary/Solution Doc, แตก tasks, generate Task_[ID].md | 30-60 นาที ต่อ feature |
 | Dev | implement ทีละ task จนครบ | ส่วนใหญ่ของเวลา |
+
+หมายเหตุ: ถ้า SA ประเมินว่า feature กระทบมากกว่าที่คิด (เช่น แตะ data model ใหม่ หรือมี business-risk flag) → tier จะถูกยกระดับเป็น Tier 2/3 อัตโนมัติ และใช้เวลามากกว่านี้ตามปกติของ Solution Doc เต็ม
 
 ### แนะนำ (โปรเจกต์มี external integrations หรือ data model ซับซ้อน)
 
@@ -66,7 +71,7 @@ cp <path-to-sdlc-playbook>/templates/option-b/commands/setup.md .claude/commands
 
 ```
 /po    → วิเคราะห์ PRD
-/sa    → ออกแบบ solution (ถ้าต้องการ)
+/sa    → Tier Triage (บังคับเสมอ) + ออกแบบ solution ถ้า Tier 2/3
 /lead  → แตก tasks
        → (Dev ไม่ต้องพิมพ์ command — CLAUDE.md load อัตโนมัติ)
 /qa    → ทำ test (ถ้าต้องการ)
@@ -86,13 +91,16 @@ cp <path-to-sdlc-playbook>/templates/option-b/commands/setup.md .claude/commands
 
 1. เปิด Claude Code → พิมพ์ `/po`
 2. Upload หรือ paste PRD content
-3. ทำตาม STEP 1-4 จนได้ `LEAD_HANDOFF_[feature].md`
-4. บันทึก handoff ใน `docs/roles/lead/`
-5. พิมพ์ `/lead` ในหน้าต่างใหม่ (หรือ session เดิมหลัง reset)
-6. ทำตาม L-STEP 1-4 จนได้ `Task_[ID]_[title].md` ทุกไฟล์
-7. บันทึก task files ใน `docs/shared/tasks/`
-8. เปิด session ใหม่ (CLAUDE.md load อัตโนมัติ)
-9. Paste content จาก Task_[ID].md ที่ต้องการ implement
+3. ทำตาม STEP 1-2 จนได้ `SA_HANDOFF_[feature].md`
+4. บันทึก handoff ใน `docs/roles/sa/`
+5. พิมพ์ `/sa` ในหน้าต่างใหม่ — SA ทำ STEP 1.5 Tier Triage (บังคับเสมอ แม้ Minimum tier) จนได้ `Triage_Summary_[feature].md` (Tier 1) หรือ `Solution_Doc_[feature].md` (Tier 2/3)
+6. บันทึกผลจาก SA ใน `docs/roles/po/` แล้วกลับไป `/po` เพื่อทำ STEP 3-4 จนได้ `LEAD_HANDOFF_[feature].md`
+7. บันทึก handoff ใน `docs/roles/lead/`
+8. พิมพ์ `/lead` ในหน้าต่างใหม่ (หรือ session เดิมหลัง reset)
+9. ทำตาม L-STEP 1-4 จนได้ `Task_[ID]_[title].md` ทุกไฟล์
+10. บันทึก task files ใน `docs/shared/tasks/`
+11. เปิด session ใหม่ (CLAUDE.md load อัตโนมัติ)
+12. Paste content จาก Task_[ID].md ที่ต้องการ implement
 
 ### ต่อ feature ที่ค้างไว้
 
@@ -109,7 +117,15 @@ cp <path-to-sdlc-playbook>/templates/option-b/commands/setup.md .claude/commands
 
 **ใช้ TASK_LOG.md จริงจัง** — เป็น single source of truth ว่า task ไหนทำแล้ว done criteria ผ่านไหม — ช่วยมากเมื่อกลับมาทำต่อหลังหยุดพักหลายวัน
 
-**Solo ไม่จำเป็นต้องมี STACK_CONTEXT.md แยก** — ถ้ารู้ stack ดีอยู่แล้ว Lead สามารถ embed stack info ลงใน CLAUDE.md โดยตรง และข้าม SA Stack Setup flow
+**Solo ไม่จำเป็นต้องมี STACK_CONTEXT.md แยก** — ถ้ารู้ stack ดีอยู่แล้ว Lead สามารถ embed stack info ลงใน CLAUDE.md โดยตรง และข้าม SA Stack Setup flow (นี่คือเรื่อง STACK_CONTEXT.md เท่านั้น — **ไม่เกี่ยวกับ SA Tier Triage session ซึ่งข้ามไม่ได้เสมอ** ดู §Roles ที่แนะนำสำหรับ solo)
+
+---
+
+## Hotfix Flow (production bug ด่วน)
+
+Solo ใช้ Hotfix Flow เดียวกับ enterprise ทุกประการ — ดู [LEAD_GUIDE.md §Hotfix Flow](LEAD_GUIDE.md#hotfix-flow) และ `ai/LEAD_PROJECT_INSTRUCTIONS.md` §Hotfix flow (ดู [CORE_POLICY.md](../CORE_POLICY.md) §4)
+
+เปิด Lead session แล้วพิมพ์ระบุ severity (P1/P2) ตามเกณฑ์เดิม — ไม่ต้องเขียน flow แยกสำหรับ solo เพราะ mechanism เหมือนกันทุกอย่าง ต่างแค่คนเดียวสวม role Lead
 
 ---
 
@@ -120,6 +136,8 @@ cp <path-to-sdlc-playbook>/templates/option-b/commands/setup.md .claude/commands
 | Artifact | สร้างตอนไหน | เก็บที่ไหน |
 |---|---|---|
 | PRD | PO session | `docs/roles/po/` |
+| SA_HANDOFF_[feature].md | PO session | `docs/roles/sa/` |
+| Triage_Summary_[feature].md (Tier 1) / Solution_Doc_[feature].md (Tier 2/3) | SA session | `docs/roles/po/` |
 | LEAD_HANDOFF_[feature].md | PO session | `docs/roles/lead/` |
 | Task_[ID]_[title].md | Lead session | `docs/shared/tasks/` |
 | CLAUDE.md | Lead session | root ของ project |
