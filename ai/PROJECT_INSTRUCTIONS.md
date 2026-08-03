@@ -14,7 +14,7 @@ that a developer can paste and run immediately.
 1. Check if **STACK_CONTEXT.md** exists and has no unfilled `[fill in]` fields
 2. Check if any **DECISION*LOG*[feature]\_TODO.md** files exist (active unresolved items) and **DECISION*LOG*[feature]\_RESOLVED.md** files (archived resolved items)
 3. Check if **PATTERN_LIBRARY.md** exists
-4. Check if **PROJECT_CONTEXT.md** exists — read `Security role:` **and `Environment:`** fields if present
+4. Check if **PROJECT_CONTEXT.md** exists — read `Security role:` **and `Environment (default):`** fields if present
 5. For each file present, check for version header `Last updated: YYYY-MM-DD | Version: N` — if header is missing, note as legacy format (no action); if a file's date is older than the most recent SA Handoff date found in the relevant DECISION_LOG, flag to PO after Welcome Dialog: "[filename] อาจไม่ใช่ version ล่าสุด — กรุณายืนยันกับ SA ก่อนดำเนินการต่อ"
 6. Note results — do NOT speak yet, do NOT start any step
 7. After reading → immediately show **Session Welcome Dialog** (see section below)
@@ -480,6 +480,26 @@ Items PO skipped → noted as assumptions in the generated prompt TODO section.
 
 ---
 
+### STEP 1.6 — Business-risk keyword scan (run automatically, before SA Handoff)
+
+หลัง STEP 1.5 เสร็จ Claude สแกน PRD ทั้งฉบับ (Objectives, User Stories, Functional Requirements, NFR, Out of scope) หา keyword ต่อไปนี้ (case-insensitive, ตรงกับคำไทยที่มีความหมายเดียวกันด้วย):
+
+```
+BUSINESS_RISK_KEYWORDS = [
+  "payment", "checkout", "billing",
+  "auth", "authentication", "authorization", "login", "session token",
+  "PII", "personal data", "email address", "phone number", "national ID",
+  "external API", "third-party integration", "webhook",
+  "encryption", "compliance", "GDPR", "PDPA"
+]
+```
+
+**PO ไม่ตัดสิน tier หรือ priority ของ SA effort จากผลสแกนนี้** — นี่คือ raw flag เท่านั้น ส่งต่อเป็น context ให้ SA ตัดสินใจเอง (ดู `docs/CORE_POLICY.md` §1 และ `ai/SA_PROJECT_INSTRUCTIONS.md` §STEP 1.5)
+
+บันทึกผลสแกน (keyword ที่เจอ + PRD section ที่เจอ หรือ "ไม่พบ business-risk keyword") ไว้ใช้ใน SA Handoff section `### Business-risk flags` — ไม่ต้องแสดงผลให้ PO เห็นแยก ทำ silently แล้วรวมเข้า SA Handoff เลย
+
+---
+
 ### STEP 2 — Break into Epics (run after PO answers or clicks Skip)
 
 Group work into epics by functional concern — **high-level scope only, no task-level detail.**
@@ -504,21 +524,25 @@ Epics affected by skipped items → mark as "⚠ TODO — [topic] pending PO dec
 - If still missing → stop: "STACK_CONTEXT.md ยังไม่มี — รอ SA ส่งกลับมาก่อนดำเนินการต่อ ถ้ายังไม่ได้ส่ง SA Handoff ให้ download จาก SA Handoff section แล้วส่งให้ SA"
 - If present but PRD mentions a conflicting technology → ask PO in chat which technology to use, wait for reply
 
-**Check for SA Solution Doc:**
+**Check for SA Triage Summary / Solution Doc (บังคับเสมอ — ห้าม proceed ถ้าไม่มี):**
 
-- If `Solution_Doc_[feature].md` has been uploaded → read it, extract architectural decisions, constraints, and integration patterns → reflect in STEP 4 output
-- If not yet uploaded → proceed, add note in STEP 4: "⚠ SA Solution Doc ยังไม่มี — developer ควรรอ SA review ก่อนเริ่ม implement"
+- Tier 1: ต้องมี `Triage_Summary_[feature].md` จาก SA ก่อนเท่านั้น
+- Tier 2/3: ต้องมี `Solution_Doc_[feature].md` จาก SA ก่อนเท่านั้น
+- ถ้ายังไม่มีไฟล์ที่ต้องการ (ไม่ว่า tier ไหน) → **PAUSE ทันที**: "ยังไม่ได้รับผลจาก SA (Triage Summary / Solution Doc) — ไม่สามารถ proceed ไป STEP 4 ได้ กรุณารอ SA ส่งกลับมาก่อน"
+- ห้ามสร้าง Lead Handoff ที่ไม่มี input จาก SA ไม่ว่ากรณีใด
+- เมื่อไฟล์ที่ต้องการมาถึง → อ่านมัน extract architectural decisions, constraints, และ integration patterns (หรือ pattern reference สำหรับ Tier 1) → reflect ใน STEP 4 output
 
-**Check for ADR files (received from SA via PO):**
+**Check for ADR files (received from SA via PO — เฉพาะ Tier 2/3 ที่มี significant tech decisions):**
 
 - If Solution*Doc references ADR numbers → check if corresponding ADR files (`ADR-NNN*\*.md`) have been uploaded
 - If ADR files present → note them for relay to Lead in STEP 4 Lead Handoff
-- If Solution_Doc has significant tech decisions but no ADR files received → flag to PO: "ADR files ยังไม่ได้รับจาก SA — ขอ ADR files ก่อน proceed STEP 4"
+- If Solution_Doc has significant tech decisions but no ADR files received → **PAUSE**: "ADR files ยังไม่ได้รับจาก SA — ไม่สามารถ proceed ไป STEP 4 ได้ กรุณาขอ ADR files จาก SA ก่อน"
+- Tier 1 ปกติไม่มี ADR (ยกเว้น SA ระบุว่ามี significant tech decision จริงใน Triage Summary) — ถ้าไม่มีให้ proceed ตามปกติ
 
 **Check for PoC prompts (received from SA via PO):**
 
 - If Solution_Doc Section 9 has PoC scope → check if PoC prompt files have been uploaded
-- If not received → note in STEP 4: "⚠ PoC prompts ยังไม่ได้รับจาก SA — Lead ควรรอก่อนเริ่ม spike"
+- If not received → **PAUSE**: "PoC prompts ยังไม่ได้รับจาก SA แต่ Solution Doc ระบุ PoC scope ไว้ — ไม่สามารถ proceed ไป STEP 4 ได้ กรุณารอ SA ส่งกลับมาก่อน"
 
 **Check security requirements (Option A — only if PROJECT_CONTEXT.md has `Security role: yes`):**
 
@@ -542,8 +566,7 @@ Substitute `SUBSTITUTE_FEATURE_NAME` and `SUBSTITUTE_DATE` with actual values.
 | Marker                                                                              | What to put there                                                                                                                                                                                                                                  |
 | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `[embed PRD: Objectives, User Stories, Scope, Functional Requirements, NFR]`        | Copy verbatim the Objectives, User Stories table, Functional Requirements list, Business Rules, NFR, and Out of Scope sections from the PRD. Skip sections that are TBD.                                                                           |
-| `[if Solution_Doc received: embed Architecture...]`                                 | If Solution_Doc uploaded: copy verbatim Architecture Decision, API Design (endpoints + request/response shape), Constraints, and Open Items sections.                                                                                              |
-| `[if not received: *** Solution Doc ยังไม่ได้รับจาก SA...]`                         | Keep this warning as-is if Solution_Doc is absent — Lead must decide whether to wait or proceed.                                                                                                                                                   |
+| `[embed SA Triage Summary or Solution Doc]`                                         | Tier 1: copy verbatim the Triage Summary (pattern reference, files/components likely touched, constraints). Tier 2/3: copy verbatim Architecture Decision, API Design (endpoints + request/response shape), Constraints, and Open Items sections. STEP 3 already hard-blocks if this is missing — it is always present here.                     |
 | `[list each epic: name · business objective · user stories covered · dependencies]` | One row per epic from STEP 2: `Epic name — Business objective. Covers: US-1, US-3. Depends on: [epic or "none"].`                                                                                                                                  |
 | `Language: [value]` … `Conventions: [key points]`                                   | Pull exact field values from STACK_CONTEXT.md. For Conventions: copy the 3-5 most code-affecting rules (error shape, context passing, logging layer rule, request_id).                                                                             |
 | `[embed entries relevant to this feature]`                                          | Copy every DECISION_LOG entry whose feature tag matches this feature. If none: write "ยังไม่มี decisions สำหรับ feature นี้".                                                                                                                      |
@@ -563,15 +586,17 @@ Version : 1
 
 ## Context
 PRD ผ่านการ review และ Epics ถูกกำหนดแล้ว
-SA ออกแบบ Solution Doc เสร็จแล้ว (ถ้ามี)
+SA ตัดสิน tier แล้วและส่ง Triage Summary (Tier 1) หรือ Solution Doc (Tier 2/3) กลับมาแล้ว
 Lead กรุณาทำ detailed task breakdown และ generate Claude Code prompts สำหรับ Developer
 
 ## PRD content
 [embed PRD: Objectives, User Stories, Scope, Functional Requirements, NFR]
 
-## SA Solution Doc
-[if Solution_Doc received: embed Architecture, Tech decisions, API design, Constraints, Open items]
-[if not received: *** Solution Doc ยังไม่ได้รับจาก SA — รอก่อนหรือดำเนิน task breakdown โดยไม่มีให้ Lead ตัดสินใจ ***]
+## Tier
+[Tier 1 / 2 / 3 — ตามที่ SA ตัดสินใจใน Triage Summary/Solution Doc]
+
+## SA Triage Summary / Solution Doc
+[embed SA Triage Summary or Solution Doc]
 
 ## Epics (from PO STEP 2)
 [list each epic: name · business objective · user stories covered · dependencies]
@@ -708,9 +733,9 @@ Use this pattern when Claude needs to ask the PO something during STEP 1 (BLOCKE
 8. At the end of every session that added decisions or confirmed STEP 4, remind PO: **"กรุณา download DECISION*LOG*[feature]_TODO.md (ถ้ายังมี TODO คงเหลือ) และ DECISION_LOG_[feature]\_RESOLVED.md (ถ้ามี resolved items ใหม่) แล้ว upload กลับเข้า Claude Project — ถ้าใช้ conversation thread เดิมต่อ ไม่ต้อง upload ซ้ำ"**
 9. Re-upload rule: **\_TODO file** เท่านั้นที่ต้อง re-upload ทุก session ที่เปิด conversation ใหม่และยังมี TODO คงเหลือ — **\_RESOLVED file** re-upload เฉพาะเมื่อมี resolved items ใหม่เพิ่ม
 10. PROJECT_CONTEXT.md ต้อง upload เข้า Project ครั้งแรกหลังสร้าง และ re-upload ถ้ามีการเปลี่ยนแปลง settings — Claude ใช้ไฟล์นี้จำ security role, environment, และ project settings ข้าม session
-11. **Environment-aware output:** อ่าน `Environment:` จาก PROJECT_CONTEXT.md ทุก session — ถ้ายังไม่มีค่า ให้ถาม PO ครั้งเดียวก่อน SA Handoff แล้ว save ทันที
-    - `Environment: cli` → ใช้ Write tool save ไฟล์ลง disk ทันทีทุกครั้งที่ generate artifact พร้อมแจ้ง path
-    - `Environment: claude.ai` → สร้าง Artifact พร้อม Download button ทุกครั้งที่ generate artifact
+11. **Environment-aware output:** อ่าน `Environment (default):` จาก PROJECT_CONTEXT.md ทุก session — ถ้ายังไม่มีค่า ให้ถาม PO ครั้งเดียวก่อน SA Handoff แล้ว save ทันที (PO ใช้ default นี้เอง ไม่มี override แยก — ดู `docs/CORE_POLICY.md` §5)
+    - `Environment (default): cli` → ใช้ Write tool save ไฟล์ลง disk ทันทีทุกครั้งที่ generate artifact พร้อมแจ้ง path
+    - `Environment (default): claude.ai` → สร้าง Artifact พร้อม Download button ทุกครั้งที่ generate artifact
 12. **QA business rule questions → PO โดยตรง:** QA ไม่ต้องผ่าน Lead เมื่อถามเรื่อง business rules (required/optional fields, allowed behaviors, scope) — PO ตอบ → Claude append DECISION_LOG_RESOLVED ทันที → อัปเดต Lead Handoff เป็น version ใหม่ (ดู QA Clarification Flow)
 13. **One conversation per feature:** ใช้ conversation thread เดียวต่อหนึ่ง feature ตลอดอายุของ feature นั้น — เมื่อ PO กลับมาทำงาน feature เดิม ให้กลับเข้า conversation thread เดิม ไม่ต้องเปิด conversation ใหม่ ถ้ากลับมาใน thread เดิม Claude เห็น decision history จาก conversation แล้ว ให้แสดง summary สั้น ๆ ว่า "feature [name] — อยู่ที่ STEP [N], TODO ที่ยังค้าง: [list]" แล้วถาม PO ว่าต้องการทำอะไรต่อ — เปิด conversation ใหม่เฉพาะเมื่อเริ่ม feature ใหม่เท่านั้น
 
@@ -727,7 +752,7 @@ Use this pattern when Claude needs to ask the PO something during STEP 1 (BLOCKE
 
 > "โปรเจกต์นี้มี Security Engineer ในทีมไหมครับ? (ใช่ / ไม่มี)"
 
-ถ้า `Environment:` ยังไม่มีค่าใน PROJECT_CONTEXT.md → ถามพร้อมกันได้เลย:
+ถ้า `Environment (default):` ยังไม่มีค่าใน PROJECT_CONTEXT.md → ถามพร้อมกันได้เลย:
 
 > "กำลังใช้งานบน claude.ai หรือ Claude Code (CLI) ครับ?"
 
@@ -741,13 +766,18 @@ Use this pattern when Claude needs to ask the PO something during STEP 1 (BLOCKE
 ## Project settings
 
 Security role: yes / no
-Environment: cli / claude.ai
+Environment (default): cli / claude.ai
+Environment overrides:
+  SA: [ไม่ระบุ = ใช้ default]
+  Lead: [ไม่ระบุ = ใช้ default]
+  Dev: cli
+  QA: [ไม่ระบุ = ใช้ default]
+  SEC: [ไม่ระบุ = ใช้ default]   # เฉพาะ Option A (Security role: yes)
 ```
 
-- `Environment: cli` → ใช้ Write tool save ไฟล์ลง disk ทันที พร้อมแจ้ง path ใน chat
-- `Environment: claude.ai` → สร้าง Artifact พร้อม Download button
+`Environment (default)` คือค่าตั้งต้นของโปรเจกต์ที่ PO ตอบตรงนี้ — role อื่น (SA/Lead/QA) จะถามตัวเองอีกครั้งตอนเริ่ม session แรกว่าจะใช้ default นี้หรือ override เป็นอย่างอื่น (ดู `docs/CORE_POLICY.md` §5) PO ไม่ต้องถามแทน role อื่น
 
-จากนั้น output PROJECT_CONTEXT.md ตาม Environment rule ด้านบน (จะได้ไม่ต้องถามซ้ำใน session ถัดไป)
+จากนั้น output PROJECT_CONTEXT.md ตาม Environment rule (ดู `docs/CORE_POLICY.md` §5 สำหรับ pairwise output logic เต็ม)
 
 **ผลของคำตอบ:**
 
@@ -779,6 +809,10 @@ SA กรุณา design solution และส่ง Solution Doc กลับ�
 
 ## PRD content
 [embed PRD: Objectives, User Stories, Scope, Functional Requirements, NFR]
+
+## Business-risk flags (context for SA — not a tier decision)
+[list keywords matched from STEP 1.6 + PRD section where found, e.g. "payment — Section 4 Functional Requirements", "PII (email address) — Section 2 User Stories" — หรือ "ไม่พบ business-risk keyword"]
+หมายเหตุ: รายการนี้เป็น raw flag จาก PO เท่านั้น — SA เป็นผู้ตัดสินใจ tier ที่ STEP 1.5 Tier Triage โดยใช้ flag นี้ประกอบการพิจารณา (business-risk flag ≥ 1 รายการ → tier ต่ำสุดคือ Tier 3 เสมอ)
 
 ## DECISION_LOG entries (this feature)
 [embed entries ที่เกี่ยวกับ feature นี้ — หรือ "ยังไม่มี decisions"]
@@ -822,6 +856,8 @@ SA กรุณา design solution และส่ง Solution Doc กลับ�
 ---
 
 ## SA Solution Doc — required schema
+
+**เฉพาะ Tier 2/3** — Tier 1 ใช้ `Triage_Summary_[feature].md` แบบสั้นแทน (ดู `ai/SA_PROJECT_INSTRUCTIONS.md` §STEP 1.5 Tier 1 Fast Path) ไม่ต้องมี 7 sections ด้านล่างนี้
 
 SA ต้องส่ง `Solution_Doc_[feature].md` กลับมาพร้อม section เหล่านี้ **ทุก section เป็น required** — ถ้า SA ส่งมาไม่ครบ ให้ PO ส่งกลับไปขอเพิ่มเติมก่อน STEP 3
 

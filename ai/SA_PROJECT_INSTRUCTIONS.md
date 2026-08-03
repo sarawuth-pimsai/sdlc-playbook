@@ -22,6 +22,7 @@ that the Lead can use to break tasks.
 | DECISION*LOG*[feature]\_RESOLVED.md | PO owns                                   | Received from PO via SA Handoff — resolved decisions archive (upload here) |
 | PATTERN_LIBRARY.md                  | PO owns                                   | Received from PO via SA Handoff — upload here                              |
 | SOLUTION_PATTERNS.md                | **SA owns** — created and maintained here | SA creates after each accepted feature                                     |
+| PROJECT_CONTEXT.md                  | PO owns                                   | Received from PO via SA Handoff — read Environment default + overrides (ดู `docs/CORE_POLICY.md` §5) |
 
 If any of these files are missing, tell SA which file is missing and what to do:
 
@@ -41,6 +42,22 @@ Last updated: YYYY-MM-DD | Version: N
 At session start, cross-check the date in each file against the previous session. If a file's date is older than the last SA Handoff date, flag it to SA:
 
 > "DECISION*LOG*[feature]\_TODO.md ระบุวันที่ [date] — เก่ากว่า SA Handoff ล่าสุด กรุณาขอไฟล์ version ล่าสุดจาก PO ก่อนดำเนินการต่อ"
+
+---
+
+### SA Environment override (ถามครั้งแรกที่ SA เริ่มทำงานในโปรเจกต์นี้เท่านั้น)
+
+ถ้า `Environment overrides: SA:` ยังไม่มีค่าใน PROJECT_CONTEXT.md → ถาม SA ครั้งเดียว:
+
+> "โปรเจกต์นี้ default เป็น [Environment default] — SA จะทำงานตามนี้ หรือใช้ช่องทางอื่น (cli/claude.ai)?"
+
+ถ้าเลือกต่างจาก default → อัปเดต `Environment overrides: SA:` แล้วส่งกลับ PO เก็บเป็น version ใหม่ ถ้าเลือกตาม default ไม่ต้องเขียนอะไรเพิ่ม
+
+### Handoff Environment Check (ก่อน generate Solution Doc / Triage Summary / ADR ส่งกลับ PO)
+
+ใช้ pairwise rule ใน `docs/CORE_POLICY.md` §5 — effective Environment ของ SA (override หรือ default) เทียบกับของ PO (default ของโปรเจกต์) แล้วเลือก Write tool (ทั้งคู่ cli) หรือ Artifact (กรณีอื่น)
+
+ถ้า PROJECT_CONTEXT.md ไม่ได้แนบมาใน SA Handoff → แจ้ง SA: "ไม่พบ PROJECT_CONTEXT.md — กรุณาขอไฟล์นี้จาก PO ก่อน generate output" แล้วรอ ห้าม default เป็นค่าใดค่าหนึ่งเอง
 
 ---
 
@@ -100,6 +117,55 @@ From the SA Handoff document, extract:
 - Open TODO items that affect architectural decisions
 - Whether STACK_CONTEXT.md is embedded (means PO sent Stack Setup Request — fill and return it)
 
+### STEP 1.5 — Tier Triage (SA only — ตัดสินใจก่อนเริ่ม STEP 2)
+
+อ่าน Feature Brief จาก PO (รวม `### Business-risk flags` section ใน SA Handoff) แล้วประเมิน:
+
+1. Feature นี้แตะ data model ใหม่ หรือเปลี่ยน schema ไหม?
+2. Feature นี้เพิ่ม external integration ใหม่ไหม?
+3. Feature นี้ตรงกับ pattern ที่มีอยู่แล้วใน SOLUTION_PATTERNS.md ไหม?
+4. STACK_CONTEXT.md รองรับสิ่งที่ feature ต้องการอยู่แล้วไหม?
+
+**ตัดสินใจ Tier:**
+
+| Tier | เกณฑ์ | Path ต่อจากนี้ |
+|---|---|---|
+| Tier 1 — Micro | ไม่แตะ data model, ไม่มี integration ใหม่, ตรงกับ pattern เดิม | ข้าม STEP 2-6, ทำ Tier 1 Fast Path (ดูด้านล่าง) |
+| Tier 2 — Standard | แตะ data model/logic ปานกลาง | STEP 2-7 ตามปกติ (Solution Doc เต็ม) |
+| Tier 3 — Full | กระทบมาก **หรือ** business-risk flag จาก PO เป็น true อย่างน้อย 1 รายการ | STEP 2-7 + บังคับเรียก SEC |
+
+**กฎ (ดู `docs/CORE_POLICY.md` §1):** business-risk flag จาก PO ไม่ได้ auto-set tier แต่บังคับให้ tier ต่ำสุดคือ Tier 3 เสมอ แม้ SA จะประเมินว่าโครงสร้างไม่กระทบก็ตาม
+
+แจ้งผล tier กับเหตุผลสั้นๆ กลับไปให้ PO ก่อนไปต่อ
+
+#### Tier 1 Fast Path
+
+แทน STEP 2-6 เดิม ด้วยขั้นตอนสั้น:
+
+1. เช็ค feature เทียบกับ `SOLUTION_PATTERNS.md` — ถ้ามี pattern ที่ใช้ได้ ให้ระบุชื่อ pattern
+2. เช็ค `STACK_CONTEXT.md` — ยืนยันว่าไม่มี deviation
+3. เขียน **Triage Summary** สั้น (ไม่ใช่ Solution Doc เต็ม) 10-15 บรรทัด:
+
+```markdown
+# Triage Summary — [Feature name]
+
+Tier: 1 | Date: [date] | SA: [confirmed no structural impact]
+
+## Pattern reference
+[ชื่อ pattern จาก SOLUTION_PATTERNS.md ที่ใช้ได้ หรือ "ไม่มี pattern เดิมที่ตรง — เขียนใหม่แบบง่าย"]
+
+## Files/components likely touched
+[รายการคร่าวๆ]
+
+## Constraints
+[ถ้ามี — เช่น ต้องตาม convention เดิมของ endpoint]
+```
+
+4. ส่ง Triage Summary นี้ให้ PO → Lead ใช้แทน Solution Doc สำหรับ task breakdown
+5. ข้าม STEP 4 (Solution Doc), STEP 5 (ADR — ยกเว้นมี significant tech decision จริง), STEP 6 (PoC — Tier 1 ไม่ควรมี PoC scope อยู่แล้ว) → ไปที่ STEP 7 โดยตรงพร้อม Triage Summary
+
+SA reviews Triage Summary draft ใน chat → SA confirms → **create HTML Artifact** สำหรับ `Triage_Summary_[feature].md` using the shell in §HTML Artifact Shell below
+
 ### STEP 2 — Analyse PRD
 
 - Summarise the feature in 2-3 sentences from a technical perspective
@@ -144,7 +210,7 @@ After SA selects an option, draft the full Solution Doc using this structure:
 ```markdown
 # Solution Doc — [Feature name]
 
-Version: 1.0 | Date: [date] | Author: SA | Status: Draft
+Version: 1.0 | Date: [date] | Author: SA | Status: Draft | Tier: 2 หรือ 3
 
 ## 1. Overview
 
@@ -306,15 +372,21 @@ After Lead runs the PoC and reports back, SA handles the result as follows:
 
 ### STEP 7 — Handoff package
 
-Compile everything SA has produced into a handoff summary, then distribute:
+Compile everything SA has produced into a handoff summary, then distribute.
+
+**Tier 1:** ใช้ Triage Summary แทน Solution Doc — ไม่มี ADR/PoC ตามปกติ (ยกเว้นระบุ significant tech decision จริงใน STEP 1.5)
+**Tier 2/3:** ใช้ Solution Doc + ADR + PoC (ถ้ามี) ตามปกติทุกประการ — flow นี้ไม่เปลี่ยนแปลง
 
 ```markdown
 ## SA Handoff — [Feature name]
 
+Tier: [1 / 2 / 3]
+
 ### Files produced — ส่งให้ PO ทั้งหมด
 
-- Solution*Doc*[feature].md → PO uploads + embeds in Lead Handoff
-- ADR*[NNN]*[title].md (x N) → PO relays to Lead for /docs/adr/ commit
+- Tier 1: Triage*Summary*[feature].md → PO uploads + embeds in Lead Handoff
+- Tier 2/3: Solution*Doc*[feature].md → PO uploads + embeds in Lead Handoff
+- ADR*[NNN]*[title].md (x N, ถ้ามี) → PO relays to Lead for /docs/adr/ commit
 - PoC\_[assumption].md (x N, ถ้ามี) → PO relays to Lead for spike
 - SOLUTION_PATTERNS.md (ถ้าถูก update session นี้) → ส่งให้ PO เพื่อ propagate entries ที่มี code-level implications เข้า PATTERN_LIBRARY.md
 
@@ -343,8 +415,9 @@ SA reviews summary in chat → confirm → **create HTML Artifact** for the SA H
 
 **ส่งให้ PO (ทุก artifact — PO เป็น single channel ให้ Lead):**
 
-- `Solution_Doc_[feature].md` → PO upload เข้า PO Project + embed ใน Lead Handoff
-- `ADR_[NNN].md` (x N) → PO relay ให้ Lead (Lead commit เข้า `/docs/adr/`)
+- Tier 1: `Triage_Summary_[feature].md` → PO upload เข้า PO Project + embed ใน Lead Handoff
+- Tier 2/3: `Solution_Doc_[feature].md` → PO upload เข้า PO Project + embed ใน Lead Handoff
+- `ADR_[NNN].md` (x N, ถ้ามี) → PO relay ให้ Lead (Lead commit เข้า `/docs/adr/`)
 - PoC prompts (ถ้ามี) → PO relay ให้ Lead
 - `STACK_CONTEXT.md` (ถ้า PO ส่ง Stack Setup Request มาด้วย) → PO upload เข้า PO Project
 
@@ -462,7 +535,8 @@ SA reviews → confirms → export updated SOLUTION_PATTERNS.md
 
 | File                        | Destination          | Who reviews                              |
 | --------------------------- | -------------------- | ---------------------------------------- |
-| Solution*Doc*[feature].md   | PO → Lead (via PO)   | PO approves; Lead reads via LEAD_HANDOFF |
+| Triage*Summary*[feature].md (Tier 1) | PO → Lead (via PO) | PO approves; Lead reads via LEAD_HANDOFF |
+| Solution*Doc*[feature].md (Tier 2/3) | PO → Lead (via PO) | PO approves; Lead reads via LEAD_HANDOFF |
 | ADR*[NNN]*[title].md        | PO → repo /docs/adr/ | Lead commits after receiving from PO     |
 | PoC\_[assumption].md        | PO → Lead (via PO)   | Lead uses as Claude Code prompt          |
 | SOLUTION_PATTERNS.md update | SA Project           | SA owns                                  |

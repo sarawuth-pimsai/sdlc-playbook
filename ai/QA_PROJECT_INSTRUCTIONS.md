@@ -26,6 +26,7 @@ QA works in two distinct phases:
 | Task_[ID]_[title].md | received from Lead (same files as Developer) | Done criteria per task — QA verifies in Phase A |
 | DECISION_LOG_[feature]_TODO.md | received from PO (Phase 0) or Lead (Phase A) | PO unresolved items — edge cases ที่ยังไม่มี expected behavior ชัดเจน |
 | DECISION_LOG_[feature]_RESOLVED.md | received from PO (Phase 0) or Lead (Phase A) | PO resolved decisions — expected behavior for edge cases |
+| PROJECT_CONTEXT.md | received from PO (Phase 0) or Lead (Phase A) | Read Environment default + overrides (ดู `docs/CORE_POLICY.md` §5) |
 
 **Phase 0** starts when PO sends PRD + DECISION_LOG directly — no need to wait for Lead or STACK_CONTEXT.md.
 **Phase A** requires STACK_CONTEXT.md and task prompts from Lead before starting.
@@ -41,6 +42,16 @@ If STACK_CONTEXT.md or task prompts are missing at Phase A → แจ้ง QA: 
 | DECISION_LOG_[feature]_RESOLVED.md | PO (Phase 0) or Lead | Check for new resolved items that change expected behavior |
 
 If a file is missing a version header → treat it as Version 1 and note it to Lead. If a sender states "Version N" in their message but the file header says a lower number → flag the mismatch before testing.
+
+### QA Environment override (ถามครั้งแรกที่ QA เริ่มทำงานในโปรเจกต์นี้เท่านั้น)
+
+เหมือน SA §SA Environment override แต่เป็นของ QA — อัปเดต `Environment overrides: QA:` ถ้าเลือกต่างจาก default
+
+### Handoff Environment Check (ก่อน generate Test Case / Bug Report / Test Suite / Test Report ส่งกลับ Lead)
+
+ใช้ pairwise rule ใน `docs/CORE_POLICY.md` §5 — effective Environment ของ QA เทียบกับของ Lead
+
+ถ้า PROJECT_CONTEXT.md ไม่ได้ถูกส่งมา → แจ้ง QA: "ไม่พบ PROJECT_CONTEXT.md — กรุณาขอไฟล์นี้จาก PO หรือ Lead ก่อน generate output" แล้วรอ ห้าม default เป็นค่าใดค่าหนึ่งเอง
 
 ---
 
@@ -104,6 +115,15 @@ Send to Lead after completing P-STEP 2 — Lead provisions test data before Phas
 
 Trigger: Dev notifies QA that a task is deployed to SIT environment.
 
+### A-STEP 0 — Check tier (ทำก่อน A-STEP 1 เสมอ)
+
+อ่าน `Tier:` จาก Solution Doc header หรือ Triage Summary header ที่ได้รับจาก Lead:
+
+- **Tier 1** → ใช้ **Lightweight Check** แทน A-STEP 2 เต็มรูปแบบ (ดูด้านล่าง)
+- **Tier 2/3** → ทำ A-STEP 1-5 ตามปกติทั้งหมด ไม่มีการเปลี่ยนแปลง
+
+ถ้าไม่พบ `Tier:` field เลย (ไฟล์เก่าก่อน migration) → ปฏิบัติเป็น Tier 2/3 เสมอ (safe default — ทดสอบเต็มไว้ก่อน)
+
 ### A-STEP 1 — Read task prompt and PRD
 
 Read the task prompt and find the matching acceptance criteria in the PRD.
@@ -143,6 +163,23 @@ Show preview → QA reviews → confirm → export TestCases_[TaskID].md
 **Ask QA before proceeding** if:
 - PRD does not define expected behavior for an edge case → PAUSE, ask QA: "PRD ไม่ได้ระบุ expected behavior สำหรับ edge case นี้ — QA คาดหวังผลลัพธ์อะไรครับ?"
 - Done criteria in task prompt is ambiguous → PAUSE, ask QA: "Done criteria ใน task prompt ยังไม่ชัดเจน — กรุณาขอ clarify จาก Lead ก่อนสร้าง test cases"
+
+#### Lightweight Check (ใช้แทน A-STEP 2 เต็มรูปแบบ เมื่อเป็น Tier 1 เท่านั้น)
+
+แทนที่จะสร้าง TestCases_[TaskID].md เต็มรูปแบบ (4 หมวด: Happy path/Edge/Error/Security) ให้ทำ checklist สั้นแทน:
+
+```markdown
+# Lightweight Check — [Task ID] [Task name]
+Tier: 1 | Environment: SIT | Date: [date] | Tester: QA
+
+## Done criteria verification
+- [ ] [copy done criteria จาก task prompt ทีละข้อ พร้อม pass/fail]
+
+## Happy path smoke check
+- [ ] [scenario หลักที่สุดของ task นี้ทำงานได้จริง]
+```
+
+ไม่ต้องสร้าง Edge case / Error case / Security case section แยก — ถ้าระหว่างทำ Lightweight Check เจอ edge case ที่น่าสงสัยจริงจัง ให้ escalate ทันที (ดู §QA Tier Escalation ด้านล่าง) แทนที่จะขยาย scope เองเงียบๆ
 
 ### A-STEP 3 — Generate Claude Code test prompt for this task
 
@@ -312,6 +349,21 @@ Dev fixes bugs → QA re-tests failed cases only.
 
 ---
 
+### QA Tier Escalation (safety net — เหมือน L-STEP 1.5 ของ Lead)
+
+ถ้า QA พบระหว่าง Lightweight Check ว่า task นี้มี edge case/risk ที่ Tier 1 ไม่ควรมี (เช่น auth logic ซ่อนอยู่, data validation ซับซ้อนเกินคาด) → **หยุด อย่าขยาย scope เอง** ส่ง Escalation Request ไปหา Lead:
+
+```markdown
+## QA Escalation Request — [Task ID]
+จาก: QA | ถึง: Lead
+เหตุผล: [สิ่งที่พบว่าเกิน scope ของ Tier 1 Lightweight Check]
+ขอ: ยืนยันว่า tier ยังถูกต้อง หรือควร escalate ต่อไป SA
+```
+
+Lead รับเรื่องนี้ต่อผ่าน escalation flow เดิม (L-STEP 1.5) ถ้าเห็นด้วยกับ QA
+
+---
+
 ## Step sequence — Phase B (Staging automated test suite)
 
 Trigger: All tasks are done on SIT, Dev deploys full feature to Staging environment.
@@ -320,7 +372,8 @@ Trigger: All tasks are done on SIT, Dev deploys full feature to Staging environm
 
 Before compiling the full test suite, identify what existing functionality could be affected by this feature.
 
-1. Read Solution Doc Section 2 (Architecture) and Section 5 (Data model changes) — note which existing endpoints or services this feature modified
+1. **Tier 2/3:** Read Solution Doc Section 2 (Architecture) and Section 5 (Data model changes) — note which existing endpoints or services this feature modified
+   **Tier 1:** Read Triage Summary §Files/components likely touched แทน (ไม่มี Solution Doc Section 2/5 ให้ใช้)
 2. Check `STACK_CONTEXT.md` for `Critical paths` section — if present, these **always** run in Phase B regardless of whether this feature touched them
 3. Ask QA: "ระบบที่มีอยู่แล้วส่วนไหนที่อาจกระทบจาก feature นี้?"
 
@@ -340,6 +393,12 @@ Generate regression scope and confirm with QA before B-STEP 1:
 ```
 
 **ถ้า regression case fail ใน Phase B → STOP ทันที → แจ้ง Lead ก่อน — อย่า continue Phase B จนกว่าจะ resolve regression failure**
+
+**Tier 1 — Regression scope แบบย่อ:** ถ้า tier เป็น 1 และ Triage Summary ระบุว่าใช้ pattern เดิมจาก SOLUTION_PATTERNS.md (ไม่ได้เขียนใหม่) → regression scope จำกัดแค่ endpoint/component ที่ระบุใน "Files/components likely touched" เท่านั้น ไม่ต้องสแกนทั้งระบบตาม Default regression scope ด้านบน
+
+**Tier 1 — Phase B execution แบบย่อ:** แทนที่จะรัน full regression suite (B-STEP 1-3 เต็มรูปแบบ) ให้รัน **Smoke Test** เฉพาะ regression scope ที่ระบุไว้ + happy path ของ feature นี้เอง ข้าม B-STEP 1 (compile suite เต็ม) ไปสร้าง smoke test สั้นแทน แล้วทำ B-STEP 3 (draft test report) ตามปกติแต่ระบุ `Scope: Tier 1 Smoke Test` ในหัว report
+
+**Tier 2/3:** ไม่มีการเปลี่ยนแปลง — รัน B-STEP 0-3 เต็มรูปแบบเหมือนเดิมทุกประการ
 
 ### B-STEP 1 — Compile full test suite from all task test cases
 

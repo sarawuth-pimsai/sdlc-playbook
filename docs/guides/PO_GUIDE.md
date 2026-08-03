@@ -4,6 +4,8 @@
 
 PO เป็น **hub กลาง** ของ SDLC Playbook — ประสานงานทุก role และเป็นเจ้าของ decision history ของทุก feature
 
+**PO ไม่ตัดสินใจ tier** — ทำได้แค่เก็บรายละเอียด feature และ flag business-risk keyword เป็น context ส่งให้ SA ตัดสินใจ ดู [CORE_POLICY.md](../CORE_POLICY.md) §1
+
 ---
 
 ## การติดตั้ง
@@ -96,23 +98,29 @@ Claude ถามทีละคำถามสำหรับ ambiguity 3 ปร
 
 ตอบคำถามทีละข้อ หรือกด **Skip** เพื่อบันทึกเป็น TODO
 
+### STEP 1.6 — สแกน Business-risk keyword
+
+หลัง STEP 1.5 Claude สแกน PRD หา business-risk keyword (payment, auth, PII, external API, encryption/compliance ฯลฯ — ดูรายการเต็มใน [CORE_POLICY.md](../CORE_POLICY.md) §1) แล้วแนบผลสแกนเป็น context ใน SA Handoff — **นี่ไม่ใช่การตัดสิน tier** เป็นแค่ raw flag ให้ SA ใช้ประกอบการตัดสินใจที่ STEP 1.5 Tier Triage ของ SA
+
 ### STEP 2 — กำหนด Epics
 
 Claude จัดกลุ่มงานเป็น Epics (high-level เท่านั้น — Lead ทำ task breakdown)
 
-**หลัง confirm STEP 2:** Claude สร้าง SA Handoff อัตโนมัติ
+**หลัง confirm STEP 2:** Claude สร้าง SA Handoff อัตโนมัติ (รวม business-risk flags จาก STEP 1.6)
 - ถ้ายังไม่มี `Security role` ใน PROJECT_CONTEXT.md → Claude ถามก่อน
 
 **หลังส่ง SA Handoff:** แจ้ง QA ให้เริ่ม Phase 0 ได้เลยโดยไม่รอ SA
 
-### STEP 3 — ตรวจ Stack + Solution Doc
+### STEP 3 — ตรวจ Stack + Triage Summary/Solution Doc
 
-**Trigger:** SA ส่ง Solution_Doc + ADRs + STACK_CONTEXT กลับมา
+**Trigger:** SA ส่ง Triage Summary (Tier 1) หรือ Solution Doc + ADRs (Tier 2/3) + STACK_CONTEXT กลับมา
+
+**บังคับเสมอ — ห้าม proceed ไป STEP 4 ถ้ายังไม่ได้รับผลจาก SA** ไม่ว่า tier ไหน (ดู [CORE_POLICY.md](../CORE_POLICY.md) §1) — ไม่มี soft-warning แล้วเดินหน้าต่ออีกต่อไป
 
 Claude ตรวจ:
 - STACK_CONTEXT.md ครบถ้วนไหม
-- Solution Doc ครบทุก section (7 sections required)
-- ADR files ตรงกับที่ reference ใน Solution Doc หรือไม่
+- Tier 1: มี Triage Summary หรือยัง — Tier 2/3: Solution Doc ครบทุก section (7 sections required) หรือยัง
+- ADR files ตรงกับที่ reference ใน Solution Doc หรือไม่ (ถ้ามี significant tech decision แต่ไม่มี ADR → PAUSE รอก่อน)
 - Security Requirements (ถ้า `Security role: yes` → รอ SEC ส่ง Security_Requirements ก่อน)
 
 ### STEP 4 — สร้าง Lead Handoff

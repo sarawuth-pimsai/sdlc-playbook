@@ -25,6 +25,9 @@
 | `STACK_CONTEXT.md` | ได้รับจาก PO พร้อม Phase A package |
 | `PRD_[feature].md` | ได้รับจาก PO |
 | `Solution_Doc_[feature].md` | ได้รับจาก PO (จาก SA) — ต้องมีก่อนเริ่ม Phase A |
+| `PROJECT_CONTEXT.md` | ได้รับจาก PO พร้อม Solution Doc — อ่าน Environment default + override (ดู [CORE_POLICY.md](../CORE_POLICY.md) §5) |
+
+**SEC ถาม Environment override ของตัวเองแค่ครั้งแรกที่เริ่มทำงานในโปรเจกต์นี้** (เหมือน SA/Lead/QA) แล้วเช็ค pairwise ก่อนส่งไฟล์กลับทุกครั้ง — Phase A เทียบกับ PO, Phase B เทียบกับ Lead (ดู `ai/SEC_PROJECT_INSTRUCTIONS.md` §Environment override + §Handoff Environment Check)
 
 ---
 

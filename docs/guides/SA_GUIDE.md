@@ -4,6 +4,8 @@
 
 SA รับผิดชอบวิเคราะห์ PRD ด้านเทคนิค ออกแบบ Solution และเป็นเจ้าของ `STACK_CONTEXT.md`
 
+**SA เป็นเจ้าของการตัดสินใจ tier เสมอ** — ไม่มี role ไหนข้าม SA ได้ ดู [CORE_POLICY.md](../CORE_POLICY.md) §1
+
 ---
 
 ## การติดตั้ง
@@ -86,7 +88,19 @@ Claude อ่านไฟล์ทั้งหมดก่อน แล้ว ex
 - Epics จาก PO STEP 2
 - Open TODO items ที่กระทบ architectural decisions
 
-### STEP 2 — วิเคราะห์ PRD ด้านเทคนิค
+### STEP 1.5 — Tier Triage (SA เท่านั้น — ก่อนเริ่ม STEP 2)
+
+SA ประเมิน 4 คำถาม (แตะ data model ใหม่? เพิ่ม integration ใหม่? ตรงกับ pattern เดิมใน SOLUTION_PATTERNS.md? STACK_CONTEXT.md รองรับอยู่แล้วไหม?) แล้วตัดสินใจ tier:
+
+| Tier | เกณฑ์ | Path |
+|---|---|---|
+| 1 — Micro | ไม่แตะ data model, ไม่มี integration ใหม่, ตรงกับ pattern เดิม | Fast Path — เขียนแค่ Triage Summary สั้น (10-15 บรรทัด) ข้าม STEP 2-6 |
+| 2 — Standard | แตะ data model/logic ปานกลาง | STEP 2-7 ปกติ พร้อม Solution Doc เต็ม |
+| 3 — Full | กระทบมาก หรือ business-risk flag จาก PO ≥ 1 รายการ | STEP 2-7 + บังคับเรียก SEC |
+
+**กฎ:** business-risk flag จาก PO ไม่ auto-set tier แต่บังคับ tier ต่ำสุด = Tier 3 เสมอ ดู [CORE_POLICY.md](../CORE_POLICY.md) §1 และ `ai/SA_PROJECT_INSTRUCTIONS.md` §STEP 1.5
+
+### STEP 2 — วิเคราะห์ PRD ด้านเทคนิค (Tier 2/3 เท่านั้น)
 
 - Summarise feature (2-3 ประโยค มุมมองเทคนิค)
 - ระบุ data flows, integration points, external dependencies, constraints
@@ -94,13 +108,13 @@ Claude อ่านไฟล์ทั้งหมดก่อน แล้ว ex
 
 ถ้าต้องการ clarification จาก PO → Claude สร้าง **HTML Artifact dialog**
 
-### STEP 3 — เสนอ Solution Options
+### STEP 3 — เสนอ Solution Options (Tier 2/3 เท่านั้น)
 
 Claude เสนอ 2-3 options พร้อม pros/cons/complexity
 
 **กฎ:** Claude ไม่เลือก option เอง — SA เป็นคนตัดสินใจ
 
-### STEP 4 — Draft Solution Doc
+### STEP 4 — Draft Solution Doc (Tier 2/3 เท่านั้น)
 
 หลัง SA เลือก option → Claude draft `Solution_Doc_[feature].md` (9 sections required)
 
@@ -117,7 +131,7 @@ Claude เสนอ 2-3 options พร้อม pros/cons/complexity
 
 SA review draft ใน chat → confirm → Claude create HTML Artifact พร้อม Download button
 
-### STEP 5 — Draft ADRs
+### STEP 5 — Draft ADRs (Tier 2/3 เท่านั้น — Tier 1 ยกเว้นมี significant decision จริง)
 
 สำหรับทุก tech decision ที่ "significant":
 - เลือก technology ที่ต่างจาก STACK_CONTEXT.md defaults
@@ -127,7 +141,7 @@ SA review draft ใน chat → confirm → Claude create HTML Artifact พร�
 
 **ADR numbering:** ใช้ global index `docs/adr/INDEX.md` — SA จอง number ก่อน draft
 
-### STEP 6 — PoC Planning (ถ้ามี PoC scope ใน STEP 4)
+### STEP 6 — PoC Planning (Tier 2/3 เท่านั้น — ถ้ามี PoC scope ใน STEP 4)
 
 Claude generate PoC prompts สำหรับ Lead ไปรัน spike
 
@@ -141,8 +155,9 @@ Claude generate PoC prompts สำหรับ Lead ไปรัน spike
 Claude compile handoff summary พร้อม distribution plan
 
 **ส่งทุก artifact ให้ PO** (ไม่ส่งตรงให้ Lead):
-- `Solution_Doc_[feature].md`
-- `ADR_[NNN]_[title].md` (x N)
+- Tier 1: `Triage_Summary_[feature].md`
+- Tier 2/3: `Solution_Doc_[feature].md`
+- `ADR_[NNN]_[title].md` (x N, ถ้ามี)
 - PoC prompts (ถ้ามี)
 - `STACK_CONTEXT.md` (ถ้า PO ส่ง Stack Setup Request มาด้วย)
 - `SOLUTION_PATTERNS.md` (ถ้า update session นี้)
