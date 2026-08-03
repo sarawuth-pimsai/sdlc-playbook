@@ -9,6 +9,8 @@
 
 ไม่มี application ที่รันได้ใน repo นี้
 
+> **หมายเหตุ:** `/CLAUDE.md` ที่ root ของ repo นี้เป็นคนละไฟล์กับ `CLAUDE.md` ที่พูดถึงข้างบน — ไฟล์ root นี้ให้ guidance กับ Claude Code สำหรับคนที่มาแก้ไข/ดูแล playbook เอง ส่วน `CLAUDE.md` ที่ Dev ใช้งานจริงคือไฟล์ที่ Lead generate ขึ้นมาใหม่ในแต่ละ feature repo (มาจาก `ai/DEV_PROJECT_INSTRUCTIONS.md`)
+
 ---
 
 ## ภาพรวม
@@ -18,23 +20,25 @@
 
 
 ```
-PO (hub) ──────► SA      SA Handoff → Solution Doc + ADRs + PoC prompts
-         ──────► SEC     Solution Doc → Security Requirements  (Option A เท่านั้น)
-         ──────► Lead    Lead Handoff = PRD + Solution Doc + Epics + Stack
+PO (hub) ──────► SA      SA Handoff → Triage Summary (Tier 1) หรือ Solution Doc + ADRs + PoC prompts (Tier 2/3)
+         ──────► SEC     Solution Doc → Security Requirements  (Option A + บังคับถ้า Tier 3)
+         ──────► Lead    Lead Handoff = PRD + Tier + Triage Summary/Solution Doc + Epics + Stack
 
-Lead ───────────► Dev    Task_[ID].md prompts ทีละไฟล์
+Lead ───────────► Dev    Task_[ID].md prompts ทีละไฟล์ตาม lane
 Dev ────────────► QA     Deploy Notification หลัง deploy SIT/Staging
 Lead ───────────► QA     PRD + DECISION_LOG + task files (Phase A setup)
 SEC ────────────► Lead   Security_Review_[TaskID].md ต่อ PR  (Option A เท่านั้น)
+Lead ◄─────────► SA      Escalation Request (ตรง ไม่ผ่าน PO — ดูเหตุผลใน CORE_POLICY.md §6)
 ```
 
-**PO เป็น hub กลาง** — ทุก artifact ผ่าน PO ก่อนกระจายต่อให้ roles อื่น
+**PO เป็น hub กลางสำหรับ planning-phase handoff** (SA/SEC ↔ Lead) — ส่วน execution-phase interaction ที่เกิดถี่ (Lead↔SA escalation, Lead↔SEC Phase B, Lead↔Dev/QA) ตัดตรงไม่ผ่าน PO ดูหลักการเต็มที่ [docs/CORE_POLICY.md](docs/CORE_POLICY.md) §6
 
 ---
 
 ## โครงสร้าง Repository
 
 ```
+CLAUDE.md                        → guidance สำหรับ Claude Code เมื่อแก้ไข playbook repo นี้เอง (ไม่ใช่ Dev role file)
 ai/
   PROJECT_INSTRUCTIONS.md        → PO Claude Project (Option A) / /po command (Option B)
   SA_PROJECT_INSTRUCTIONS.md     → SA Claude Project / /sa command
@@ -43,6 +47,10 @@ ai/
   QA_PROJECT_INSTRUCTIONS.md     → QA Claude Project / /qa command
   SEC_PROJECT_INSTRUCTIONS.md    → Security Engineer Claude Project (Option A only)
 docs/
+  CORE_POLICY.md    → single source of truth: tier ownership, escalation, parallel execution,
+                       hotfix flow, environment default+override, routing principle
+  WORKFLOW_OVERVIEW.md → Mermaid diagrams: role-to-role flow, tier/escalation overview, hotfix flow
+  roles/            → ตัวอย่าง knowledge files (STACK_CONTEXT.md, ADR INDEX.md, stack setup template)
   guides/
     PO_GUIDE.md       → คู่มือ Product Owner
     SA_GUIDE.md       → คู่มือ Solution Architect
@@ -183,34 +191,44 @@ PO ส่ง SA Stack Setup Request ให้ SA กรอก `STACK_CONTEXT.md`
 ┌─────────────────────────────────────────────────────────────────────┐
 │  1. PO เริ่ม session ใหม่                                           │
 │     Welcome Wizard → ตรวจสอบไฟล์ → STEP 1 (วิเคราะห์ PRD)         │
-│     → STEP 1.5 (ชี้แจง) → STEP 2 (Epics)                           │
-│     → สร้าง SA Handoff อัตโนมัติ                                    │
+│     → STEP 1.5 (ชี้แจง) → STEP 1.6 (scan business-risk keywords)   │
+│     → STEP 2 (Epics) → สร้าง SA Handoff อัตโนมัติ                  │
 ├─────────────────────────────────────────────────────────────────────┤
 │  2. SA รับ SA Handoff                                               │
-│     วิเคราะห์ PRD → เสนอ options → draft Solution Doc              │
-│     → ADRs → PoC (ถ้าจำเป็น) → ส่งทุก artifact กลับ PO            │
+│     STEP 1.5 — Tier Triage (บังคับเสมอ, SA เป็นคนตัดสิน ไม่ใช่ PO) │
+│     Tier 1 → Triage Summary สั้น (fast path)                        │
+│     Tier 2/3 → เสนอ options → draft Solution Doc (มี Tier: header) │
+│       → ADRs → PoC (ถ้าจำเป็น) → ส่งทุก artifact กลับ PO           │
 ├─────────────────────────────────────────────────────────────────────┤
-│  3. SEC รับ Solution Doc (Option A เท่านั้น)                        │
-│     Phase A review → Security_Requirements → ส่ง PO               │
+│  3. SEC รับ Solution Doc (Option A + บังคับถ้า Tier 3)              │
+│     Phase A review → Security_Requirements → ส่ง PO (ผ่าน PO เสมอ) │
 ├─────────────────────────────────────────────────────────────────────┤
 │  4. PO รัน STEP 3 + STEP 4                                          │
-│     ตรวจ stack + Solution Doc → สร้าง Lead Handoff                  │
+│     ตรวจ stack + Triage Summary/Solution Doc (hard block ถ้ายังไม่มี) │
+│     → สร้าง Lead Handoff                                            │
 ├─────────────────────────────────────────────────────────────────────┤
 │  5. Lead รับ Lead Handoff                                           │
-│     L-STEP 1-4: cross-check → task breakdown → Claude Code prompts  │
+│     L-STEP 1 cross-check → L-STEP 1.5 Escalation Check              │
+│       (scope เกินเอกสาร → escalate ตรงไป SA ไม่ผ่าน PO)            │
+│     → L-STEP 2 task breakdown → L-STEP 2.5 Dependency Graph +       │
+│       Parallel Lane Assignment → generate Claude Code prompts       │
 │     → CLAUDE.md → ส่ง task prompts ให้ Dev + setup files ให้ QA    │
 ├─────────────────────────────────────────────────────────────────────┤
-│  6. Dev implement (ทีละ task)                                       │
+│  6. Dev implement (ทีละ task ตาม lane)                              │
 │     Paste Task_[ID].md ใน Claude Code → implement → run done criteria │
-│     → update TASK_LOG → deploy SIT → notify QA                     │
+│     → update TASK_LOG (Lane + Assigned Dev) → deploy SIT → notify QA │
 ├─────────────────────────────────────────────────────────────────────┤
-│  7. QA test                                                          │
+│  7. QA test — A-STEP 0 เช็ค tier ก่อนเสมอ                          │
 │     Phase 0: draft test cases จาก PRD (parallel กับ SA)            │
-│     Phase A: SIT test ต่อ task → TaskTestSummary → Dev fix bugs     │
-│     Phase B: Staging full suite → TestReport → Lead sign-off        │
+│     Phase A: Tier 1 → Lightweight Check | Tier 2/3 → full TestCases │
+│       → TaskTestSummary → Dev fix bugs                              │
+│     Phase B: Tier 1 → Smoke Test | Tier 2/3 → full suite            │
+│       → TestReport → Lead sign-off                                  │
 │     Phase C: Production smoke test → rollback ถ้า P1 fail           │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+
+> Routing บางจุดผ่าน PO (planning-phase, ความถี่ต่ำ) บางจุดตรงระหว่าง role ปฏิบัติการ (execution-phase, ความถี่สูง) — หลักการเต็มดู [docs/CORE_POLICY.md](docs/CORE_POLICY.md) §6
 
 ---
 
@@ -290,8 +308,9 @@ my-project/
 | `DECISION_LOG_[feature]_RESOLVED.md` | PO      | SA, Lead, QA              |
 | `PATTERN_LIBRARY.md`                 | PO      | SA, Lead                  |
 | `SOLUTION_PATTERNS.md`               | SA      | SA-internal               |
-| `PROJECT_CONTEXT.md`                 | PO      | PO-internal               |
-| `Solution_Doc_[feature].md`          | SA      | PO → Lead, SEC            |
+| `PROJECT_CONTEXT.md`                 | PO      | PO → SA, Lead, QA, SEC (Environment default + per-role override) |
+| `Triage_Summary_[feature].md` (Tier 1) | SA    | PO → Lead                 |
+| `Solution_Doc_[feature].md` (Tier 2/3) | SA    | PO → Lead, SEC            |
 | `Security_Requirements_[feature].md` | SEC     | PO → Lead                 |
 | `LEAD_HANDOFF_[feature].md`          | PO      | Lead                      |
 | `Task_[ID]_[title].md`               | Lead    | Dev, QA                   |
