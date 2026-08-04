@@ -189,6 +189,13 @@ Error codes:
 ## Task [N] of [total] — [Task title]
 **Do only this. Stop when done. Do not start Task [N+1].**
 
+### Branch setup
+Branch from : [PR target from STACK_CONTEXT §Git branching — the base branch to branch from]
+Branch name : [Feature branch pattern from STACK_CONTEXT §Git branching — substitute [task-id] with this task's ID]
+PR target   : [PR target from STACK_CONTEXT §Git branching]
+
+สร้าง branch นี้ก่อนเขียน code ใดๆ
+
 ### Parallel metadata
 Lane          : [lane name — domain-based, e.g. lane-auth]
 Assigned Dev  : [name, or "unassigned" for solo]
