@@ -78,6 +78,8 @@ Claude อ่าน Lead Handoff และ extract:
 
 เมื่อ trigger → ส่ง **Escalation Request ตรงไปหา SA** (ไม่ผ่าน PO) แล้วรอคำตอบก่อนไปต่อ — Lead ห้ามตัดสินใจเชิงสถาปัตยกรรมแทน SA ยกเว้น Hotfix Flow P1/P2 (ดู §Hotfix Flow และ [CORE_POLICY.md](../CORE_POLICY.md) §2)
 
+**ก่อนส่ง Escalation Request** ต้องเพิ่ม entry เข้า `PATTERN_LIBRARY.md` section `## Escalated Keywords` ด้วยเสมอ (keyword ที่ scan เดิมพลาด, feature, Tier ที่ควรจะเป็นจริง) แล้วส่งไฟล์ที่อัปเดตแล้วให้ PO แนบเข้า SA Handoff ครั้งถัดไป — ไม่ต้อง block รอ SA ตอบกลับ escalation ก่อน (ดู `ai/LEAD_PROJECT_INSTRUCTIONS.md` §L-STEP 1.5)
+
 ### L-STEP 2 — Break เป็น Epics และ Tasks
 
 Claude เสนอ task board — กฎของแต่ละ task:
@@ -177,10 +179,10 @@ PO สร้าง `BugIntake_BR-[NNN]_[title].md` แล้วส่งมา�
 | Severity | เงื่อนไข | Path |
 |----------|---------|------|
 | **P1** | Service down / data loss / security breach | Lead ออก HotfixTask ตรง — ไม่ต้องรอ SA sign-off |
-| **P2** | Functional bug, มี workaround | Lead ออก HotfixTask; SA review async หลัง merge |
+| **P2** | Functional bug, มี workaround | Lead ออก HotfixTask ตรง — ไม่ต้องรอ SA sign-off |
 | **P3** | Minor bug | ใส่ backlog — ใช้ normal pipeline ปกติ |
 
-**กฎ:** escalate ถึง SA หลัง merge — ไม่ใช่ก่อน (P1/P2 speed over process)
+**กฎ:** escalate ถึง SA หลัง merge — ไม่ใช่ก่อน (P1/P2 speed over process) — แต่หลัง merge ทุก hotfix ต้องผ่าน **Retroactive Tier Tagging** จาก SA เสมอ ไม่ใช่ optional (ดู §Post-merge Checklist ด้านล่าง และ `ai/SA_PROJECT_INSTRUCTIONS.md` §Retroactive Hotfix Triage)
 
 ### Lead ออก HotfixTask ให้ Dev
 
@@ -195,6 +197,7 @@ PO สร้าง `BugIntake_BR-[NNN]_[title].md` แล้วส่งมา�
 - [ ] QA smoke test **ผ่านบน Staging** → Lead จึง deploy สู่ Production (ห้าม deploy Production ก่อน QA ผ่าน Staging)
 - [ ] Lead แจ้ง QA ให้ run **Production smoke check** (P1 cases เท่านั้น)
 - [ ] Production smoke check ผ่าน → Lead สร้าง `HotfixNotification_HF-[NNN].md` ส่งให้ PO
+- [ ] PO ส่งต่อ HF summary ให้ SA ทำ **Retroactive Tier Tagging** — บังคับทุก hotfix (ดู `ai/SA_PROJECT_INSTRUCTIONS.md` §Retroactive Hotfix Triage) — SA บันทึกผลกลับเข้า `TASK_LOG.md` ที่ entry เดิมของ `HF-[NNN]`
 - [ ] ถ้า fix เบี่ยงจาก Solution Doc / ADR → Lead สร้าง ADR Amendment
 - [ ] ถ้า fix เผย architectural gap → Lead ส่ง Issue Report ให้ SA
 
@@ -214,7 +217,7 @@ Lead ส่ง Issue Report ตรงถึง SA ได้ (ไม่ต้อ�
 
 - [ ] `LEAD_HANDOFF_[feature].md` อัปโหลดเข้า Lead Project แล้ว
 - [ ] `STACK_CONTEXT.md` มีและครบทุก field
-- [ ] Solution Doc ครบทุก section (7 required sections)
+- [ ] Solution Doc ครบทุก section (9 required sections + section 10 ถ้ามี UX/UI)
 - [ ] Version header ของทุกไฟล์ตรงกับ Lead Handoff date
 
 ## Checklist ก่อนส่ง Task Prompts ให้ Dev

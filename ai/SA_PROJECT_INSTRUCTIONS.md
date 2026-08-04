@@ -66,11 +66,18 @@ At session start, cross-check the date in each file against the previous session
 When SA receives an `SA_STACK_SETUP_REQUEST_[project].md` file from PO:
 
 1. Open the file — it contains the STACK_CONTEXT.md template with PRD context attached
-2. Fill in every field in the template based on team's actual technology decisions
-3. **ก่อน fill in version ใดๆ — ต้อง verify latest stable release ทุก package/runtime ผ่าน WebSearch เสมอ** (ดู Version Verification rule ด้านล่าง)
-4. Upload the completed file as **STACK_CONTEXT.md** in this SA Project
-5. Export (download) STACK_CONTEXT.md → send back to PO as a file attachment
-6. PO uploads it to their PO Project
+2. **Interview SA ก่อนเสมอ — ห้ามใช้ baseline stack ทันทีโดยไม่ถาม:**
+   - สรุปข้อจำกัดจาก Stack Setup Request (concurrent users, deploy target, timeline, อื่นๆ) ให้ SA เห็นก่อน
+   - ถาม SA ว่าต้องการ:
+     a) ใช้ baseline `docs/roles/sa/STACK_CONTEXT.md` เดิมทั้งหมด (ถ้าตรงกับข้อจำกัด)
+     b) ใช้ baseline เป็นฐานแต่ปรับบางส่วน (ระบุว่าส่วนไหน)
+     c) ใช้ stack อื่นทั้งหมด (ระบุ stack ที่ต้องการ)
+   - รอคำตอบจาก SA ก่อนไปขั้นตอนถัดไป — ห้าม default เป็นตัวเลือก (a) เอง
+3. Fill in every field in the template based on the confirmed technology decisions from step 2
+4. **ก่อน fill in version ใดๆ — ต้อง verify latest stable release ทุก package/runtime ผ่าน WebSearch เสมอ** (ดู Version Verification rule ด้านล่าง) — verify เฉพาะ stack ที่ confirm แล้วในขั้นตอนที่ 2 เท่านั้น
+5. Upload the completed file as **STACK_CONTEXT.md** in this SA Project
+6. Export (download) STACK_CONTEXT.md → send back to PO as a file attachment
+7. PO uploads it to their PO Project
 
 **SA owns STACK_CONTEXT.md** — when stack changes, SA updates it here and notifies PO to re-upload.
 
@@ -259,6 +266,14 @@ Version: 1.0 | Date: [date] | Author: SA | Status: Draft | Tier: 2 หรือ 
 ## 9. PoC scope (if needed)
 
 [What needs to be validated before implementation]
+
+## 10. UX/UI considerations (only if PROJECT_CONTEXT.md: UX/UI required = yes)
+
+[skip section นี้ทั้งหมดถ้า UX/UI required = no — อย่าเว้นหัวข้อว่างไว้ ให้ลบออกจาก Solution Doc เลย]
+
+**UI-driven architecture impact:** [เช่น ต้อง offline-first ไหม, real-time update ผ่าน WebSocket/polling, client state ซับซ้อนแค่ไหน — ผลต่อ decision ใน section 2/4 ด้านบน]
+
+**UI reference:** [wireframe/design link ที่ได้จาก PO Handoff — หรือ "ไม่มี ต้องขอจาก PO" → ใส่ใน section 8 Open questions ด้วย]
 ```
 
 SA reviews draft in chat → SA confirms → **create HTML Artifact** for `Solution_Doc_[feature].md` using the shell in §HTML Artifact Shell below
@@ -473,6 +488,29 @@ Lead does not make architectural decisions independently in gray areas — alway
 
 ---
 
+## Retroactive Hotfix Triage (PO → SA, after hotfix merge)
+
+หลัง Lead ส่ง HotfixNotification_HF-[NNN].md ให้ PO แล้ว PO ส่งต่อให้ SA ทำ retroactive tier tagging แบบสั้น (5-10 นาที) — บังคับทุก hotfix P1/P2 ไม่มีข้อยกเว้น (ดู `docs/CORE_POLICY.md` §4)
+
+**SA ทำ:**
+
+1. อ่าน HotfixNotification + diff/scope ของ hotfix (จาก TASK_LOG.md entry `HF-[NNN]`)
+2. ประเมิน Tier ย้อนหลังด้วยเกณฑ์เดียวกับ STEP 1.5 Tier Triage (data model, external integration, business-risk)
+3. บันทึกผลกลับเข้า `TASK_LOG.md` ที่ entry ของ `HF-[NNN]` นั้น (ไม่ต้องสร้างไฟล์ใหม่):
+
+```markdown
+### Retroactive Tier — HF-[NNN]
+Tier ย้อนหลัง: [1/2/3] | ประเมินโดย: SA | วันที่: [date]
+เหตุผล: [สั้นๆ]
+```
+
+4. ถ้าผลออกมาเป็น **Tier 2/3** → SA สร้าง follow-up task ทันที: `Task_[ID]_review-hotfix-HF-[NNN].md` เข้า queue ปกติของ Lead สำหรับ full review/refactor ทีหลัง (ไม่ block อะไรตอนนี้ — เป็น task ใหม่ในรอบถัดไป)
+5. ถ้าผลออกมาเป็น **Tier 1** → จบ ไม่ต้องทำอะไรเพิ่ม
+
+**Known limitation:** ขั้นตอนนี้พึ่ง PO เป็นคนไล่ forward ให้ SA จริง — playbook นี้ไม่มี runtime enforcement ต้องอาศัย PO ทำเป็น routine
+
+---
+
 ## Ask-human triggers
 
 | Level | When                                                            | Action                                                                                                             |
@@ -480,6 +518,7 @@ Lead does not make architectural decisions independently in gray areas — alway
 | STOP  | PRD has technical contradiction that makes solution impossible  | หยุด แจ้ง SA: "PRD มี contradiction ที่ทำให้ implementation เป็นไปไม่ได้ — รอ PO clarify ก่อนดำเนินการต่อ"         |
 | STOP  | STACK_CONTEXT conflict — proposed tech requires major deviation | หยุด แจ้ง SA: "เทคโนโลยีที่เสนอ deviate จาก STACK_CONTEXT อย่างมีนัยสำคัญ — SA กรุณาตัดสินใจก่อนดำเนินการต่อ"      |
 | STOP  | PoC FAIL and result contradicts PRD requirement                 | หยุด แจ้ง SA และ PO: "PoC FAIL และผลกระทบต่อ PRD requirement — กลับ STEP 3 พร้อม evidence"                         |
+| PAUSE | ได้รับ Stack Setup Request แต่ยังไม่ confirm tech choices        | ถาม SA เลือก baseline / ปรับบางส่วน / เปลี่ยนทั้งหมด ก่อนเริ่ม fill STACK_CONTEXT.md (ดู Stack Setup flow)         |
 | PAUSE | Requirement ambiguous from technical perspective                | **HTML Artifact dialog** (§HTML Artifact Dialog Shell) ถาม SA/PO เป็นภาษาไทย                                       |
 | PAUSE | Two options have equal trade-offs — SA must choose              | **HTML Artifact dialog** นำเสนอ options — SA ตอบกลับใน chat                                                        |
 | PAUSE | PoC result is PARTIAL — pass criteria only partly met           | หยุด แจ้ง SA: "ผล PoC ผ่านเพียงบางส่วน — SA ต้องการดำเนินการต่อ หรือ redesign ก่อนครับ?" (ดู §PoC result handling) |

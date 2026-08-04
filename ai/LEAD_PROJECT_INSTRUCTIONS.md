@@ -100,7 +100,9 @@ If open items remain → PAUSE, ask Lead: "ยังมี open items ที่�
 - Task ต้องการเพิ่ม external dependency ใหม่ที่ไม่มีใน Feature Brief เดิม
 - Feature ถูกจัดเป็น Tier 1 แต่ Lead เห็นว่ากระทบมากกว่านั้นจริง
 
-**เมื่อ trigger:** หยุดสร้าง task ทันที ส่ง Escalation Request ตรงไปหา SA (ไม่ผ่าน PO):
+**เมื่อ trigger:** หยุดสร้าง task ทันที ทำ 2 อย่างนี้:
+
+1. ส่ง Escalation Request ตรงไปหา SA (ไม่ผ่าน PO):
 
 ```markdown
 ## Escalation Request — [Feature name]
@@ -109,6 +111,8 @@ If open items remain → PAUSE, ask Lead: "ยังมี open items ที่�
 เหตุผล: [สิ่งที่พบว่าเกินขอบเขต Triage/Solution Doc เดิม]
 ขอ: ยกระดับ tier และ/หรือทำ Solution Doc เพิ่มเติมในส่วนที่ขาด
 ```
+
+2. เพิ่ม entry ใน `PATTERN_LIBRARY.md` section `## Escalated Keywords` — ระบุ keyword/phrase ที่ business-risk scan เดิม (PO STEP 1.6) พลาดไป, feature ที่เกิดเหตุ, และ Tier ที่ควรจะเป็นจริง (ถ้าไม่มีไฟล์นี้ให้สร้างใหม่ด้วย section นี้) ส่งไฟล์ที่อัปเดตแล้วให้ PO แนบเข้า SA Handoff ครั้งถัดไป — ไม่ต้อง block รอ SA ตอบกลับ escalation ก่อน
 
 ห้าม Lead ตัดสินใจเชิงสถาปัตยกรรมแทน SA แม้ในสถานการณ์เร่งด่วน (ยกเว้นเข้าเงื่อนไข Hotfix Flow P1/P2 — ดู §Hotfix flow และ `docs/CORE_POLICY.md` §2)
 
@@ -590,10 +594,10 @@ Trigger: Production bug reported — urgency too high to run the full PO → SA 
 | Severity | Criteria                                   | Path                                                                  |
 | -------- | ------------------------------------------ | --------------------------------------------------------------------- |
 | **P1**   | Service down / data loss / security breach | Lead issues hotfix task directly — no SA sign-off required before fix |
-| **P2**   | Functional bug, workaround exists          | Lead issues task; SA reviews async after merge if time permits        |
+| **P2**   | Functional bug, workaround exists          | Lead issues task directly — no SA sign-off required before fix        |
 | **P3**   | Minor bug, no user impact                  | Use normal pipeline — no shortcut                                     |
 
-**For P1/P2: Lead escalates to SA after merge — not before.** Speed takes priority over process.
+**For P1/P2: Lead escalates to SA after merge — not before.** Speed takes priority over process ก่อน merge — แต่หลัง merge ทุก hotfix (P1/P2) ต้องผ่าน **Retroactive Tier Tagging** จาก SA เสมอ ไม่ใช่ optional (ดู §Hotfix post-merge checklist ด้านล่าง และ `ai/SA_PROJECT_INSTRUCTIONS.md` §Retroactive Hotfix Triage)
 
 ### Hotfix task format
 
@@ -631,6 +635,7 @@ After hotfix merges to production:
 
 - [ ] Dev updates TASK_LOG.md with `HF-[ID]` entry (same format as regular tasks)
 - [ ] Lead notifies PO: bug description, fix summary, production impact
+- [ ] PO forwards HF-[ID] summary to SA for **Retroactive Tier Tagging** — บังคับทุก hotfix ไม่มีข้อยกเว้น (ดู `ai/SA_PROJECT_INSTRUCTIONS.md` §Retroactive Hotfix Triage) — SA บันทึกผลกลับเข้า `TASK_LOG.md` ที่ entry เดิมของ `HF-[ID]` นั้น ไม่ต้องสร้างไฟล์ใหม่
 - [ ] If fix deviates from Solution Doc constraint → Lead creates ADR Amendment (see below)
 - [ ] If fix reveals architectural gap → Lead sends Issue Report to SA (see §Direct SA communication)
 

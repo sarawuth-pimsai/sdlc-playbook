@@ -24,13 +24,13 @@ PO เป็น **hub กลาง** ของ SDLC Playbook — ประสา
 
 | ไฟล์ | เมื่อไหร่ | หมายเหตุ |
 |------|----------|---------|
-| `PROJECT_CONTEXT.md` | ✅ ก่อน session แรก | กำหนด `Security role:` และ `Environment:` — Claude สร้างให้ใน session แรก → re-upload |
+| `PROJECT_CONTEXT.md` | ✅ ก่อน session แรก | กำหนด `Security role:`, `UX/UI required:` และ `Environment:` — Claude สร้างให้ใน session แรก → re-upload |
 | `STACK_CONTEXT.md` | หลังได้รับจาก SA | ต้องครบก่อน STEP 3 |
 | `DECISION_LOG_[feature]_TODO.md` | ทุก session ที่มี TODO คงเหลือ | Re-upload ทุก session ใหม่ |
 | `DECISION_LOG_[feature]_RESOLVED.md` | เมื่อมี resolved items | Upload ครั้งแรก แล้ว re-upload เฉพาะเมื่อมีเพิ่ม |
 | `PATTERN_LIBRARY.md` | ถ้ามี | SA หรือ PO สร้าง |
 
-> **Session แรก:** Claude จะถาม `Security role` และ `Environment` แล้วสร้าง `PROJECT_CONTEXT.md` ให้อัตโนมัติ → ดาวน์โหลดแล้ว re-upload เข้า Project Knowledge
+> **Session แรก:** Claude จะถาม `Security role`, `UX/UI required` และ `Environment` แล้วสร้าง `PROJECT_CONTEXT.md` ให้อัตโนมัติ → ดาวน์โหลดแล้ว re-upload เข้า Project Knowledge
 
 ---
 
@@ -100,6 +100,8 @@ Claude ถามทีละคำถามสำหรับ ambiguity 3 ปร
 
 ### STEP 1.6 — สแกน Business-risk keyword
 
+ก่อนสแกน ถ้ามี `PATTERN_LIBRARY.md` ให้ Claude อ่าน section `## Escalated Keywords` ก่อนเสมอ (keyword ที่เคย escalate มาก่อนหน้า) แล้วรวมเข้ากับ scan รอบนี้ด้วย — ดู `ai/PROJECT_INSTRUCTIONS.md` §STEP 1.6
+
 หลัง STEP 1.5 Claude สแกน PRD หา business-risk keyword (payment, auth, PII, external API, encryption/compliance ฯลฯ — ดูรายการเต็มใน [CORE_POLICY.md](../CORE_POLICY.md) §1) แล้วแนบผลสแกนเป็น context ใน SA Handoff — **นี่ไม่ใช่การตัดสิน tier** เป็นแค่ raw flag ให้ SA ใช้ประกอบการตัดสินใจที่ STEP 1.5 Tier Triage ของ SA
 
 ### STEP 2 — กำหนด Epics
@@ -107,7 +109,7 @@ Claude ถามทีละคำถามสำหรับ ambiguity 3 ปร
 Claude จัดกลุ่มงานเป็น Epics (high-level เท่านั้น — Lead ทำ task breakdown)
 
 **หลัง confirm STEP 2:** Claude สร้าง SA Handoff อัตโนมัติ (รวม business-risk flags จาก STEP 1.6)
-- ถ้ายังไม่มี `Security role` ใน PROJECT_CONTEXT.md → Claude ถามก่อน
+- ถ้ายังไม่มี `Security role` หรือ `UX/UI required` ใน PROJECT_CONTEXT.md → Claude ถามพร้อมกันก่อน (ดู `ai/PROJECT_INSTRUCTIONS.md` §Security role & UX/UI check)
 
 **หลังส่ง SA Handoff:** แจ้ง QA ให้เริ่ม Phase 0 ได้เลยโดยไม่รอ SA
 
@@ -119,7 +121,8 @@ Claude จัดกลุ่มงานเป็น Epics (high-level เท่
 
 Claude ตรวจ:
 - STACK_CONTEXT.md ครบถ้วนไหม
-- Tier 1: มี Triage Summary หรือยัง — Tier 2/3: Solution Doc ครบทุก section (7 sections required) หรือยัง
+- **STACK_CONTEXT.md version sync (hard gate):** เทียบ version header ของฉบับที่นี่กับฉบับล่าสุดใน SA Project Knowledge — ถ้าไม่ตรงกัน **block** ไม่สร้าง Lead Handoff จนกว่า PO จะ re-sync ไฟล์ (ดู `ai/PROJECT_INSTRUCTIONS.md` §STEP 3)
+- Tier 1: มี Triage Summary หรือยัง — Tier 2/3: Solution Doc ครบทุก section (9 sections required + section 10 ถ้ามี UX/UI) หรือยัง
 - ADR files ตรงกับที่ reference ใน Solution Doc หรือไม่ (ถ้ามี significant tech decision แต่ไม่มี ADR → PAUSE รอก่อน)
 - Security Requirements (ถ้า `Security role: yes` → รอ SEC ส่ง Security_Requirements ก่อน)
 
@@ -226,6 +229,6 @@ Severity : รอ Lead ยืนยัน
 
 ## Checklist ก่อนเริ่ม Feature ใหม่
 
-- [ ] `PROJECT_CONTEXT.md` อยู่ใน Project Knowledge แล้ว — ต้องมี `Security role:` และ `Environment:` (`cli` หรือ `claude.ai`)
+- [ ] `PROJECT_CONTEXT.md` อยู่ใน Project Knowledge แล้ว — ต้องมี `Security role:`, `UX/UI required:` และ `Environment:` (`cli` หรือ `claude.ai`)
 - [ ] `STACK_CONTEXT.md` อยู่ใน Project Knowledge แล้ว (ถ้ามีจากโปรเจกต์ก่อน)
 - [ ] เปิด conversation thread ใหม่สำหรับ feature นี้โดยเฉพาะ

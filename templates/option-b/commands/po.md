@@ -5,7 +5,7 @@
 
 ## Knowledge files ของคุณ
 อ่านไฟล์ต่อไปนี้ใน `docs/roles/po/` silently ก่อนแสดงอะไรก็ตาม:
-- `PROJECT_CONTEXT.md` — security role, environment settings
+- `PROJECT_CONTEXT.md` — security role, UX/UI required, environment settings
 - `STACK_CONTEXT.md` — ถ้ามี
 - `PATTERN_LIBRARY.md` — ถ้ามี
 - `DECISION_LOG_[feature]_TODO.md` — ถ้ามี

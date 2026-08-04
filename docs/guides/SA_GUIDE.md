@@ -62,10 +62,12 @@ PO ส่งไฟล์ `SA_STACK_SETUP_REQUEST_[ProjectName].md`
 
 **Action:**
 1. เปิดไฟล์ — มี STACK_CONTEXT.md template + PRD context แนบมา
-2. กรอกทุก field ใน template ตามการตัดสินใจ tech stack จริงของทีม
-3. บันทึกเป็น `STACK_CONTEXT.md`
-4. อัปโหลดเข้า SA Project Knowledge
-5. ส่งไฟล์กลับให้ PO → PO อัปโหลดเข้า PO Project
+2. **Interview SA ก่อน** — สรุปข้อจำกัดจาก Stack Setup Request ให้ SA เห็น แล้วถามว่าจะใช้ baseline stack เดิม, ปรับบางส่วน, หรือเปลี่ยนทั้งหมด (ห้ามใช้ baseline ทันทีโดยไม่ถาม — ดูรายละเอียดใน `ai/SA_PROJECT_INSTRUCTIONS.md` §Stack Setup flow)
+3. กรอกทุก field ใน template ตามการตัดสินใจที่ confirm แล้ว
+4. WebSearch verify version ทุก package/runtime ก่อนบันทึก (ดู Version Verification rule ใน `ai/SA_PROJECT_INSTRUCTIONS.md`)
+5. บันทึกเป็น `STACK_CONTEXT.md`
+6. อัปโหลดเข้า SA Project Knowledge
+7. ส่งไฟล์กลับให้ PO → PO อัปโหลดเข้า PO Project
 
 ### กรณี B — SA Handoff (มี STACK_CONTEXT.md แล้ว)
 
@@ -116,9 +118,9 @@ Claude เสนอ 2-3 options พร้อม pros/cons/complexity
 
 ### STEP 4 — Draft Solution Doc (Tier 2/3 เท่านั้น)
 
-หลัง SA เลือก option → Claude draft `Solution_Doc_[feature].md` (9 sections required)
+หลัง SA เลือก option → Claude draft `Solution_Doc_[feature].md` (9 sections required + section 10 ถ้า PROJECT_CONTEXT.md มี `UX/UI required: yes`)
 
-**9 sections ที่ต้องครบ:**
+**9 sections ที่ต้องครบ (+ section 10 ถ้ามี UI):**
 1. Overview
 2. Architecture
 3. Tech decisions
@@ -128,6 +130,7 @@ Claude เสนอ 2-3 options พร้อม pros/cons/complexity
 7. Risks and mitigations
 8. Open questions
 9. PoC scope (ถ้าจำเป็น)
+10. UX/UI considerations (เฉพาะเมื่อ `UX/UI required: yes` — ดู `ai/PROJECT_INSTRUCTIONS.md` §Security role & UX/UI check)
 
 SA review draft ใน chat → confirm → Claude create HTML Artifact พร้อม Download button
 
@@ -182,6 +185,14 @@ Lead ส่ง Issue Report ตรงถึง SA ได้ (ไม่ต้อ�
 
 ---
 
+## Retroactive Hotfix Triage (PO → SA)
+
+หลัง hotfix (P1/P2) merge แล้ว PO ส่ง HF summary ให้ SA ทำ retroactive tier tagging แบบสั้น (5-10 นาที) — **บังคับทุก hotfix ไม่มีข้อยกเว้น** (ดู [CORE_POLICY.md](../CORE_POLICY.md) §4)
+
+SA ประเมิน Tier ย้อนหลังด้วยเกณฑ์เดียวกับ STEP 1.5 Tier Triage แล้วบันทึกกลับเข้า `TASK_LOG.md` ที่ entry ของ `HF-[NNN]` (ไม่สร้างไฟล์ใหม่) — ถ้าผลออกมาเป็น Tier 2/3 ให้สร้าง follow-up task เข้า queue ปกติของ Lead ทันที
+
+---
+
 ## SOLUTION_PATTERNS.md — Maintain
 
 หลัง PO accept feature → SA review ว่ามี architectural pattern ที่ควรเก็บไว้ใช้ซ้ำหรือไม่
@@ -194,7 +205,7 @@ SA confirm → Claude append → export → SA อัปโหลดกลับ
 
 ## Checklist ก่อนส่ง SA Handoff ให้ PO
 
-- [ ] Solution Doc ครบทุก 9 sections (ไม่มี section ที่เป็นแค่ "TBD")
+- [ ] Solution Doc ครบทุก 9 sections (+ section 10 ถ้ามี UX/UI) (ไม่มี section ที่เป็นแค่ "TBD")
 - [ ] ADR files ครบตาม reference ใน Solution Doc
 - [ ] ADR numbers sequential ใน `docs/adr/INDEX.md`
 - [ ] PoC prompts พร้อม (ถ้ามี PoC scope)
