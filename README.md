@@ -50,7 +50,8 @@ docs/
   CORE_POLICY.md    → single source of truth: tier ownership, escalation, parallel execution,
                        hotfix flow, environment default+override, routing principle
   WORKFLOW_OVERVIEW.md → Mermaid diagrams: role-to-role flow, tier/escalation overview, hotfix flow
-  roles/            → ตัวอย่าง knowledge files (STACK_CONTEXT.md, ADR INDEX.md, stack setup template)
+  roles/            → ตัวอย่าง knowledge files (STACK_CONTEXT.md, ADR INDEX.md)
+                       (SA Stack Setup Request ไม่ใช่ static template — PO generate อัตโนมัติทุกครั้งจาก ai/PROJECT_INSTRUCTIONS.md §SA Stack Setup Request)
   guides/
     PO_GUIDE.md       → คู่มือ Product Owner
     SA_GUIDE.md       → คู่มือ Solution Architect
