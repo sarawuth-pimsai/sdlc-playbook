@@ -18,7 +18,7 @@ docs/
   guides/                Human-readable guide per role, mirrors ai/*.md content for people, not Claude
   roles/                 Example/seed knowledge files (STACK_CONTEXT.md samples, ADR index, etc.)
 templates/option-b/     Slash-command templates (/po, /sa, /lead, /qa, /setup) for Claude Code consumers
-.claude/commands/       Slash commands for maintaining *this* repo (e.g. /ship) — not templates for consumers
+.claude/commands/       Slash commands for maintaining *this* repo (e.g. /ship, /release) — not templates for consumers
 ```
 
 `ai/DEV_PROJECT_INSTRUCTIONS.md` is the odd one out: Dev always uses Claude Code directly (never a claude.ai Project), so consumers copy it in as their project's own `CLAUDE.md`.
@@ -26,6 +26,8 @@ templates/option-b/     Slash-command templates (/po, /sa, /lead, /qa, /setup) f
 ## Working on this repo
 
 All work happens directly on `develop`; `main` only receives merges via PR. Use the `/ship` slash command (`.claude/commands/ship.md`) to commit, push to `develop`, and open the `develop` → `main` PR in one flow — it encodes the safety checks (branch check, no force-push, ask before touching `.gitignore`) worked out for this repo, so prefer it over ad-hoc `git`/`gh` commands.
+
+After a `/ship` PR is merged into `main`, use the `/release` slash command (`.claude/commands/release.md`) to tag a semver version from `main` and publish a GitHub release from it — it works against `origin/main` directly (no checkout) and always stops to get explicit confirmation on the version number before tagging, since that judgment call is hard to undo once public.
 
 ## Core architecture — read before editing any role file
 
