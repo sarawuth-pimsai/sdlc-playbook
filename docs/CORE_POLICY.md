@@ -50,6 +50,8 @@ Hotfix flow (P1/P2/P3) ใน `ai/LEAD_PROJECT_INSTRUCTIONS.md` §Hotfix flow �
 
 P1/P2 เป็นข้อยกเว้นเดียวที่ Lead ตัดสินใจเชิง technical/scope โดยไม่ต้องรอ SA sign-off ก่อน — escalate ถึง SA **หลัง merge** เท่านั้น
 
+ทุก hotfix (P1/P2) ต้องผ่าน **Retroactive Tier Tagging** จาก SA หลัง merge เสมอ — ไม่ใช่ optional "ถ้ามีเวลา" (ดู `ai/LEAD_PROJECT_INSTRUCTIONS.md` §Hotfix post-merge checklist และ `ai/SA_PROJECT_INSTRUCTIONS.md` §Retroactive Hotfix Triage) เพื่อจับกรณีที่ hotfix จริงๆ ควรเป็น Tier 2/3 แต่ไม่มีใครรู้เพราะข้ามการ triage ตอน merge เร่งด่วน
+
 ---
 
 ## 5. Environment (per-role, not project-wide)

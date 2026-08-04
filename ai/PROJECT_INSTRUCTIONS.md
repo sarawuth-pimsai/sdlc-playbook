@@ -14,8 +14,8 @@ that a developer can paste and run immediately.
 1. Check if **STACK_CONTEXT.md** exists, has no unfilled `[fill in]` fields, **and `Status:` in the version header is not `Template`** — ถ้า Status เป็น Template ให้ treat เหมือนไม่มีไฟล์ (ไฟล์นั้นคือ baseline template ขององค์กร ยังไม่มีค่าเฉพาะโปรเจกต์)
 2. Check if any **DECISION*LOG*[feature]\_TODO.md** files exist (active unresolved items) and **DECISION*LOG*[feature]\_RESOLVED.md** files (archived resolved items)
 3. Check if **PATTERN_LIBRARY.md** exists
-4. Check if **PROJECT_CONTEXT.md** exists — read `Security role:` **and `Environment (default):`** fields if present
-5. For each file present, check for version header `Last updated: YYYY-MM-DD | Version: N` — if header is missing, note as legacy format (no action); if a file's date is older than the most recent SA Handoff date found in the relevant DECISION_LOG, flag to PO after Welcome Dialog: "[filename] อาจไม่ใช่ version ล่าสุด — กรุณายืนยันกับ SA ก่อนดำเนินการต่อ"
+4. Check if **PROJECT_CONTEXT.md** exists — read `Security role:`, `UX/UI required:`, **and `Environment (default):`** fields if present
+5. For each file present (ยกเว้น STACK_CONTEXT.md — มี hard gate เฉพาะที่ STEP 3 แทน ดู §STEP 3 ด้านล่าง), check for version header `Last updated: YYYY-MM-DD | Version: N` — if header is missing, note as legacy format (no action); if a file's date is older than the most recent SA Handoff date found in the relevant DECISION_LOG, flag to PO after Welcome Dialog: "[filename] อาจไม่ใช่ version ล่าสุด — กรุณายืนยันกับ SA ก่อนดำเนินการต่อ"
 6. Note results — do NOT speak yet, do NOT start any step
 7. After reading → immediately show **Session Welcome Dialog** (see section below)
 
@@ -482,7 +482,7 @@ Items PO skipped → noted as assumptions in the generated prompt TODO section.
 
 ### STEP 1.6 — Business-risk keyword scan (run automatically, before SA Handoff)
 
-หลัง STEP 1.5 เสร็จ Claude สแกน PRD ทั้งฉบับ (Objectives, User Stories, Functional Requirements, NFR, Out of scope) หา keyword ต่อไปนี้ (case-insensitive, ตรงกับคำไทยที่มีความหมายเดียวกันด้วย):
+หลัง STEP 1.5 เสร็จ **ถ้ามี PATTERN_LIBRARY.md ให้อ่าน section `## Escalated Keywords` ก่อนเสมอ** (read แยกต่างหาก ไม่ต้องรอรอบ read ปกติก่อน STEP 3) แล้วรวม keyword/phrase ที่เคย escalate มาก่อนหน้าเข้ากับ list ด้านล่างนี้ด้วย จากนั้น Claude สแกน PRD ทั้งฉบับ (Objectives, User Stories, Functional Requirements, NFR, Out of scope) หา keyword ต่อไปนี้ (case-insensitive, ตรงกับคำไทยที่มีความหมายเดียวกันด้วย):
 
 ```
 BUSINESS_RISK_KEYWORDS = [
@@ -523,6 +523,13 @@ Epics affected by skipped items → mark as "⚠ TODO — [topic] pending PO dec
 
 - If still missing → stop: "STACK_CONTEXT.md ยังไม่มี — รอ SA ส่งกลับมาก่อนดำเนินการต่อ ถ้ายังไม่ได้ส่ง SA Handoff ให้ download จาก SA Handoff section แล้วส่งให้ SA"
 - If present but PRD mentions a conflicting technology → ask PO in chat which technology to use, wait for reply
+
+**Check STACK_CONTEXT.md version sync (hard gate — บังคับก่อนสร้าง Lead Handoff):**
+
+- ถาม PO: "ช่วย paste บรรทัด version header (`Last updated: ... | Version: N`) จาก STACK_CONTEXT.md ทั้งสองฉบับให้หน่อยครับ — ฉบับที่ upload ไว้ที่นี่ (PO Project) กับฉบับล่าสุดใน SA Project Knowledge (เปิดเช็คโดยตรงที่ SA Project)"
+- ถ้า Version ไม่ตรงกัน → **STOP**: "STACK_CONTEXT.md ฉบับที่นี่ (Version [X]) ไม่ตรงกับฉบับล่าสุดของ SA (Version [Y]) — กรุณา copy ไฟล์ล่าสุดจาก SA Project Knowledge มา re-upload ที่นี่ก่อน ไม่สร้าง Lead Handoff จนกว่าจะ sync กัน"
+- ถ้า Version ตรงกัน → proceed ตามปกติ
+- gate นี้แทนที่ soft-flag ทั่วไปของ Welcome Dialog ข้อ 5 เฉพาะไฟล์นี้ — ไฟล์อื่น (DECISION_LOG, PATTERN_LIBRARY, PROJECT_CONTEXT) ยังใช้ soft-flag เดิม เพราะไม่ได้ไหลตรงเข้า Lead Handoff แบบเดียวกัน
 
 **Check for SA Triage Summary / Solution Doc (บังคับเสมอ — ห้าม proceed ถ้าไม่มี):**
 
@@ -741,16 +748,20 @@ Use this pattern when Claude needs to ask the PO something during STEP 1 (BLOCKE
 
 ---
 
-## Security role check — before SA Handoff
+## Security role & UX/UI check — before SA Handoff
 
 **ทำทันทีหลัง PO confirm STEP 2 Epics ก่อนสร้าง SA Handoff:**
 
 ตรวจสอบ PROJECT_CONTEXT.md:
 
-- ถ้า `Security role:` มีค่าอยู่แล้ว → ใช้ค่านั้น ข้ามขั้นตอนนี้
+- ถ้า `Security role:` มีค่าอยู่แล้ว → ใช้ค่านั้น ข้ามคำถามนี้
 - ถ้ายังไม่มี → ถาม PO ใน chat:
 
 > "โปรเจกต์นี้มี Security Engineer ในทีมไหมครับ? (ใช่ / ไม่มี)"
+
+ถ้า `UX/UI required:` ยังไม่มีค่า → ถามพร้อมกันได้เลย:
+
+> "Feature/โปรเจกต์นี้มี UX/UI ให้ user ใช้งานไหมครับ? (มี / ไม่มี — เช่น backend service, internal API, cron job ไม่ต้องมี)"
 
 ถ้า `Environment (default):` ยังไม่มีค่าใน PROJECT_CONTEXT.md → ถามพร้อมกันได้เลย:
 
@@ -766,6 +777,7 @@ Use this pattern when Claude needs to ask the PO something during STEP 1 (BLOCKE
 ## Project settings
 
 Security role: yes / no
+UX/UI required: yes / no
 Environment (default): cli / claude.ai
 Environment overrides:
   SA: [ไม่ระบุ = ใช้ default]
@@ -783,6 +795,9 @@ Environment overrides:
 
 - `Security role: no` → Option B ใช้งาน automatically (SA/Lead/QA มี security checkpoints อยู่แล้วใน instructions)
 - `Security role: yes` → Option A: เพิ่ม SEC review steps ใน workflow (ดูด้านล่าง)
+- `UX/UI required: no` → SA ข้าม UX/UI considerations ทั้งหมด ไม่ต้องถามหรือ draft ส่วนนี้ใน Solution Doc
+- `UX/UI required: yes` → PO แนบ UI requirement/reference (wireframe, design link, หรือคำอธิบาย) เข้าไปใน SA Handoff — ถ้ายังไม่มีให้ถาม stakeholder ก่อน หรือ skip เป็น TODO ได้เหมือน STEP 1.5 ทั่วไป เพราะ UI requirement (offline support, real-time update, client state) มีผลต่อ architecture decision ของ SA โดยตรง ต้องรู้ก่อนเริ่ม STEP 3 ไม่ใช่รู้ทีหลัง
+- field นี้เป็นค่า default ระดับ**โปรเจกต์** — ถ้าบางโปรเจกต์มีทั้ง feature ที่มี UI และไม่มี UI ปน (เช่น mobile app repo ที่มี internal cron job feature ด้วย) ให้ PO override เป็นรายฟีเจอร์ได้ตรง ๆ ใน SA Handoff โดยพิมพ์ทับ ไม่ต้องมี mechanism ใหม่
 
 ---
 
@@ -813,6 +828,11 @@ SA กรุณา design solution และส่ง Solution Doc กลับ�
 ## Business-risk flags (context for SA — not a tier decision)
 [list keywords matched from STEP 1.6 + PRD section where found, e.g. "payment — Section 4 Functional Requirements", "PII (email address) — Section 2 User Stories" — หรือ "ไม่พบ business-risk keyword"]
 หมายเหตุ: รายการนี้เป็น raw flag จาก PO เท่านั้น — SA เป็นผู้ตัดสินใจ tier ที่ STEP 1.5 Tier Triage โดยใช้ flag นี้ประกอบการพิจารณา (business-risk flag ≥ 1 รายการ → tier ต่ำสุดคือ Tier 3 เสมอ)
+
+## UX/UI requirement
+[ถ้า UX/UI required: no → "ไม่มี UI — SA ข้ามส่วนนี้"]
+[ถ้า UX/UI required: yes → แนบ wireframe link / design reference / คำอธิบาย UI flow ที่ PO มี
+  หรือ "ยังไม่มี UI reference — SA flag เป็น Open question ใน Solution Doc"]
 
 ## DECISION_LOG entries (this feature)
 [embed entries ที่เกี่ยวกับ feature นี้ — หรือ "ยังไม่มี decisions"]
@@ -1096,7 +1116,16 @@ After PO replies → append confirmed patterns to PATTERN_LIBRARY.md → show fu
 ## Data model conventions
 
 [naming, indexing, soft delete patterns]
+
+---
+
+## Escalated Keywords
+
+| Keyword/phrase ที่ scan เดิมพลาด | พบใน feature | Tier ที่ควรจะเป็นจริง | วันที่ escalate |
+| --------------------------------- | ------------ | ---------------------- | ---------------- |
 ```
+
+Lead เพิ่ม entry เข้า section นี้ทุกครั้งที่ส่ง Escalation Request (ดู `ai/LEAD_PROJECT_INSTRUCTIONS.md` §L-STEP 1.5) — PO อ่าน section นี้ก่อนรัน STEP 1.6 ของ feature ถัดไปเสมอ เพื่อให้ keyword scan ครอบคลุมมากขึ้นเรื่อยๆ ตามประวัติจริง
 
 ### After PO confirms patterns
 
@@ -1110,6 +1139,7 @@ After PO replies → append confirmed patterns to PATTERN_LIBRARY.md → show fu
 If PATTERN_LIBRARY.md exists:
 
 - Read silently before STEP 3
+- `## Escalated Keywords` section ต้องอ่านเร็วกว่านั้น — ก่อน STEP 1.6 เสมอ (ดู §STEP 1.6 ด้านบน) เพราะต้องใช้ป้อน keyword scan
 - When generating task prompts (STEP 4) → reference existing patterns
 - If new PRD introduces pattern that conflicts with existing one → PAUSE, flag to PO
 

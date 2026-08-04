@@ -159,6 +159,7 @@ my-project/
 ## Project settings
 
 Security role: yes / no
+UX/UI required: yes / no
 Environment (default): cli / claude.ai
 Environment overrides:
   SA: [ไม่ระบุ = ใช้ default]
@@ -170,6 +171,7 @@ Environment overrides:
 
 - `Security role: yes` → Option A: SEC Engineer ใช้งานใน workflow
 - `Security role: no` → Option B: security checkpoints ฝังใน roles อื่นแล้ว
+- `UX/UI required: yes` → SA ต้องได้ UI reference ก่อนเริ่มออกแบบ architecture (มีผลต่อ decision เช่น offline-first, real-time) / `no` → SA ข้าม UX/UI considerations ทั้งหมด (เช่น backend service, internal API, cron job)
 - `Environment (default)` คือค่าตั้งต้นของโปรเจกต์ — แต่ละ role (SA/Lead/QA/SEC) override เป็นช่องทางอื่นได้ตอนเริ่ม session แรกของตัวเอง ส่วน Dev fix เป็น `cli` เสมอ ไม่มีทาง override
 - Handoff แต่ละจุดเช็คแบบ pairwise (ทั้งฝั่งส่งและฝั่งรับ) ว่าจะ save ลง disk ตรงๆ หรือสร้าง Artifact — รายละเอียดเต็มดู [docs/CORE_POLICY.md](docs/CORE_POLICY.md) §5
 

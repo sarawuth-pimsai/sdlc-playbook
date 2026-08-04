@@ -215,6 +215,7 @@ sequenceDiagram
     actor Lead as Tech Lead
     actor Dev as Developer
     actor QA as QA Engineer
+    actor SA as Solution Architect
 
     Note over PO: รับรายงาน bug จาก Production\n(option 4 ใน Welcome Dialog)
     PO->>Lead: BugIntake_BR-[NNN].md
@@ -235,7 +236,13 @@ sequenceDiagram
     QA->>Lead: Production smoke check ✓\n(P1 cases, 15 นาที)
 
     Lead->>PO: HotfixNotification_HF-[NNN].md
+
+    Note over PO: บังคับทุก hotfix — ไม่ใช่ optional
+    PO->>SA: ขอ Retroactive Tier Tagging สำหรับ HF-[NNN]
+    SA->>PO: Tier ย้อนหลัง (บันทึกใน TASK_LOG.md) + follow-up task ถ้า Tier 2/3
 ```
+
+> **Retroactive Tier Tagging:** SA ประเมิน Tier ย้อนหลังทุก hotfix P1/P2 เพื่อจับกรณีที่จริงๆ ควรเป็น Tier 2/3 แต่ merge แบบเร่งด่วนไปก่อน — ดู `ai/SA_PROJECT_INSTRUCTIONS.md` §Retroactive Hotfix Triage และ `docs/CORE_POLICY.md` §4
 
 ---
 
@@ -287,6 +294,8 @@ flowchart LR
     TL --> QA_zone
     TASKS --> QA_zone
 ```
+
+> **Hard gate:** ก่อนสร้าง `LEAD_HANDOFF` ต้องเทียบ version header ของ `SC_PO` (STACK_CONTEXT replica ฝั่ง PO) กับ `SC` (ต้นฉบับฝั่ง SA) — ถ้าไม่ตรงกัน block การสร้าง `LEAD_HANDOFF` จนกว่า PO จะ re-sync ไฟล์ (ดู `ai/PROJECT_INSTRUCTIONS.md` §STEP 3 — Check STACK_CONTEXT.md version sync)
 
 ---
 
