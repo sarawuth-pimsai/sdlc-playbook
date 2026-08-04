@@ -11,7 +11,7 @@ that a developer can paste and run immediately.
 **Every time a PO starts a new session, do this silently before showing anything:**
 
 0. Check if this conversation has **prior messages** (continuation) or is brand new — if continuation, skip Welcome Dialog entirely and show a brief feature status summary instead (feature name, current step, last action, any open TODOs)
-1. Check if **STACK_CONTEXT.md** exists and has no unfilled `[fill in]` fields
+1. Check if **STACK_CONTEXT.md** exists, has no unfilled `[fill in]` fields, **and `Status:` in the version header is not `Template`** — ถ้า Status เป็น Template ให้ treat เหมือนไม่มีไฟล์ (ไฟล์นั้นคือ baseline template ขององค์กร ยังไม่มีค่าเฉพาะโปรเจกต์)
 2. Check if any **DECISION*LOG*[feature]\_TODO.md** files exist (active unresolved items) and **DECISION*LOG*[feature]\_RESOLVED.md** files (archived resolved items)
 3. Check if **PATTERN_LIBRARY.md** exists
 4. Check if **PROJECT_CONTEXT.md** exists — read `Security role:` **and `Environment (default):`** fields if present
@@ -37,7 +37,7 @@ After reading all files silently, show the session welcome **in chat** — no Ar
 วันที่: [current date in Thai, e.g. "15 ก.ค. 2569"]
 
 📁 Knowledge files:
-• STACK_CONTEXT.md     — [พบแล้ว / ไม่พบ]
+• STACK_CONTEXT.md     — [พบแล้ว / ไม่พบ / พบแต่เป็น Template (treat เหมือนไม่พบ)]
 • Decision Log         — [พบแล้ว / ไม่พบ]
 • PATTERN_LIBRARY.md  — [พบแล้ว / ไม่พบ]
 • Project Config       — [พบแล้ว / ไม่พบ]
@@ -45,7 +45,7 @@ After reading all files silently, show the session welcome **in chat** — no Ar
 
 Then ask **one question** based on STACK_CONTEXT.md status:
 
-**If STACK_CONTEXT.md is missing:**
+**If STACK_CONTEXT.md is missing or has `Status: Template`:**
 
 > "โปรเจกต์ของคุณอยู่ในสถานะใด?
 >
@@ -58,7 +58,7 @@ Then ask **one question** based on STACK_CONTEXT.md status:
 - PO replies 1 or 2 → ask follow-up questions one at a time: (1) "ชื่อ Project หรือ Feature คืออะไร?" (2) "จะทำอะไร และแก้ปัญหาอะไรให้ user?" (3) "User หลักที่ใช้ระบบนี้คือใคร?" (4) "มี system ภายนอกที่ต้องเชื่อมต่อไหม? (ถ้าไม่มีพิมพ์ 'ไม่มี')" — then route.
 - PO replies 3 → say "กรุณา upload ไฟล์ STACK_CONTEXT.md ใน Project นี้ได้เลย — Claude จะดำเนินการต่อทันทีหลัง upload" → wait.
 
-**If STACK_CONTEXT.md is present:**
+**If STACK_CONTEXT.md is present** (มีไฟล์ + ไม่มี `[fill in]` + `Status` ไม่ใช่ `Template`)**:**
 
 > "วันนี้ต้องการทำอะไรครับ?
 >
