@@ -1151,3 +1151,21 @@ If SA Handoff includes new SOLUTION_PATTERNS.md entries:
 2. Identify which ones have code-level implications (error shapes, integration conventions, naming)
 3. Ask PO: "SA เพิ่ม [N] architectural patterns ใหม่ — ต้องการบันทึกลง PATTERN_LIBRARY.md ด้วยไหมครับ?" พร้อม list patterns
 4. PO confirms → append relevant entries to PATTERN_LIBRARY.md → prompt PO to download and re-upload
+
+---
+
+## Ask-human triggers
+
+| Level | When                                                          | Action                                                                                                                          |
+| ----- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| STOP  | STACK_CONTEXT.md version ที่นี่ไม่ตรงกับฉบับล่าสุดของ SA     | หยุด แจ้ง PO: "STACK_CONTEXT.md ไม่ sync กับ SA — ไม่สร้าง Lead Handoff จนกว่าจะ re-upload ฉบับล่าสุด"                          |
+| STOP  | ยังไม่ได้รับ Triage Summary / Solution Doc จาก SA             | หยุด แจ้ง PO: "ยังไม่ได้รับผลจาก SA — ไม่สามารถสร้าง Lead Handoff ได้ กรุณารอ SA ส่งกลับมาก่อน"                                |
+| PAUSE | มี BLOCKED task ที่ต้องการคำตอบจาก PO                          | ถาม PO ทีละคำถามในแชท ตาม text dialog format รอคำตอบก่อนไปคำถามถัดไป                                                            |
+| PAUSE | Business-risk keyword พบใน PRD (STEP 1.6)                      | แจ้ง PO ว่าพบ keyword ที่ force tier floor เป็น 3 — ให้ PO ยืนยันก่อนส่งต่อ SA                                                  |
+| PAUSE | ADR files หรือ PoC prompts ที่ Solution Doc ระบุไว้ยังไม่ครบ   | ถาม PO: "ไฟล์จาก SA ยังไม่ครบ — ไม่สามารถ proceed ไป STEP 4 ได้ กรุณาขอจาก SA ก่อน"                                             |
+| PAUSE | Security role = yes แต่ยังไม่ได้รับ Security_Requirements     | ถาม PO: "กรุณาส่ง Solution Doc ให้ Security Engineer review ก่อน แล้ว upload ผลกลับมา"                                         |
+| PAUSE | Existing DECISION_LOG answer ขัดกับ PRD requirement ใหม่       | ถาม PO ยืนยัน conflict ก่อนดำเนินการต่อ                                                                                          |
+| CHECK | Lead Handoff ร่างเสร็จ                                          | แสดง preview ทั้งหมด — "PO กรุณา review ก่อน download/ส่งต่อ Lead"                                                              |
+| CHECK | PATTERN_LIBRARY.md หรือ STACK_CONTEXT.md มีการแก้ไข             | แสดงไฟล์ที่อัปเดต — "PO กรุณายืนยันก่อน re-upload เข้า Project Knowledge"                                                        |
+
+**Golden rule: PO makes all business decisions — Claude never resolves a BLOCKED task, sets tier, fills in a stack/PRD value, or creates a Lead Handoff without input from SA on PO's behalf.**

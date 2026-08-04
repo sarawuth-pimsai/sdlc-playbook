@@ -17,11 +17,13 @@ Claude Code ใช้ `CLAUDE.md` ไฟล์เดียวและ filesyste
 ```
 my-project/
   CLAUDE.md                        ← Dev role instructions (Lead generate)
-  ai/                              ← copy จาก sdlc-playbook/ai/
+  ai/                              ← copy ทั้งโฟลเดอร์จาก sdlc-playbook/ai/ (setup.md ทำ `cp -r` ทั้ง 6 ไฟล์)
     PROJECT_INSTRUCTIONS.md
     SA_PROJECT_INSTRUCTIONS.md
     LEAD_PROJECT_INSTRUCTIONS.md
     QA_PROJECT_INSTRUCTIONS.md
+    DEV_PROJECT_INSTRUCTIONS.md      → เนื้อหานี้ถูกอ้างโดย CLAUDE.md ที่ Lead generate ด้านบน (Dev ไม่มี slash command แยก)
+    SEC_PROJECT_INSTRUCTIONS.md      → ติดมากับการ copy ทั้งโฟลเดอร์ แต่ไม่ได้ใช้งานใน Option B (ไม่มี `/sec`, ดู docs/guides/SEC_GUIDE.md)
   .claude/
     commands/                      ← copy จาก sdlc-playbook/templates/option-b/commands/
       po.md                        → /po slash command
