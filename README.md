@@ -16,6 +16,7 @@
 ## ภาพรวม
 
 > 📊 ดู Workflow Diagrams แบบครบถ้วน → [docs/WORKFLOW_OVERVIEW.md](docs/WORKFLOW_OVERVIEW.md)
+> 🏷️ ไฟล์ `ai/*.md` ที่ copy ไปใช้อยู่เก่ากว่าเวอร์ชันล่าสุดหรือเปล่า? เช็คได้ที่ → [Releases](https://github.com/sarawuth-pimsai/sdlc-playbook/releases)
 
 
 
