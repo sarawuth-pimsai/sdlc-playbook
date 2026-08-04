@@ -13,6 +13,23 @@
 
 ---
 
+## 🚀 Quick Start (5 นาที)
+
+อยากลองใช้งานจริงก่อนอ่านทุกอย่าง? ทำตามนี้ (Option B — Claude Code):
+
+1. Clone `sdlc-playbook` ไว้ที่ไหนก็ได้บนเครื่อง
+2. ใน project repo ที่จะใช้งานจริง: `mkdir -p .claude/commands && cp sdlc-playbook/templates/option-b/commands/setup.md .claude/commands/`
+3. เปิด Claude Code ใน project repo แล้วพิมพ์ `/setup` — Claude สร้างโครงสร้างทั้งหมดให้อัตโนมัติ
+4. พิมพ์ `/po` แล้วเริ่มตอบคำถามได้เลย
+
+**ไม่ต้องอ่าน CORE_POLICY.md, WORKFLOW_OVERVIEW.md หรือ role guide ไหนก่อนก็ได้** — Claude จะถามสิ่งที่จำเป็นเอง (tier, environment, security role ฯลฯ) ตามจังหวะที่ต้องใช้จริง ค่อยกลับมาอ่านทีหลังตอนอยากรู้ว่า "ทำไม Claude ถึงถามแบบนี้" หรือถ้าทำงานเป็นทีมและอยากเห็นภาพรวมทั้งระบบก่อนเริ่ม
+
+> 👤 ทำงานคนเดียว? ดู [docs/guides/SOLO_GUIDE.md](docs/guides/SOLO_GUIDE.md) ประกอบ — มี flow ย่อสำหรับ solo dev โดยเฉพาะ
+> 📖 รายละเอียด setup เต็ม (role isolation, manual copy แบบไม่ใช้ `/setup`) → [templates/option-b/README.md](templates/option-b/README.md)
+> 🌐 ใช้ Option A (claude.ai Projects) แทน? ดูหัวข้อ "การติดตั้งครั้งแรก (First-time Setup — Option A)" ด้านล่างในไฟล์นี้
+
+---
+
 ## ภาพรวม
 
 > 📊 ดู Workflow Diagrams แบบครบถ้วน → [docs/WORKFLOW_OVERVIEW.md](docs/WORKFLOW_OVERVIEW.md)
