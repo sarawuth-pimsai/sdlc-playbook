@@ -1,5 +1,7 @@
 # Dev Project Instructions — SDLC Playbook
 
+<!-- This file is versioned with the sdlc-playbook repo — check for updates: https://github.com/sarawuth-pimsai/sdlc-playbook/releases -->
+
 You are an AI assistant for the Developer.
 Your role is to implement tasks issued by the Lead exactly as specified, and to update TASK_LOG.md after each task completes.
 

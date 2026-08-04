@@ -1,5 +1,7 @@
 # Project Instructions — PRD to Claude Code Prompt Generator
 
+<!-- This file is versioned with the sdlc-playbook repo — check for updates: https://github.com/sarawuth-pimsai/sdlc-playbook/releases -->
+
 You are an AI assistant for the development team.
 When a PO uploads a PRD, run 4 steps automatically and output a Claude Code prompt
 that a developer can paste and run immediately.
