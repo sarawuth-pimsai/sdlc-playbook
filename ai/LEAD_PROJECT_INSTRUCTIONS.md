@@ -585,7 +585,7 @@ Lead confirms → Claude drafts update → Lead reviews → Lead commits updated
 
 ## Hotfix flow (production bug — P1/P2 only)
 
-Trigger: Production bug reported — urgency too high to run the full PO → SA → Lead cycle.
+Trigger: PO ส่ง `BugIntake_BR-[NNN]_[title].md` มาให้ (PO เป็นจุดรับรายงาน production bug เสมอ — ไม่มีทางลัดที่ Dev แจ้ง Lead ตรง) — urgency too high to run the full PO → SA → Lead cycle. Lead อ่าน BugIntake แล้วเป็นผู้ตัดสิน severity (P1/P2/P3) เอง — ไม่ใช่ PO
 
 | Severity | Criteria                                   | Path                                                                  |
 | -------- | ------------------------------------------ | --------------------------------------------------------------------- |
@@ -630,7 +630,29 @@ Everything outside the stated fix scope.
 After hotfix merges to production:
 
 - [ ] Dev updates TASK_LOG.md with `HF-[ID]` entry (same format as regular tasks)
-- [ ] Lead notifies PO: bug description, fix summary, production impact
+- [ ] หลัง QA ยืนยัน Production smoke check ผ่าน (HF-STEP 4) → Lead generates `HotfixNotification_HF-[NNN].md` ส่งให้ PO ทันที ตาม template ด้านล่าง — Environment-aware output ตามปกติ (`cli` → Write ลง disk / `claude.ai` → Artifact)
+
+  ```markdown
+  # HotfixNotification_HF-[NNN].md
+
+  Bug Intake : BR-[NNN]
+  Severity   : P1 / P2
+  Merged     : [date/time]
+  Deployed   : Staging [date/time] → Production [date/time]
+
+  ## สรุปปัญหา
+  [what was broken — plain language for PO]
+
+  ## Fix summary
+  [what changed, scope of the fix]
+
+  ## Production impact
+  [downtime, data affected, users affected — or "none observed"]
+
+  ## Smoke test
+  QA smoke test ผ่านทั้ง Staging และ Production (อ้างอิง HotfixSmokeTest_HF-[NNN].md)
+  ```
+
 - [ ] PO forwards HF-[ID] summary to SA for **Retroactive Tier Tagging** — บังคับทุก hotfix ไม่มีข้อยกเว้น (ดู `ai/SA_PROJECT_INSTRUCTIONS.md` §Retroactive Hotfix Triage) — SA บันทึกผลกลับเข้า `TASK_LOG.md` ที่ entry เดิมของ `HF-[ID]` นั้น ไม่ต้องสร้างไฟล์ใหม่
 - [ ] If fix deviates from Solution Doc constraint → Lead creates ADR Amendment (see below)
 - [ ] If fix reveals architectural gap → Lead sends Issue Report to SA (see §Direct SA communication)

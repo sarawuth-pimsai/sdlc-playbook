@@ -65,12 +65,14 @@ Then ask **one question** based on STACK_CONTEXT.md status:
 > 1. **เพิ่ม Feature ใหม่** — เริ่ม feature ใหม่ตั้งแต่ต้น
 > 2. **ต่อ Feature ที่ค้างไว้** — กลับมาทำต่อจากที่หยุดไว้
 > 3. **ดู Decision Log** — ทบทวนการตัดสินใจที่ผ่านมา
+> 4. **แจ้ง Bug / ปัญหา Production** — รับรายงานและส่งต่อ Lead
 >
-> พิมพ์ 1, 2, หรือ 3"
+> พิมพ์ 1, 2, 3 หรือ 4"
 
 - PO replies 1 → ask one at a time: (1) "ชื่อ Feature คืออะไร?" (2) "มี PRD พร้อมแล้วหรือยัง? (1. มี PRD พร้อมแล้ว / 2. ยังไม่มี PRD)" — then route.
 - PO replies 2 → ask: "Feature ที่ค้างไว้ชื่ออะไร?" — then route.
 - PO replies 3 → route immediately.
+- PO replies 4 → ask: "รายงาน Bug ใหม่ หรือ ติดตาม Bug ที่ส่ง BugIntake ไปแล้ว? (1. Bug ใหม่ / 2. ติดตาม Bug เดิม)" — reply 1 → start §Production Bug Intake below; reply 2 → look up matching `BugIntake_BR-[NNN]` in Project Knowledge and report its latest known status (severity + whether HotfixNotification received yet).
 
 ---
 
@@ -86,6 +88,8 @@ Route immediately based on collected answers — no paste-back needed:
 | งาน: เพิ่ม Feature ใหม่ + PRD: ยังไม่มี PRD               | Start PRD interview mode for the named feature                                                                                                         |
 | งาน: ต่อ Feature ที่ค้างไว้ + Feature: [name]             | Summarise DECISION_LOG progress for that feature, state current STEP, recommend next action                                                            |
 | งาน: ดู Decision Log                                      | Show all DECISION*LOG*[feature]_TODO.md (unresolved) และ DECISION_LOG_[feature]\_RESOLVED.md (resolved) — list by feature if multiple features present |
+| งาน: แจ้ง Bug / ปัญหา Production + Bug ใหม่                | Generate BugIntake immediately — see §Production Bug Intake                                                                                             |
+| งาน: แจ้ง Bug / ปัญหา Production + ติดตาม Bug เดิม        | Report latest status of the named `BugIntake_BR-[NNN]` from Project Knowledge                                                                          |
 
 **Q3–Q6 already collected in chat** — use directly in `SUBSTITUTE_PO_CONTEXT` for SA Stack Setup Request:
 
@@ -482,17 +486,7 @@ Items PO skipped → noted as assumptions in the generated prompt TODO section.
 
 ### STEP 1.6 — Business-risk keyword scan (run automatically, before SA Handoff)
 
-หลัง STEP 1.5 เสร็จ **ถ้ามี PATTERN_LIBRARY.md ให้อ่าน section `## Escalated Keywords` ก่อนเสมอ** (read แยกต่างหาก ไม่ต้องรอรอบ read ปกติก่อน STEP 3) แล้วรวม keyword/phrase ที่เคย escalate มาก่อนหน้าเข้ากับ list ด้านล่างนี้ด้วย จากนั้น Claude สแกน PRD ทั้งฉบับ (Objectives, User Stories, Functional Requirements, NFR, Out of scope) หา keyword ต่อไปนี้ (case-insensitive, ตรงกับคำไทยที่มีความหมายเดียวกันด้วย):
-
-```
-BUSINESS_RISK_KEYWORDS = [
-  "payment", "checkout", "billing",
-  "auth", "authentication", "authorization", "login", "session token",
-  "PII", "personal data", "email address", "phone number", "national ID",
-  "external API", "third-party integration", "webhook",
-  "encryption", "compliance", "GDPR", "PDPA"
-]
-```
+หลัง STEP 1.5 เสร็จ **ถ้ามี PATTERN_LIBRARY.md ให้อ่าน section `## Escalated Keywords` ก่อนเสมอ** (read แยกต่างหาก ไม่ต้องรอรอบ read ปกติก่อน STEP 3) แล้วรวม keyword/phrase ที่เคย escalate มาก่อนหน้าเข้ากับ `BUSINESS_RISK_KEYWORDS` list (นิยามไว้ที่เดียวใน `docs/CORE_POLICY.md` §1 — ห้ามคัดลอก list มาไว้ที่นี่ซ้ำ) จากนั้น Claude สแกน PRD ทั้งฉบับ (Objectives, User Stories, Functional Requirements, NFR, Out of scope) หา keyword ในลิสต์นั้น (case-insensitive, ตรงกับคำไทยที่มีความหมายเดียวกันด้วย)
 
 **PO ไม่ตัดสิน tier หรือ priority ของ SA effort จากผลสแกนนี้** — นี่คือ raw flag เท่านั้น ส่งต่อเป็น context ให้ SA ตัดสินใจเอง (ดู `docs/CORE_POLICY.md` §1 และ `ai/SA_PROJECT_INSTRUCTIONS.md` §STEP 1.5)
 
@@ -669,7 +663,55 @@ Lead พบปัญหาระหว่าง task breakdown → ส่ง Iss
 | **Small** — ไม่กระทบ requirements หรือ services อื่น                  | SA ออก ADR Amendment + อัปเดต Solution_Doc section ที่เกี่ยวข้อง → ส่ง revised Solution_Doc ให้ PO → PO re-enters STEP 3 |
 | **Large** — กระทบ requirements, data model ที่ใช้ร่วม, หรือ PRD scope | SA notify PO ก่อน → **PO ต้อง approve scope change** → หลัง approve SA revises Solution_Doc → PO re-enters STEP 3        |
 
-**กฎ:** ทั้งสอง re-entry flows เริ่มที่ STEP 3 เสมอ — อ่าน revised Solution_Doc ใหม่ ตรวจ 7 sections + ADR check แล้ว proceed ต่อ STEP 4
+**กฎ:** ทั้งสอง re-entry flows เริ่มที่ STEP 3 เสมอ — อ่าน revised Solution_Doc ใหม่ ตรวจ required sections (ดู §SA Solution Doc — required schema) + ADR check แล้ว proceed ต่อ STEP 4
+
+---
+
+## Production Bug Intake
+
+**Trigger:** ใครก็ได้ (แคชเชียร์, Ops, Dev) แจ้ง PO ว่ามีปัญหาบน production — หรือ PO เลือก option 4 ในหน้า Welcome Dialog
+
+**กฎ:** PO คือจุดรับรายงานเสมอ — Dev ห้ามแจ้ง Lead โดยตรง
+
+### PO ทำทันที (< 5 นาที)
+
+1. ถามข้อมูลทีละข้อ (ใช้รูปแบบเดียวกับ §Text dialog format): อาการที่พบ → environment ที่พบปัญหา → ขั้นตอน reproduce (ถ้าทราบ) → ผลกระทบ (กี่สาขา/กี่ user/มี workaround ไหม)
+2. Generate `BugIntake_BR-[NNN]_[title].md` ตาม template ด้านล่าง — `[NNN]` เรียงต่อจากเลขล่าสุดที่เคยออก (ดูใน DECISION_LOG หรือ Project Knowledge)
+3. Environment-aware output (ดู Hard rule 11): `cli` → Write ไฟล์ลง `docs/roles/po/` ทันที; `claude.ai` → สร้าง Artifact + Download button
+4. แจ้ง PO ว่าให้ส่งไฟล์ BugIntake ให้ Lead ทันที
+5. **รอ Lead ยืนยัน severity** — PO ไม่ตัดสิน severity เอง ไม่สั่ง Dev เอง
+
+```markdown
+# BugIntake_BR-[NNN]_[ชื่อ bug สั้นๆ].md
+
+Date     : [วันที่]
+Reporter : PO / [ผู้รายงาน]
+Severity : รอ Lead ยืนยัน
+
+## อาการที่พบ
+[PO อธิบายจากสิ่งที่ได้รับแจ้ง — ไม่ต้องเป็น technical]
+
+## สาขา / environment ที่พบปัญหา
+[Production เท่านั้น? หรือ SIT/Staging ด้วย?]
+
+## ขั้นตอนที่ reproduce ได้
+[ถ้าทราบ]
+
+## ผลกระทบ
+[กี่สาขา / กี่ user / มี workaround ไหม]
+```
+
+Severity (Lead เป็นคนตัดสิน ไม่ใช่ PO) ใช้เกณฑ์นี้เพื่ออธิบายให้ PO เข้าใจสิ่งที่จะเกิดขึ้นต่อ:
+
+| Severity | ความหมาย | สิ่งที่ Lead จะทำ |
+| -------- | -------- | ----------------- |
+| **P1** | Service down / data loss / security breach | ออก HotfixTask ทันที — ไม่รอ SA |
+| **P2** | Functional bug, มี workaround | ออก HotfixTask; SA review async หลัง merge |
+| **P3** | Minor bug, ไม่กระทบ user โดยตรง | ใส่ backlog — ใช้ normal pipeline |
+
+### สิ่งที่ PO จะได้รับคืน
+
+หลัง hotfix deploy สู่ Production และ QA smoke test ผ่าน → Lead ส่ง `HotfixNotification_HF-[NNN].md` ให้ PO บันทึกไว้ใน `docs/roles/po/` (หรือ Project Knowledge) — ใช้เป็น audit trail ว่า bug นั้นได้รับการแก้ไขแล้ว บันทึกอ้างอิงไว้ในบทสนทนาเพื่อให้ค้นหาได้เมื่อ PO เลือก "ติดตาม Bug เดิม" ในครั้งถัดไป
 
 ---
 
@@ -745,6 +787,7 @@ Use this pattern when Claude needs to ask the PO something during STEP 1 (BLOCKE
     - `Environment (default): claude.ai` → สร้าง Artifact พร้อม Download button ทุกครั้งที่ generate artifact
 12. **QA business rule questions → PO โดยตรง:** QA ไม่ต้องผ่าน Lead เมื่อถามเรื่อง business rules (required/optional fields, allowed behaviors, scope) — PO ตอบ → Claude append DECISION_LOG_RESOLVED ทันที → อัปเดต Lead Handoff เป็น version ใหม่ (ดู QA Clarification Flow)
 13. **One conversation per feature:** ใช้ conversation thread เดียวต่อหนึ่ง feature ตลอดอายุของ feature นั้น — เมื่อ PO กลับมาทำงาน feature เดิม ให้กลับเข้า conversation thread เดิม ไม่ต้องเปิด conversation ใหม่ ถ้ากลับมาใน thread เดิม Claude เห็น decision history จาก conversation แล้ว ให้แสดง summary สั้น ๆ ว่า "feature [name] — อยู่ที่ STEP [N], TODO ที่ยังค้าง: [list]" แล้วถาม PO ว่าต้องการทำอะไรต่อ — เปิด conversation ใหม่เฉพาะเมื่อเริ่ม feature ใหม่เท่านั้น
+14. **PO คือจุดรับรายงาน production bug เสมอ:** Dev หรือใครก็ตามห้ามแจ้ง Lead เรื่อง production bug โดยตรง ต้องผ่าน PO ก่อนเสมอ (ดู §Production Bug Intake) — PO ไม่ตัดสิน severity เอง มีหน้าที่แค่สร้าง BugIntake แล้วส่งต่อ Lead
 
 ---
 
@@ -877,53 +920,22 @@ SA กรุณา design solution และส่ง Solution Doc กลับ�
 
 ## SA Solution Doc — required schema
 
-**เฉพาะ Tier 2/3** — Tier 1 ใช้ `Triage_Summary_[feature].md` แบบสั้นแทน (ดู `ai/SA_PROJECT_INSTRUCTIONS.md` §STEP 1.5 Tier 1 Fast Path) ไม่ต้องมี 7 sections ด้านล่างนี้
+**เฉพาะ Tier 2/3** — Tier 1 ใช้ `Triage_Summary_[feature].md` แบบสั้นแทน (ดู `ai/SA_PROJECT_INSTRUCTIONS.md` §Tier 1 Fast Path) ไม่ต้องมี section ด้านล่างนี้
 
-SA ต้องส่ง `Solution_Doc_[feature].md` กลับมาพร้อม section เหล่านี้ **ทุก section เป็น required** — ถ้า SA ส่งมาไม่ครบ ให้ PO ส่งกลับไปขอเพิ่มเติมก่อน STEP 3
+`ai/SA_PROJECT_INSTRUCTIONS.md` §STEP 4 คือ single source of truth ของโครงสร้าง Solution Doc — ห้ามคัดลอก template เต็มมาไว้ที่นี่ซ้ำ ให้ PO เช็คแค่ว่า SA ส่ง `Solution_Doc_[feature].md` กลับมาครบทั้ง 10 section header ต่อไปนี้ (ตรงกับ §STEP 4 เป๊ะ) **ทุก section เป็น required** ยกเว้น section 10:
 
-```markdown
-# Solution Doc — [Feature Name]
+1. Overview
+2. Architecture
+3. Tech decisions
+4. API / Interface design
+5. Data model changes
+6. Non-functional considerations
+7. Risks and mitigations
+8. Open questions
+9. PoC scope (if needed)
+10. UX/UI considerations — **required เฉพาะเมื่อ** `PROJECT_CONTEXT.md`: `UX/UI required = yes`; ถ้า `no` ต้องไม่มี section นี้เลย (ไม่ใช่เว้นว่าง)
 
-Version : draft
-Date : [date]
-Author : SA
-
-## Architecture overview
-
-[1-2 paragraphs: how this feature fits into the existing system — new services, layers changed, data flow]
-
-## API design
-
-| Method | Path | Request body | Response body | Auth | Notes |
-| ------ | ---- | ------------ | ------------- | ---- | ----- |
-
-[one row per endpoint]
-
-## Database / data model
-
-[new tables, columns, or changes to existing schema — include index strategy]
-
-## Tech decisions
-
-| Decision | Choice | Rationale | Alternatives considered |
-| -------- | ------ | --------- | ----------------------- |
-
-[one row per significant decision — e.g. sync vs async, library chosen, caching strategy]
-
-## Integration patterns
-
-[how this feature calls or is called by other services — protocol, retry policy, timeout, circuit breaker if any]
-
-## Constraints
-
-[performance budgets, security requirements, PDPA considerations, infra limits that affect implementation]
-
-## Open items
-
-[unresolved items SA needs PO or Lead input on before finalising design]
-```
-
-**STEP 3 check:** When reading Solution_Doc, verify all 7 sections are present. If any section is missing or contains only "TBD" → list the missing sections → tell PO to send back to SA for completion before proceeding to STEP 4.
+**STEP 3 check:** When reading Solution_Doc, verify all required section headers above are present (matching §STEP 4 exactly — section names/numbers must not drift from SA's template). If any section is missing or contains only "TBD" → list the missing sections → tell PO to send back to SA for completion before proceeding to STEP 4.
 
 **STEP 3 ADR check:** If Solution_Doc references ADR numbers, verify each follows the `ADR-NNN` format. SA reserves numbers in `docs/adr/INDEX.md` before drafting — if numbers are absent or non-sequential, flag to PO to confirm with SA. ADRs are written when a decision: (1) chooses a technology that differs from STACK_CONTEXT defaults, (2) changes a data model affecting more than one service, (3) involves a trade-off whose rationale must be preserved, or (4) cannot be inferred from the code alone — if Solution_Doc has significant decisions but no ADRs, ask PO to request ADRs from SA before STEP 4.
 
