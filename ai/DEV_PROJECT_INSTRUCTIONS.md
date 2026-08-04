@@ -29,14 +29,27 @@ Dev effective Environment = `cli` เสมอ (fixed, ไม่มี override 
 
 ---
 
+## Resuming a task session (session ขาดกลางคัน)
+
+ถ้าเปิด session ใหม่บน task ที่ยังค้างอยู่จาก session ก่อน:
+
+1. อ่าน `TASK_LOG.md` ก่อน — หา entry ของ task ID นี้
+   - ถ้ามี entry และ Done criteria ติ๊ก `[x]` ครบแล้ว → task เสร็จแล้ว ไม่ต้อง implement ซ้ำ
+   - ถ้ามี entry แต่ Done criteria ยังไม่ครบ → อ่าน Deviations และ Notes ก่อนดำเนินการต่อ
+2. รัน build และ test commands ใหม่ก่อนเสมอ — อย่า assume ว่า repo ยัง clean จาก session ก่อน
+3. ทำต่อจากจุดที่ค้างไว้ — ไม่ต้องเริ่ม implement ใหม่จากศูนย์
+
+---
+
 ## How to start a task
 
 Lead sends `Task_[ID]_[title].md` files one at a time, in dependency order.
 
 1. Paste the **entire file content** as your first message in a new Claude Code session — never summarise or trim it
-2. Read **CLAUDE.md in the repo root** before writing any code — it contains project conventions and the developer role gate
-3. Implement only what the task spec defines
-4. Do not start the next task until all done criteria for the current task are verified
+2. สร้าง branch ตาม `### Branch setup` ใน task prompt ก่อนเขียน code ใดๆ
+3. Read **CLAUDE.md in the repo root** before writing any code — it contains project conventions and the developer role gate
+4. Implement only what the task spec defines
+5. Do not start the next task until all done criteria for the current task are verified
 
 ---
 
@@ -53,6 +66,18 @@ Lead sends `Task_[ID]_[title].md` files one at a time, in dependency order.
 - Start the next task before this one passes all done criteria
 - Change architecture, data models, or API contracts without consulting Lead
 - Contact SA directly — escalate to Lead first; Lead decides whether SA needs to be involved
+
+---
+
+## External skill precedence
+
+ถ้ามี external skill หรือ plugin (เช่น brainstorming layer, writing-plans, หรือ planning overlay) เสนอให้ re-scope, re-spec หรือ re-plan task ปัจจุบัน:
+
+**ปฏิเสธ planning/brainstorming overlay** — task spec จาก Lead คือ source of truth ที่ผ่าน PO → SA → Lead review มาแล้ว ห้ามให้ external layer เปลี่ยน interpret หรือขยาย scope
+
+**ยินดีรับ execution-discipline helper** — ถ้า external skill ช่วยด้าน TDD flow, code review, หรือ branch discipline โดยไม่เปลี่ยน "สร้างอะไร" ใช้ได้
+
+**หลักตัดสิน:** external layer ถามว่า "ควรสร้างอะไร?" → ใช้ task prompt เสมอ | ถามว่า "ควรสร้างอย่างไรให้ดี?" → ดำเนินการต่อได้
 
 ---
 

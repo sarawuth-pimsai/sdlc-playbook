@@ -41,6 +41,18 @@ Lead ส่งทีละไฟล์ตาม dependency order:
 
 ---
 
+## การ Resume task session (session ขาดกลางคัน)
+
+ถ้าต้องกลับมาทำ task ที่ทำค้างไว้จาก session ก่อน:
+
+1. เปิด `TASK_LOG.md` ก่อน — หา entry ของ task ID นั้น
+   - Done criteria ทุกข้อติ๊ก `[x]` ครบแล้ว → task เสร็จแล้ว ไม่ต้อง implement ซ้ำ
+   - Done criteria ยังไม่ครบ → อ่าน Deviations และ Notes ก่อนดำเนินการต่อ
+2. รัน build และ test ก่อนเสมอ — อย่า assume ว่า repo ยัง clean
+3. ทำต่อจากจุดที่ค้าง — ไม่ต้องเริ่มใหม่จากศูนย์
+
+---
+
 ## วิธีเริ่ม Task
 
 ### ขั้นตอนที่ 1 — เตรียม Claude Code
@@ -55,13 +67,23 @@ claude
 
 CLAUDE.md มี project conventions ที่ต้องตาม เช่น error shape, logging rules, context passing
 
-### ขั้นตอนที่ 3 — Paste Task Prompt
+### ขั้นตอนที่ 3 — สร้าง branch
+
+สร้าง branch ตาม `### Branch setup` ใน task prompt ก่อนเริ่มเขียน code:
+
+```bash
+git checkout [base branch from task prompt]
+git pull
+git checkout -b [branch name from task prompt]
+```
+
+### ขั้นตอนที่ 4 — Paste Task Prompt
 
 Paste **เนื้อหาทั้งหมด** ของ `Task_[ID]_[title].md` ลงใน Claude Code session ใหม่
 
 > ห้าม summarize หรือตัดเนื้อหาออก — paste verbatim
 
-### ขั้นตอนที่ 4 — Implement
+### ขั้นตอนที่ 5 — Implement
 
 Claude Code implement ตาม spec ใน task prompt
 
