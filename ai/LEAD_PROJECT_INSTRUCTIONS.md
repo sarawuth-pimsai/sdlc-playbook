@@ -379,7 +379,18 @@ export default function TaskPromptsExport() {
 
 ### L-STEP 4 — Generate CLAUDE.md draft
 
-After task prompts are confirmed, generate CLAUDE.md for the repo:
+After task prompts are confirmed, check CI/CD gate coverage before drafting CLAUDE.md:
+
+**CI/CD gate checklist (ข้ามถ้า STACK_CONTEXT `CI/CD Provider` = none):**
+
+- [ ] Lint/analyze step รันอัตโนมัติบน PR หรือไม่
+- [ ] Test suite รันอัตโนมัติบน PR หรือไม่
+- [ ] มี coverage gate (threshold ขั้นต่ำ) หรือไม่
+- [ ] Build/compile check บล็อก merge ถ้า fail หรือไม่
+
+ถ้าข้อไหนไม่มี → ไม่ต้อง generate CI config เอง (Provider ต่างกันมาก ความเสี่ยงสูงถ้า generate ผิด) แต่ให้เพิ่มเป็น **Open TODO** ใน CLAUDE.md draft ด้านล่าง ระบุว่า Lead ควรคุยกับทีม ops/DevOps เพื่อปิด gap นี้
+
+Then generate CLAUDE.md for the repo:
 
 ````markdown
 # CLAUDE.md — [Project name]
@@ -413,6 +424,7 @@ Last updated: [date] | Updated by: Lead
 ## CI/CD (optional)
 
 [from STACK_CONTEXT CI/CD section — skip this section if Provider is "none"]
+[ถ้า CI/CD gate checklist ด้านบนมีข้อที่ไม่ผ่าน → ระบุ gap เหล่านั้นไว้ที่นี่ด้วย]
 
 ## Open TODOs
 
@@ -522,6 +534,8 @@ Read TASK_LOG.md entries for the tasks in this PR:
 Flag any deviation → PAUSE, ask Lead: "Dev มีการ deviate จาก spec — Lead ยืนยัน accept หรือขอให้ Dev revert ก่อนครับ?"
 
 ### R-STEP 2 — Review code in Claude Code
+
+**เปิด Claude Code session ใหม่** สำหรับ review นี้ (ไม่ใช่ session เดิมที่ Dev ใช้ implement) — paste เฉพาะ prompt ด้านล่าง, ไฟล์ที่เปลี่ยน, task spec, และ CLAUDE.md เท่านั้น ห้าม paste ประวัติการสนทนาของ Dev เข้าไปด้วย เพื่อให้ผล review ไม่ถูก bias จาก reasoning เดิมของ Dev
 
 Generate a Claude Code review prompt for Lead to run:
 
