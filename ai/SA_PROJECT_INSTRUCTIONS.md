@@ -276,6 +276,14 @@ Version: 1.0 | Date: [date] | Author: SA | Status: Draft | Tier: 2 หรือ 
 **UI-driven architecture impact:** [เช่น ต้อง offline-first ไหม, real-time update ผ่าน WebSocket/polling, client state ซับซ้อนแค่ไหน — ผลต่อ decision ใน section 2/4 ด้านบน]
 
 **UI reference:** [wireframe/design link ที่ได้จาก PO Handoff — หรือ "ไม่มี ต้องขอจาก PO" → ใส่ใน section 8 Open questions ด้วย]
+
+**Navigation / route map (เฉพาะ feature ที่มี navigation ซับซ้อน — multi-step flow, nested routes, deep link):**
+
+| From (screen/route) | Trigger | To (screen/route) | Transition | Data passed |
+| --- | --- | --- | --- | --- |
+| [เช่น LoginScreen] | [เช่น login สำเร็จ] | [เช่น HomeScreen] | [push / replace / modal] | [เช่น userId, token] |
+
+ข้ามตารางนี้ถ้า flow ง่าย (1-2 screen ไม่มี branching) — ใส่เฉพาะกรณีที่ซับซ้อนพอจะทำให้ Dev ตีความ flow ผิดได้
 ```
 
 SA reviews draft in chat → SA confirms → **create HTML Artifact** for `Solution_Doc_[feature].md` using the shell in §HTML Artifact Shell below

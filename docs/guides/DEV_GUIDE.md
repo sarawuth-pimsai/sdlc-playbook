@@ -118,6 +118,21 @@ Claude Code implement ตาม spec ใน task prompt
 
 ---
 
+## Self-check ก่อน raise PR (เกินกว่า build/test ผ่าน)
+
+Build ผ่านและ test ผ่าน ไม่ได้แปลว่า code พร้อม — รันก่อนทุกครั้ง:
+
+1. **Static analysis แบบเข้ม** — strict lint/analyze command จาก STACK_CONTEXT.md ต้องผ่านแบบ zero warning ไม่ใช่แค่ zero error
+2. **Verify API ที่ใช้มีอยู่จริง** — เช็คกับ lockfile version จริงก่อนเชื่อว่า method/class มีอยู่ — ห้าม assume จาก training knowledge
+3. **Error handling ครบ** — ทุก async call มี error path และเช็ค null/undefined ก่อนใช้งาน
+4. **Resource cleanup** — controller/stream/listener ที่เปิดใหม่ ต้อง dispose ชัดเจน
+5. **Self-review diff** — ไฟล์ที่แก้เกินขอบเขต task ไหม เพิ่ม dependency ใหม่โดยไม่จำเป็นไหม
+6. **Test assert ของจริง** — test ที่เขียนเองต้อง assertion ผูกกับ behavior จริง ไม่ใช่ placeholder (เช่น `expect(true, true)`)
+
+ข้อใดไม่ผ่าน → กลับไปแก้ก่อน ไม่ raise PR
+
+---
+
 ## TASK_LOG.md — อัปเดตหลังทุก task
 
 ```markdown
@@ -144,6 +159,7 @@ Lead อ่าน TASK_LOG ก่อน review PR ทุกครั้ง — �
 ก่อน raise PR ตรวจ:
 
 - [ ] Done criteria ทุกข้อผ่าน (รันแล้ว ไม่ใช่แค่ดู)
+- [ ] Self-check 6 ข้อผ่านครบ (static analysis, API verification, error handling, resource cleanup, self-review diff, real test assertions)
 - [ ] `TASK_LOG.md` อัปเดตสำหรับ task นี้แล้ว
 - [ ] ตาม conventions ใน `CLAUDE.md` (error shape, logging, context passing)
 - [ ] ไม่มี hardcoded values ที่ควรมาจาก environment variables

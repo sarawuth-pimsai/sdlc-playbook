@@ -121,6 +121,8 @@ Claude แสดง preview → Lead review done criteria ทุกข้อ →
 
 ### L-STEP 4 — Generate CLAUDE.md สำหรับ Code Repo
 
+ก่อน draft CLAUDE.md เช็ค **CI/CD gate checklist** ก่อน (ข้ามถ้า Provider = none): lint/analyze รันอัตโนมัติบน PR ไหม, test suite รันอัตโนมัติไหม, มี coverage gate ไหม, build check บล็อก merge ไหม — ข้อไหนไม่มี ไม่ generate CI config เอง (เสี่ยงผิดต่อ provider) แต่ใส่เป็น Open TODO ให้ Lead คุยกับ ops แทน
+
 Claude draft `CLAUDE.md` จาก STACK_CONTEXT.md + Solution Doc constraints
 
 **Lead ต้อง commit CLAUDE.md เข้า repo root ก่อน Dev เริ่ม task แรก**
@@ -137,6 +139,8 @@ Claude draft `CLAUDE.md` จาก STACK_CONTEXT.md + Solution Doc constraints
 - มี open TODO ที่ block merge หรือไม่?
 
 ### R-STEP 2 — Review Code ใน Claude Code
+
+**เปิด session ใหม่** สำหรับ review นี้ (ไม่ใช่ session เดิมที่ Dev ใช้ implement) — paste เฉพาะ review prompt, ไฟล์ที่เปลี่ยน, task spec, CLAUDE.md เท่านั้น ห้าม paste ประวัติของ Dev เข้าไปด้วย เพื่อไม่ให้ผล review bias จาก reasoning เดิม
 
 Claude generate review prompt สำหรับ Lead รันใน **Claude Code** (ไม่ใช่ claude.ai chat)
 
