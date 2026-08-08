@@ -67,19 +67,45 @@ At session start, cross-check the date in each file against the previous session
 
 When SA receives an `SA_STACK_SETUP_REQUEST_[project].md` file from PO:
 
-1. Open the file — it contains the STACK_CONTEXT.md template with PRD context attached
-2. **Interview SA ก่อนเสมอ — ห้ามใช้ baseline stack ทันทีโดยไม่ถาม:**
-   - สรุปข้อจำกัดจาก Stack Setup Request (concurrent users, deploy target, timeline, อื่นๆ) ให้ SA เห็นก่อน
-   - ถาม SA ว่าต้องการ:
-     a) ใช้ baseline `docs/roles/sa/STACK_CONTEXT.md` เดิมทั้งหมด (ถ้าตรงกับข้อจำกัด)
-     b) ใช้ baseline เป็นฐานแต่ปรับบางส่วน (ระบุว่าส่วนไหน)
-     c) ใช้ stack อื่นทั้งหมด (ระบุ stack ที่ต้องการ)
-   - รอคำตอบจาก SA ก่อนไปขั้นตอนถัดไป — ห้าม default เป็นตัวเลือก (a) เอง
-3. Fill in every field in the template based on the confirmed technology decisions from step 2
-4. **ก่อน fill in version ใดๆ — ต้อง verify latest stable release ทุก package/runtime ผ่าน WebSearch เสมอ** (ดู Version Verification rule ด้านล่าง) — verify เฉพาะ stack ที่ confirm แล้วในขั้นตอนที่ 2 เท่านั้น
-5. Upload the completed file as **STACK_CONTEXT.md** in this SA Project
-6. Export (download) STACK_CONTEXT.md → send back to PO as a file attachment
-7. PO uploads it to their PO Project
+### STEP A — ตรวจสอบ PE Org Template
+
+ตรวจสอบว่า PO แนบ PE org template มาด้วยหรือไม่ (ไฟล์ชื่อ `STACK_CONTEXT_[OrgName].md`)
+
+- **ถ้ามี PE org template** → ใช้เป็น baseline ข้าม STEP B ไป STEP C เลย
+- **ถ้าไม่มี** → ไป STEP B
+
+### STEP B — Interview SA เพื่อเลือก Stack Template
+
+สรุปข้อจำกัดจาก Stack Setup Request (concurrent users, deploy target, timeline, อื่นๆ) ให้ SA เห็นก่อน แล้วถาม SA:
+
+**แจ้ง SA:** "จากข้อจำกัดข้างต้น — SA ต้องการใช้ stack แบบไหนครับ?
+
+| ตัวเลือก | รายละเอียด |
+|---------|-----------|
+| `STACK_CONTEXT_go_clean_arch.md` | Go + Clean Architecture + PostgreSQL/Redis + Next.js/Vite |
+| _(blank schema)_ | ไม่มี template ที่ match — SA fill in ทุก section เอง |
+
+SA เลือก template ไหน หรืออยาก customize อย่างไรครับ?"
+
+**กฎ:** ไม่เลือกให้ SA โดยอัตโนมัติ — รอคำตอบจาก SA ก่อนเสมอ ห้าม default เป็นตัวเลือกใดเอง
+
+### STEP C — Customize สำหรับ project
+
+หลัง SA ยืนยัน template (หรือใช้ PE org template):
+
+1. Load เนื้อหาของ template นั้นเป็น baseline
+2. ระบุ fields ที่ต้อง fill in ให้ SA เห็นชัดเจน โดยเฉพาะ:
+   - IdP ที่ใช้จริง
+   - Fields ที่ยังเป็น `[FILL IN]` หรือ `[SA ระบุ]`
+   - Sections ที่อาจไม่จำเป็น (เช่น ถ้า project ไม่มี frontend)
+3. **ก่อน fill in version ใดๆ — ต้อง verify latest stable release ทุก package/runtime ผ่าน WebSearch เสมอ** (ดู Version Verification rule ด้านล่าง) — verify เฉพาะ stack ที่ confirm แล้วเท่านั้น
+4. Fill in Stack Versions table ที่ท้าย template ด้วย verified versions
+
+### STEP D — Export และส่ง PO
+
+1. Upload ไฟล์ที่ completed เป็น **STACK_CONTEXT.md** ใน SA Project
+2. Export (download) STACK_CONTEXT.md → send back to PO as a file attachment
+3. PO uploads it to their PO Project
 
 **SA owns STACK_CONTEXT.md** — when stack changes, SA updates it here and notifies PO to re-upload.
 

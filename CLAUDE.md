@@ -12,11 +12,21 @@ This is **not an application** — there is no code to build, lint, or test. `sd
 
 ```
 ai/           System prompts, one per role — the actual "product" of this repo
+  PROJECT_INSTRUCTIONS.md      → PO
+  SA_PROJECT_INSTRUCTIONS.md   → SA
+  LEAD_PROJECT_INSTRUCTIONS.md → Lead
+  DEV_PROJECT_INSTRUCTIONS.md  → Dev (consumers copy this as their CLAUDE.md)
+  QA_PROJECT_INSTRUCTIONS.md   → QA
+  SEC_PROJECT_INSTRUCTIONS.md  → SEC (Option A only)
 docs/
   CORE_POLICY.md        Single source of truth for policy shared across roles (see below)
   WORKFLOW_OVERVIEW.md  Mermaid diagrams of the full flow, both Option A and B
   guides/                Human-readable guide per role, mirrors ai/*.md content for people, not Claude
-  roles/                 Example/seed knowledge files (STACK_CONTEXT.md samples, ADR index, etc.)
+                         Includes PE_GUIDE.md (Platform Engineering org-template workflow)
+                         and SOLO_GUIDE.md (solo-dev flow: one person wearing multiple hats, separate sessions)
+  roles/                 Example/seed knowledge files (STACK_CONTEXT.md blank schema, ADR index, etc.)
+                         sa/stack-templates/ — pre-filled STACK_CONTEXT per stack family (Go Clean Arch, etc.)
+                           and base cross-cutting reference; PE forks these to create org templates
 templates/option-b/     Slash-command templates (/po, /sa, /lead, /qa, /setup) for Claude Code consumers
 .claude/commands/       Slash commands for maintaining *this* repo (e.g. /ship, /release) — not templates for consumers
 ```
@@ -43,6 +53,7 @@ The system is a PO-centered handoff pipeline: **PO → SA → SEC (Option A only
 ## Editing conventions
 
 - Every shared knowledge file template (`STACK_CONTEXT.md`, `DECISION_LOG_*`, `PATTERN_LIBRARY.md`, `PROJECT_CONTEXT.md`) carries a `Last updated: YYYY-MM-DD | Version: N` header — keep this when touching templates.
+- `SA_STACK_SETUP_REQUEST_template.md` no longer exists — PO generates the Stack Setup Request automatically from `ai/PROJECT_INSTRUCTIONS.md`. Stack templates live in `docs/roles/sa/stack-templates/` instead.
 - `ai/*.md` files are written in English; the "ภาษาที่ใช้" section in each mandates that everything Claude *outputs* to that role (questions, warnings, summaries) is in Thai. Keep this split when editing.
 - Each role file ends with an "Ask-human triggers" / "Golden rule" section defining STOP/PAUSE/CHECK levels and which role is the sole decision-maker for that domain (e.g. "SA is the technical decision maker", "QA sets the verdict"). Never let one role silently make another's decision when adding new logic.
 - `docs/guides/*.md` should stay in sync with the corresponding `ai/*.md` file whenever a workflow step changes — they're two audiences (human vs. Claude) for the same process, not independent documents.
