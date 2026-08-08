@@ -67,6 +67,19 @@ Claude อ่าน Lead Handoff และ extract:
 
 ถ้า open items ยังไม่ resolve → Claude ถาม Lead: block task generation หรือใช้ placeholder?
 
+### L-STEP 1.5 — Tier Escalation Check
+
+ก่อนแตก task ตรวจว่า Triage Summary/Solution Doc ที่ได้รับครอบคลุมสิ่งที่ Lead เห็นจริงในโค้ด/requirement หรือไม่
+
+**Block ทันทีถ้าเจอ:**
+- Task ต้องเปลี่ยน data schema ที่เอกสารเดิมไม่ได้พูดถึง
+- Task ต้องเพิ่ม external dependency ใหม่ที่ไม่มีใน Feature Brief เดิม
+- Feature เป็น Tier 1 แต่ Lead เห็นว่ากระทบมากกว่านั้นจริง
+
+เมื่อ trigger → ส่ง **Escalation Request ตรงไปหา SA** (ไม่ผ่าน PO) แล้วรอคำตอบก่อนไปต่อ — Lead ห้ามตัดสินใจเชิงสถาปัตยกรรมแทน SA ยกเว้น Hotfix Flow P1/P2 (ดู §Hotfix Flow และ [CORE_POLICY.md](../CORE_POLICY.md) §2)
+
+**ก่อนส่ง Escalation Request** ต้องเพิ่ม entry เข้า `PATTERN_LIBRARY.md` section `## Escalated Keywords` ด้วยเสมอ (keyword ที่ scan เดิมพลาด, feature, Tier ที่ควรจะเป็นจริง) แล้วส่งไฟล์ที่อัปเดตแล้วให้ PO แนบเข้า SA Handoff ครั้งถัดไป — ไม่ต้อง block รอ SA ตอบกลับ escalation ก่อน (ดู `ai/LEAD_PROJECT_INSTRUCTIONS.md` §L-STEP 1.5)
+
 ### L-STEP 2 — Break เป็น Epics และ Tasks
 
 Claude เสนอ task board — กฎของแต่ละ task:
@@ -81,6 +94,19 @@ Claude แสดง task board preview → Lead review → confirm ก่อน�
 - Task scope > 3 story points (แนะนำ split)
 - SA constraint ขัดกับ PRD requirement
 
+### L-STEP 2.5 — Dependency Graph + Lane Assignment
+
+หลัง task board confirm แล้ว Claude สร้าง Dependency Graph จาก `Depends on`/`Blocks` แล้วเช็ค file overlap ระหว่างทุกคู่ task:
+
+- Task แตะไฟล์เดียวกัน → **บังคับ sequence เสมอ** แม้ไม่มี dependency ประกาศไว้
+- Task ไม่แตะไฟล์ซ้ำ + ไม่มี dependency → **แยก lane อิสระ** รันขนานกันได้
+
+**Lane ตั้งชื่อตาม domain** (เช่น `lane-auth`, `lane-api-gateway`) — ไม่ผูกกับชื่อคน เพราะคนรับ lane เปลี่ยนได้
+
+Claude แสดง Dependency Graph + lane assignment → Lead review → confirm ก่อนไป L-STEP 3
+
+ดูรายละเอียดใน `ai/LEAD_PROJECT_INSTRUCTIONS.md` §L-STEP 2.5 และ [CORE_POLICY.md](../CORE_POLICY.md) §3
+
 ### L-STEP 3 — Generate Claude Code Prompts
 
 Claude generate 1 prompt ต่อ task ตาม template มาตรฐาน แต่ละ prompt มี:
@@ -94,6 +120,8 @@ Claude generate 1 prompt ต่อ task ตาม template มาตรฐาน
 Claude แสดง preview → Lead review done criteria ทุกข้อ → confirm → Claude สร้าง React Artifact พร้อม Download ทีละไฟล์
 
 ### L-STEP 4 — Generate CLAUDE.md สำหรับ Code Repo
+
+ก่อน draft CLAUDE.md เช็ค **CI/CD gate checklist** ก่อน (ข้ามถ้า Provider = none): lint/analyze รันอัตโนมัติบน PR ไหม, test suite รันอัตโนมัติไหม, มี coverage gate ไหม, build check บล็อก merge ไหม — ข้อไหนไม่มี ไม่ generate CI config เอง (เสี่ยงผิดต่อ provider) แต่ใส่เป็น Open TODO ให้ Lead คุยกับ ops แทน
 
 Claude draft `CLAUDE.md` จาก STACK_CONTEXT.md + Solution Doc constraints
 
@@ -111,6 +139,8 @@ Claude draft `CLAUDE.md` จาก STACK_CONTEXT.md + Solution Doc constraints
 - มี open TODO ที่ block merge หรือไม่?
 
 ### R-STEP 2 — Review Code ใน Claude Code
+
+**เปิด session ใหม่** สำหรับ review นี้ (ไม่ใช่ session เดิมที่ Dev ใช้ implement) — paste เฉพาะ review prompt, ไฟล์ที่เปลี่ยน, task spec, CLAUDE.md เท่านั้น ห้าม paste ประวัติของ Dev เข้าไปด้วย เพื่อไม่ให้ผล review bias จาก reasoning เดิม
 
 Claude generate review prompt สำหรับ Lead รันใน **Claude Code** (ไม่ใช่ claude.ai chat)
 
@@ -153,10 +183,10 @@ PO สร้าง `BugIntake_BR-[NNN]_[title].md` แล้วส่งมา�
 | Severity | เงื่อนไข | Path |
 |----------|---------|------|
 | **P1** | Service down / data loss / security breach | Lead ออก HotfixTask ตรง — ไม่ต้องรอ SA sign-off |
-| **P2** | Functional bug, มี workaround | Lead ออก HotfixTask; SA review async หลัง merge |
+| **P2** | Functional bug, มี workaround | Lead ออก HotfixTask ตรง — ไม่ต้องรอ SA sign-off |
 | **P3** | Minor bug | ใส่ backlog — ใช้ normal pipeline ปกติ |
 
-**กฎ:** escalate ถึง SA หลัง merge — ไม่ใช่ก่อน (P1/P2 speed over process)
+**กฎ:** escalate ถึง SA หลัง merge — ไม่ใช่ก่อน (P1/P2 speed over process) — แต่หลัง merge ทุก hotfix ต้องผ่าน **Retroactive Tier Tagging** จาก SA เสมอ ไม่ใช่ optional (ดู §Post-merge Checklist ด้านล่าง และ `ai/SA_PROJECT_INSTRUCTIONS.md` §Retroactive Hotfix Triage)
 
 ### Lead ออก HotfixTask ให้ Dev
 
@@ -171,6 +201,7 @@ PO สร้าง `BugIntake_BR-[NNN]_[title].md` แล้วส่งมา�
 - [ ] QA smoke test **ผ่านบน Staging** → Lead จึง deploy สู่ Production (ห้าม deploy Production ก่อน QA ผ่าน Staging)
 - [ ] Lead แจ้ง QA ให้ run **Production smoke check** (P1 cases เท่านั้น)
 - [ ] Production smoke check ผ่าน → Lead สร้าง `HotfixNotification_HF-[NNN].md` ส่งให้ PO
+- [ ] PO ส่งต่อ HF summary ให้ SA ทำ **Retroactive Tier Tagging** — บังคับทุก hotfix (ดู `ai/SA_PROJECT_INSTRUCTIONS.md` §Retroactive Hotfix Triage) — SA บันทึกผลกลับเข้า `TASK_LOG.md` ที่ entry เดิมของ `HF-[NNN]`
 - [ ] ถ้า fix เบี่ยงจาก Solution Doc / ADR → Lead สร้าง ADR Amendment
 - [ ] ถ้า fix เผย architectural gap → Lead ส่ง Issue Report ให้ SA
 
@@ -190,7 +221,7 @@ Lead ส่ง Issue Report ตรงถึง SA ได้ (ไม่ต้อ�
 
 - [ ] `LEAD_HANDOFF_[feature].md` อัปโหลดเข้า Lead Project แล้ว
 - [ ] `STACK_CONTEXT.md` มีและครบทุก field
-- [ ] Solution Doc ครบทุก section (7 required sections)
+- [ ] Solution Doc ครบทุก section (9 required sections + section 10 ถ้ามี UX/UI)
 - [ ] Version header ของทุกไฟล์ตรงกับ Lead Handoff date
 
 ## Checklist ก่อนส่ง Task Prompts ให้ Dev
@@ -199,3 +230,6 @@ Lead ส่ง Issue Report ตรงถึง SA ได้ (ไม่ต้อ�
 - [ ] Done criteria ทุกข้อ verifiable (ด้วย command จริง ไม่ใช่ "code looks right")
 - [ ] `CLAUDE.md` committed เข้า repo root แล้ว
 - [ ] ส่ง task prompts ทีละไฟล์ตาม dependency order
+- [ ] ทุก task มี Lane assigned ใน Parallel metadata block
+- [ ] Task ที่แตะไฟล์ร่วมกันถูกทำเป็น sequence แล้ว — ไม่มีสอง task ในไฟล์เดียวกันที่ยัง mark เป็น parallel
+- [ ] Assigned Dev ระบุครบทุก lane (หรือ "unassigned")

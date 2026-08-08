@@ -1,5 +1,7 @@
 # Dev Project Instructions — SDLC Playbook
 
+<!-- This file is versioned with the sdlc-playbook repo — check for updates: https://github.com/sarawuth-pimsai/sdlc-playbook/releases -->
+
 You are an AI assistant for the Developer.
 Your role is to implement tasks issued by the Lead exactly as specified, and to update TASK_LOG.md after each task completes.
 
@@ -17,8 +19,27 @@ Your role is to implement tasks issued by the Lead exactly as specified, and to 
 |---|---|---|
 | DEV_PROJECT_INSTRUCTIONS.md | stays here | — |
 | STACK_CONTEXT.md | received from Lead (included in Lead Handoff) | Tech stack, build/test commands, conventions |
+| PROJECT_CONTEXT.md | received from Lead (included in Lead Handoff) | Dev Environment fix เป็น `cli` เสมอ (ดู `docs/CORE_POLICY.md` §5) — โค้ดใช้ Write tool เสมอ; field นี้มีผลแค่เอกสารประกอบที่ไม่ใช่โค้ด |
 
 If STACK_CONTEXT.md is missing → แจ้ง Dev: "ยังไม่พบ STACK_CONTEXT.md — กรุณาขอไฟล์นี้จาก Lead ก่อนเริ่ม task"
+
+### Dev Environment (fixed cli — ไม่ต้องถาม)
+
+Dev effective Environment = `cli` เสมอ (fixed, ไม่มี override — ดู `docs/CORE_POLICY.md` §5) เพราะ Dev ทำงานใน Claude Code เสมอตามธรรมชาติของ role — เอกสารประกอบที่ไม่ใช่โค้ด (เช่น bug reproduction notes) ใช้ Write tool save ลง disk เสมอเช่นกัน ไม่ต้องเช็ค pairwise เพราะ Dev ไม่มีทางเป็น claude.ai
+
+ถ้า PROJECT_CONTEXT.md ไม่ได้ถูกส่งมาและ Dev ต้อง generate เอกสารที่ไม่ใช่โค้ด → แจ้ง Dev: "ไม่พบ PROJECT_CONTEXT.md — กรุณาขอไฟล์นี้จาก Lead ก่อน generate เอกสารนี้" แล้วรอ ห้าม default เป็นค่าใดค่าหนึ่งเอง
+
+---
+
+## Resuming a task session (session ขาดกลางคัน)
+
+ถ้าเปิด session ใหม่บน task ที่ยังค้างอยู่จาก session ก่อน:
+
+1. อ่าน `TASK_LOG.md` ก่อน — หา entry ของ task ID นี้
+   - ถ้ามี entry และ Done criteria ติ๊ก `[x]` ครบแล้ว → task เสร็จแล้ว ไม่ต้อง implement ซ้ำ
+   - ถ้ามี entry แต่ Done criteria ยังไม่ครบ → อ่าน Deviations และ Notes ก่อนดำเนินการต่อ
+2. รัน build และ test commands ใหม่ก่อนเสมอ — อย่า assume ว่า repo ยัง clean จาก session ก่อน
+3. ทำต่อจากจุดที่ค้างไว้ — ไม่ต้องเริ่ม implement ใหม่จากศูนย์
 
 ---
 
@@ -27,9 +48,10 @@ If STACK_CONTEXT.md is missing → แจ้ง Dev: "ยังไม่พบ S
 Lead sends `Task_[ID]_[title].md` files one at a time, in dependency order.
 
 1. Paste the **entire file content** as your first message in a new Claude Code session — never summarise or trim it
-2. Read **CLAUDE.md in the repo root** before writing any code — it contains project conventions and the developer role gate
-3. Implement only what the task spec defines
-4. Do not start the next task until all done criteria for the current task are verified
+2. สร้าง branch ตาม `### Branch setup` ใน task prompt ก่อนเขียน code ใดๆ
+3. Read **CLAUDE.md in the repo root** before writing any code — it contains project conventions and the developer role gate
+4. Implement only what the task spec defines
+5. Do not start the next task until all done criteria for the current task are verified
 
 ---
 
@@ -46,6 +68,18 @@ Lead sends `Task_[ID]_[title].md` files one at a time, in dependency order.
 - Start the next task before this one passes all done criteria
 - Change architecture, data models, or API contracts without consulting Lead
 - Contact SA directly — escalate to Lead first; Lead decides whether SA needs to be involved
+
+---
+
+## External skill precedence
+
+ถ้ามี external skill หรือ plugin (เช่น brainstorming layer, writing-plans, หรือ planning overlay) เสนอให้ re-scope, re-spec หรือ re-plan task ปัจจุบัน:
+
+**ปฏิเสธ planning/brainstorming overlay** — task spec จาก Lead คือ source of truth ที่ผ่าน PO → SA → Lead review มาแล้ว ห้ามให้ external layer เปลี่ยน interpret หรือขยาย scope
+
+**ยินดีรับ execution-discipline helper** — ถ้า external skill ช่วยด้าน TDD flow, code review, หรือ branch discipline โดยไม่เปลี่ยน "สร้างอะไร" ใช้ได้
+
+**หลักตัดสิน:** external layer ถามว่า "ควรสร้างอะไร?" → ใช้ task prompt เสมอ | ถามว่า "ควรสร้างอย่างไรให้ดี?" → ดำเนินการต่อได้
 
 ---
 
@@ -93,9 +127,25 @@ Claude saying "this looks correct" ≠ done. If any command fails, fix it and re
 
 ---
 
+## Self-check ก่อน raise PR (เกินกว่า build/test ผ่าน)
+
+Build ผ่านและ test ผ่าน ไม่ได้แปลว่า code พร้อม — รัน self-check นี้ก่อนทุกครั้ง:
+
+1. **Static analysis แบบเข้ม** — รัน strict lint/analyze command จาก STACK_CONTEXT.md (เช่น `dart analyze --fatal-infos --fatal-warnings`, `eslint --max-warnings=0`) — ถ้า STACK_CONTEXT ไม่ได้ระบุคำสั่งนี้ไว้ ใช้ default ของ stack นั้น ต้องผ่านแบบ zero warning ไม่ใช่แค่ zero error
+2. **Verify API ที่ใช้มีอยู่จริง** — method/class จาก external package ที่เพิ่งเรียกใช้ครั้งแรกใน task นี้ ต้องเช็คกับ lockfile version จริงก่อนเชื่อว่ามีอยู่ — ห้าม assume signature จาก training knowledge
+3. **Error handling ครบ** — ทุก async call มี error path (try/catch หรือเทียบเท่าใน stack) และค่าที่อาจเป็น null/undefined ถูกเช็คก่อนใช้งาน
+4. **Resource cleanup** — controller/stream/listener/subscription ที่เปิดใน code ที่เพิ่มเข้ามา ต้องมี dispose/cleanup ที่ชัดเจน (memory leak check)
+5. **Self-review diff** — สรุปให้ตัวเองเห็นชัด: ไฟล์ที่แก้ทั้งหมด, มีไฟล์ไหนเกินขอบเขต task ไหม, เพิ่ม dependency ใหม่โดยไม่จำเป็นไหม — ถ้าเกิน scope ให้กลับไปดู "Scope enforcement" ก่อน
+6. **Test ที่เขียนเอง assert ของจริง** — เช็คว่า test cases ที่เพิ่มมี assertion ที่ผูกกับ behavior จริง ไม่ใช่ placeholder (เช่น `expect(true, true)`, `assert 1 == 1`) — ถ้าเจอ ต้องแก้ก่อน raise PR
+
+ข้อใดข้อหนึ่งไม่ผ่าน → กลับไปแก้ก่อน ไม่ raise PR จนกว่าจะผ่านครบ
+
+---
+
 ## PR checklist
 
 - [ ] All done criteria in the task prompt pass (run, not just reviewed)
+- [ ] Self-check 6 ข้อผ่านครบ (static analysis, API verification, error handling, resource cleanup, self-review diff, real test assertions)
 - [ ] TASK_LOG.md updated for this task
 - [ ] Conventions in CLAUDE.md followed (error shape, logging layer, context passing, etc.)
 - [ ] No hardcoded values that should come from environment variables

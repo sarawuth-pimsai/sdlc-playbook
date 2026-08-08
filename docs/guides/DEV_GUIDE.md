@@ -41,6 +41,18 @@ Lead ส่งทีละไฟล์ตาม dependency order:
 
 ---
 
+## การ Resume task session (session ขาดกลางคัน)
+
+ถ้าต้องกลับมาทำ task ที่ทำค้างไว้จาก session ก่อน:
+
+1. เปิด `TASK_LOG.md` ก่อน — หา entry ของ task ID นั้น
+   - Done criteria ทุกข้อติ๊ก `[x]` ครบแล้ว → task เสร็จแล้ว ไม่ต้อง implement ซ้ำ
+   - Done criteria ยังไม่ครบ → อ่าน Deviations และ Notes ก่อนดำเนินการต่อ
+2. รัน build และ test ก่อนเสมอ — อย่า assume ว่า repo ยัง clean
+3. ทำต่อจากจุดที่ค้าง — ไม่ต้องเริ่มใหม่จากศูนย์
+
+---
+
 ## วิธีเริ่ม Task
 
 ### ขั้นตอนที่ 1 — เตรียม Claude Code
@@ -55,13 +67,23 @@ claude
 
 CLAUDE.md มี project conventions ที่ต้องตาม เช่น error shape, logging rules, context passing
 
-### ขั้นตอนที่ 3 — Paste Task Prompt
+### ขั้นตอนที่ 3 — สร้าง branch
+
+สร้าง branch ตาม `### Branch setup` ใน task prompt ก่อนเริ่มเขียน code:
+
+```bash
+git checkout [base branch from task prompt]
+git pull
+git checkout -b [branch name from task prompt]
+```
+
+### ขั้นตอนที่ 4 — Paste Task Prompt
 
 Paste **เนื้อหาทั้งหมด** ของ `Task_[ID]_[title].md` ลงใน Claude Code session ใหม่
 
 > ห้าม summarize หรือตัดเนื้อหาออก — paste verbatim
 
-### ขั้นตอนที่ 4 — Implement
+### ขั้นตอนที่ 5 — Implement
 
 Claude Code implement ตาม spec ใน task prompt
 
@@ -96,6 +118,21 @@ Claude Code implement ตาม spec ใน task prompt
 
 ---
 
+## Self-check ก่อน raise PR (เกินกว่า build/test ผ่าน)
+
+Build ผ่านและ test ผ่าน ไม่ได้แปลว่า code พร้อม — รันก่อนทุกครั้ง:
+
+1. **Static analysis แบบเข้ม** — strict lint/analyze command จาก STACK_CONTEXT.md ต้องผ่านแบบ zero warning ไม่ใช่แค่ zero error
+2. **Verify API ที่ใช้มีอยู่จริง** — เช็คกับ lockfile version จริงก่อนเชื่อว่า method/class มีอยู่ — ห้าม assume จาก training knowledge
+3. **Error handling ครบ** — ทุก async call มี error path และเช็ค null/undefined ก่อนใช้งาน
+4. **Resource cleanup** — controller/stream/listener ที่เปิดใหม่ ต้อง dispose ชัดเจน
+5. **Self-review diff** — ไฟล์ที่แก้เกินขอบเขต task ไหม เพิ่ม dependency ใหม่โดยไม่จำเป็นไหม
+6. **Test assert ของจริง** — test ที่เขียนเองต้อง assertion ผูกกับ behavior จริง ไม่ใช่ placeholder (เช่น `expect(true, true)`)
+
+ข้อใดไม่ผ่าน → กลับไปแก้ก่อน ไม่ raise PR
+
+---
+
 ## TASK_LOG.md — อัปเดตหลังทุก task
 
 ```markdown
@@ -122,6 +159,7 @@ Lead อ่าน TASK_LOG ก่อน review PR ทุกครั้ง — �
 ก่อน raise PR ตรวจ:
 
 - [ ] Done criteria ทุกข้อผ่าน (รันแล้ว ไม่ใช่แค่ดู)
+- [ ] Self-check 6 ข้อผ่านครบ (static analysis, API verification, error handling, resource cleanup, self-review diff, real test assertions)
 - [ ] `TASK_LOG.md` อัปเดตสำหรับ task นี้แล้ว
 - [ ] ตาม conventions ใน `CLAUDE.md` (error shape, logging, context passing)
 - [ ] ไม่มี hardcoded values ที่ควรมาจาก environment variables

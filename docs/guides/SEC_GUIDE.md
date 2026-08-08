@@ -25,27 +25,11 @@
 | `STACK_CONTEXT.md` | ได้รับจาก PO พร้อม Phase A package |
 | `PRD_[feature].md` | ได้รับจาก PO |
 | `Solution_Doc_[feature].md` | ได้รับจาก PO (จาก SA) — ต้องมีก่อนเริ่ม Phase A |
+| `PROJECT_CONTEXT.md` | ได้รับจาก PO พร้อม Solution Doc — อ่าน Environment default + override (ดู [CORE_POLICY.md](../CORE_POLICY.md) §5) |
 
----
+**SEC ถาม Environment override ของตัวเองแค่ครั้งแรกที่เริ่มทำงานในโปรเจกต์นี้** (เหมือน SA/Lead/QA) แล้วเช็ค pairwise ก่อนส่งไฟล์กลับทุกครั้ง — Phase A เทียบกับ PO, Phase B เทียบกับ Lead (ดู `ai/SEC_PROJECT_INSTRUCTIONS.md` §Environment override + §Handoff Environment Check)
 
-### Option B — Claude Code
-
-ใช้ผ่าน Claude Code CLI, Desktop App, หรือ IDE Extension แทน claude.ai Projects
-
-#### ขั้นตอนที่ 1 — ตั้งค่า Workspace
-
-```bash
-mkdir ~/[project]-sec
-cd ~/[project]-sec
-cp /path/to/sdlc-workflow/ai/SEC_PROJECT_INSTRUCTIONS.md CLAUDE.md
-```
-
-รัน `claude` จาก directory นั้น — Claude Code อ่าน `CLAUDE.md` อัตโนมัติเมื่อเริ่ม session
-
-#### ขั้นตอนที่ 2 — วางไฟล์ใน Directory
-
-วางไฟล์ทุกรายการจากตาราง Option A ลง directory เดียวกัน แทนการ upload เข้า Project Knowledge  
-Claude Code สามารถอ่านไฟล์ใน working directory ได้โดยตรง
+SEC ไม่มี Option B setup ของตัวเอง — ในทีมที่ใช้ Option B (Claude Code), security checkpoints ฝังอยู่ใน SA/Lead/QA instructions โดยตรงแทน (ไม่มี `/sec` slash command หรือ `docs/roles/sec/` แยกต่างหาก) ดู `templates/option-b/README.md`
 
 ---
 
