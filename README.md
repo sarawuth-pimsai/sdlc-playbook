@@ -50,7 +50,15 @@ docs/
     DEV_GUIDE.md      → คู่มือ Developer
     QA_GUIDE.md       → คู่มือ QA Engineer
     SEC_GUIDE.md      → คู่มือ Security Engineer
+    PE_GUIDE.md       → คู่มือ Platform Engineering (org template)
     SOLO_GUIDE.md     → คู่มือ Solo Developer (ทำงานคนเดียว หลาย role)
+  roles/
+    sa/
+      STACK_CONTEXT.md              → blank schema (ใช้เมื่อไม่มี template ที่ match)
+      stack-templates/
+        README.md                   → คู่มือการเลือกและใช้ template + PE workflow
+        STACK_CONTEXT_base_crosscutting.md  → cross-cutting reference (Auth, OTel, PDPA)
+        STACK_CONTEXT_go_clean_arch.md      → Go + Clean Architecture + PostgreSQL/Redis
 templates/
   option-b/
     README.md         → setup guide สำหรับ Option B (role isolation)
@@ -161,13 +169,20 @@ Environment: cli / claude.ai
 
 ### ขั้นตอนที่ 4 — SA สร้าง STACK_CONTEXT.md
 
-PO ส่ง SA Stack Setup Request ให้ SA กรอก `STACK_CONTEXT.md`
-(Claude ใน PO Project จะ generate template ให้อัตโนมัติเมื่อเริ่ม feature แรก)
+PO ส่ง `SA_STACK_SETUP_REQUEST_[ProjectName].md` ให้ SA
+(ดู template ที่ `docs/roles/po/SA_STACK_SETUP_REQUEST_template.md`)
+
+**ถ้าองค์กรมี Platform Engineering และ org template พร้อมแล้ว** → แนบ `STACK_CONTEXT_[OrgName].md` มาพร้อม request
+SA จะใช้ org template เป็น baseline — ลดเวลา setup และ enforce org standard อัตโนมัติ
+
+**ถ้ายังไม่มี org template** → SA เลือก stack template จาก `docs/roles/sa/stack-templates/` ที่ match stack family
 
 เมื่อได้รับ `STACK_CONTEXT.md` จาก SA → อัปโหลดเข้า:
 
 - **PO Project Knowledge**
 - **SA Project Knowledge**
+
+> ดูรายละเอียด Platform Engineering workflow ที่ [docs/guides/PE_GUIDE.md](docs/guides/PE_GUIDE.md)
 
 ---
 
@@ -262,16 +277,18 @@ my-project/
 
 ## คู่มือแต่ละ Role
 
-| Role               | คู่มือ                                                 |
-| ------------------ | ------------------------------------------------------ |
-| **ภาพรวม Workflow** | [docs/WORKFLOW_OVERVIEW.md](docs/WORKFLOW_OVERVIEW.md) |
-| Product Owner      | [docs/guides/PO_GUIDE.md](docs/guides/PO_GUIDE.md)     |
-| Solution Architect | [docs/guides/SA_GUIDE.md](docs/guides/SA_GUIDE.md)     |
-| Tech Lead          | [docs/guides/LEAD_GUIDE.md](docs/guides/LEAD_GUIDE.md) |
-| Developer          | [docs/guides/DEV_GUIDE.md](docs/guides/DEV_GUIDE.md)   |
-| QA Engineer        | [docs/guides/QA_GUIDE.md](docs/guides/QA_GUIDE.md)     |
-| Security Engineer  | [docs/guides/SEC_GUIDE.md](docs/guides/SEC_GUIDE.md)   |
-| Solo Developer     | [docs/guides/SOLO_GUIDE.md](docs/guides/SOLO_GUIDE.md) |
+| Role                  | คู่มือ                                                         |
+| --------------------- | -------------------------------------------------------------- |
+| **ภาพรวม Workflow**   | [docs/WORKFLOW_OVERVIEW.md](docs/WORKFLOW_OVERVIEW.md)         |
+| Product Owner         | [docs/guides/PO_GUIDE.md](docs/guides/PO_GUIDE.md)             |
+| Solution Architect    | [docs/guides/SA_GUIDE.md](docs/guides/SA_GUIDE.md)             |
+| Tech Lead             | [docs/guides/LEAD_GUIDE.md](docs/guides/LEAD_GUIDE.md)         |
+| Developer             | [docs/guides/DEV_GUIDE.md](docs/guides/DEV_GUIDE.md)           |
+| QA Engineer           | [docs/guides/QA_GUIDE.md](docs/guides/QA_GUIDE.md)             |
+| Security Engineer     | [docs/guides/SEC_GUIDE.md](docs/guides/SEC_GUIDE.md)           |
+| Platform Engineering  | [docs/guides/PE_GUIDE.md](docs/guides/PE_GUIDE.md)             |
+| Solo Developer        | [docs/guides/SOLO_GUIDE.md](docs/guides/SOLO_GUIDE.md)         |
+| **Stack Templates**   | [docs/roles/sa/stack-templates/README.md](docs/roles/sa/stack-templates/README.md) |
 
 ---
 

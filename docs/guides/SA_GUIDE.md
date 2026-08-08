@@ -59,11 +59,16 @@ SA รับผิดชอบวิเคราะห์ PRD ด้านเท
 PO ส่งไฟล์ `SA_STACK_SETUP_REQUEST_[ProjectName].md`
 
 **Action:**
-1. เปิดไฟล์ — มี STACK_CONTEXT.md template + PRD context แนบมา
-2. กรอกทุก field ใน template ตามการตัดสินใจ tech stack จริงของทีม
-3. บันทึกเป็น `STACK_CONTEXT.md`
-4. อัปโหลดเข้า SA Project Knowledge
-5. ส่งไฟล์กลับให้ PO → PO อัปโหลดเข้า PO Project
+1. ตรวจสอบว่า PO แนบ PE org template (`STACK_CONTEXT_[OrgName].md`) มาด้วยหรือไม่
+   - **ถ้ามี** → ใช้ org template เป็น baseline ข้ามขั้นตอน 2
+   - **ถ้าไม่มี** → เลือก template จาก `docs/roles/sa/stack-templates/` ที่ match stack family
+2. Copy template ที่เลือก → ยืนยันกับ SA ว่า template ถูกต้องก่อน customize
+3. Fill in ค่าที่ขาด + verify versions ทุกตัวผ่าน WebSearch
+4. บันทึกเป็น `STACK_CONTEXT.md`
+5. อัปโหลดเข้า SA Project Knowledge
+6. ส่งไฟล์กลับให้ PO → PO อัปโหลดเข้า PO Project
+
+ดู stack templates ที่มีอยู่: [docs/roles/sa/stack-templates/README.md](../roles/sa/stack-templates/README.md)
 
 ### กรณี B — SA Handoff (มี STACK_CONTEXT.md แล้ว)
 
@@ -154,6 +159,7 @@ Claude compile handoff summary พร้อม distribution plan
 - SA **เป็นเจ้าของแต่เพียงผู้เดียว** — ห้าม PO แก้ไข
 - เมื่อ stack เปลี่ยน → SA อัปเดตใน SA Project → increment version → notify PO ให้ re-upload เข้า PO Project
 - ทุกครั้งที่ส่งไฟล์ให้ PO ระบุ version ใน message: เช่น `STACK_CONTEXT.md Version 2`
+- ถ้าองค์กรมี PE และ org template เปลี่ยน → PE จะแจ้ง SA ว่า project ต้อง sync อะไรบ้าง
 
 ---
 

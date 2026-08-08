@@ -48,12 +48,45 @@ At session start, cross-check the date in each file against the previous session
 
 When SA receives an `SA_STACK_SETUP_REQUEST_[project].md` file from PO:
 
-1. Open the file — it contains the STACK_CONTEXT.md template with PRD context attached
-2. Fill in every field in the template based on team's actual technology decisions
+### STEP A — ตรวจสอบ PE Org Template
+
+ตรวจสอบว่า PO แนบ PE org template มาด้วยหรือไม่ (ไฟล์ชื่อ `STACK_CONTEXT_[OrgName].md`)
+
+- **ถ้ามี PE org template** → ใช้เป็น baseline ข้าม STEP B ไป STEP C เลย
+- **ถ้าไม่มี** → ไป STEP B
+
+### STEP B — เลือก Stack Template
+
+เลือก template จาก `docs/roles/sa/stack-templates/` ที่ตรงกับ stack family ของ project นี้มากที่สุด
+
+**แจ้ง SA:** "Project นี้น่าจะ match กับ template ต่อไปนี้ — SA กรุณายืนยันก่อนดำเนินการต่อ:
+
+| Template | ครอบคลุม |
+|----------|---------|
+| `STACK_CONTEXT_go_clean_arch.md` | Go + Clean Architecture + PostgreSQL/Redis + Next.js/Vite |
+| _(blank schema)_ | ใช้เมื่อไม่มี template ที่ match — SA fill in ทุก section เอง |
+
+SA เลือก template ไหนครับ?"
+
+**กฎ:** ไม่เลือกให้ SA โดยอัตโนมัติ — SA ต้องยืนยันก่อนเสมอ
+
+### STEP C — Customize สำหรับ project
+
+หลัง SA ยืนยัน template (หรือใช้ PE org template):
+
+1. Load เนื้อหาของ template นั้นเป็น baseline
+2. ระบุ fields ที่ต้อง fill in ให้ SA เห็นชัดเจน โดยเฉพาะ:
+   - IdP ที่ใช้จริง
+   - Fields ที่ยังเป็น `[FILL IN]` หรือ `[SA ระบุ]`
+   - Sections ที่อาจไม่จำเป็น (เช่น ถ้า project ไม่มี frontend)
 3. **ก่อน fill in version ใดๆ — ต้อง verify latest stable release ทุก package/runtime ผ่าน WebSearch เสมอ** (ดู Version Verification rule ด้านล่าง)
-4. Upload the completed file as **STACK_CONTEXT.md** in this SA Project
-5. Export (download) STACK_CONTEXT.md → send back to PO as a file attachment
-6. PO uploads it to their PO Project
+4. Fill in Stack Versions table ที่ท้าย template ด้วย verified versions
+
+### STEP D — Export และส่ง PO
+
+1. Upload ไฟล์ที่ completed เป็น **STACK_CONTEXT.md** ใน SA Project
+2. Export (download) STACK_CONTEXT.md → send back to PO as a file attachment
+3. PO uploads it to their PO Project
 
 **SA owns STACK_CONTEXT.md** — when stack changes, SA updates it here and notifies PO to re-upload.
 
