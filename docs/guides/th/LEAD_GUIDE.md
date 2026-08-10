@@ -1,0 +1,240 @@
+# คู่มือ Tech Lead
+
+> ดูภาพรวม workflow และการ setup → [WORKFLOW_OVERVIEW.md](../WORKFLOW_OVERVIEW.md)
+
+Lead มีหน้าที่ 2 อย่าง: (1) แตก task + generate Claude Code prompts และ (2) review PR ของ Dev ก่อน merge
+
+---
+
+## การติดตั้ง
+
+### Option A — claude.ai Projects
+
+ใช้ผ่าน claude.ai web interface
+
+#### ขั้นตอนที่ 1 — สร้าง Project
+
+1. เปิด [claude.ai](https://claude.ai) → **Projects** → **New project**
+2. ตั้งชื่อ เช่น `[ชื่อโปรเจกต์] — Lead`
+3. เปิด **Project Instructions** → Copy เนื้อหาจาก `ai/LEAD_PROJECT_INSTRUCTIONS.md` → Paste → บันทึก
+
+#### ขั้นตอนที่ 2 — อัปโหลด Project Knowledge
+
+ไฟล์ทั้งหมดมาจาก **Lead Handoff** ที่ PO ส่งให้:
+
+| ไฟล์ | จำเป็น | หมายเหตุ |
+|------|--------|---------|
+| `LEAD_HANDOFF_[feature].md` | ✅ | ไฟล์หลัก — รวม PRD + Solution Doc + Epics |
+| `STACK_CONTEXT.md` | ✅ | ฝังอยู่ใน Lead Handoff หรือส่งแยก |
+| `ADR_[NNN].md` | ถ้ามี | SA ส่งผ่าน PO |
+| `DECISION_LOG_[feature]_TODO.md` | ถ้ามี | |
+| `DECISION_LOG_[feature]_RESOLVED.md` | ถ้ามี | |
+
+---
+
+### Option B — Claude Code
+
+ใช้ผ่าน Claude Code CLI, Desktop App, หรือ IDE Extension แทน claude.ai Projects
+
+#### ขั้นตอนที่ 1 — Setup workspace (ทำครั้งเดียว)
+
+ดูรายละเอียดการ setup ที่ [templates/option-b/README.md](../../templates/option-b/README.md) — ใช้ `/setup` command เพื่อสร้าง directory structure และ copy ไฟล์ที่จำเป็นทั้งหมดอัตโนมัติ
+
+#### ขั้นตอนที่ 2 — เริ่ม Lead session
+
+```
+/lead
+```
+
+พิมพ์ `/lead` ใน Claude Code — Claude จะอ่าน `ai/LEAD_PROJECT_INSTRUCTIONS.md` และโฟกัสที่ `docs/roles/lead/` และ `docs/shared/`
+
+#### ขั้นตอนที่ 3 — วางไฟล์ใน directory ของ Lead
+
+วางไฟล์ knowledge ใน `docs/roles/lead/` แทนการ upload เข้า Project Knowledge
+
+---
+
+## Workflow ของ Lead — Task Breakdown
+
+### L-STEP 1 — อ่านและ Cross-check
+
+Claude อ่าน Lead Handoff และ extract:
+- PRD requirements
+- SA Solution Doc constraints ที่ Dev ห้าม override
+- Architecture decisions ที่กระทบ task sequencing
+- Epics จาก PO STEP 2
+- Open items จาก DECISION_LOG
+
+ถ้า open items ยังไม่ resolve → Claude ถาม Lead: block task generation หรือใช้ placeholder?
+
+### L-STEP 1.5 — Tier Escalation Check
+
+ก่อนแตก task ตรวจว่า Triage Summary/Solution Doc ที่ได้รับครอบคลุมสิ่งที่ Lead เห็นจริงในโค้ด/requirement หรือไม่
+
+**Block ทันทีถ้าเจอ:**
+- Task ต้องเปลี่ยน data schema ที่เอกสารเดิมไม่ได้พูดถึง
+- Task ต้องเพิ่ม external dependency ใหม่ที่ไม่มีใน Feature Brief เดิม
+- Feature เป็น Tier 1 แต่ Lead เห็นว่ากระทบมากกว่านั้นจริง
+
+เมื่อ trigger → ส่ง **Escalation Request ตรงไปหา SA** (ไม่ผ่าน PO) แล้วรอคำตอบก่อนไปต่อ — Lead ห้ามตัดสินใจเชิงสถาปัตยกรรมแทน SA ยกเว้น Hotfix Flow P1/P2 (ดู §Hotfix Flow และ [CORE_POLICY.md](../CORE_POLICY.md) §2)
+
+**ก่อนส่ง Escalation Request** ต้องเพิ่ม entry เข้า `PATTERN_LIBRARY.md` section `## Escalated Keywords` ด้วยเสมอ (keyword ที่ scan เดิมพลาด, feature, Tier ที่ควรจะเป็นจริง) แล้วส่งไฟล์ที่อัปเดตแล้วให้ PO แนบเข้า SA Handoff ครั้งถัดไป — ไม่ต้อง block รอ SA ตอบกลับ escalation ก่อน (ดู `ai/LEAD_PROJECT_INSTRUCTIONS.md` §L-STEP 1.5)
+
+### L-STEP 2 — Break เป็น Epics และ Tasks
+
+Claude เสนอ task board — กฎของแต่ละ task:
+- Single responsibility
+- เสร็จได้ใน 1-2 วันต่อ developer คนเดียว
+- มี done criteria อย่างน้อย 2 ข้อที่ verifiable ได้
+
+Claude แสดง task board preview → Lead review → confirm ก่อนไปต่อ
+
+**Claude PAUSE ถ้า:**
+- Task dependency order ไม่ชัดเจน
+- Task scope > 3 story points (แนะนำ split)
+- SA constraint ขัดกับ PRD requirement
+
+### L-STEP 2.5 — Dependency Graph + Lane Assignment
+
+หลัง task board confirm แล้ว Claude ทำ 3 ขั้นตอนก่อน generate prompts:
+
+1. **สร้าง Dependency Graph** — จาก `Depends on`/`Blocks` ของทุก task
+2. **เช็ค file overlap** — task แตะไฟล์เดียวกัน → บังคับ sequence เสมอ; task ไม่แตะไฟล์ซ้ำ + ไม่มี dependency → แยก lane อิสระ รันขนานกันได้
+3. **Cross-lane utility scan** — สำรวจ "What to create/modify" ข้าม lane ทั้งหมด ถ้ามี helper/utility ที่ 2 lane ขึ้นไปจะใช้ร่วมกัน (เช่น validation, formatting, error builder) → extract เป็น shared task แยก และตั้ง `Depends on` ให้ทุก lane ที่ใช้ — task นั้นต้อง merge ก่อน lane เหล่านั้นเริ่ม
+
+**Lane ตั้งชื่อตาม domain** (เช่น `lane-auth`, `lane-api-gateway`) — ไม่ผูกกับชื่อคน เพราะคนรับ lane เปลี่ยนได้
+
+Claude แสดง Dependency Graph + lane assignment → Lead review → confirm ก่อนไป L-STEP 3
+
+**PAUSE trigger:** ถ้า cross-lane scan พบ helper ที่หลาย lane น่าจะใช้ร่วมกัน แต่ Lead ไม่แน่ใจว่าควร extract → Claude ถาม Lead ก่อน: "พบ [utility name] ที่อาจใช้ร่วมกันใน [lane A] และ [lane B] — ต้องการ extract เป็น shared task ก่อน หรือให้แต่ละ lane implement แยกกันครับ?"
+
+ดูรายละเอียดใน `ai/LEAD_PROJECT_INSTRUCTIONS.md` §L-STEP 2.5 และ [CORE_POLICY.md](../CORE_POLICY.md) §3
+
+### L-STEP 3 — Generate Claude Code Prompts
+
+Claude generate 1 prompt ต่อ task ตาม template มาตรฐาน แต่ละ prompt มี:
+- Project context (stack, framework, conventions)
+- Task context (why this task exists)
+- What to create/modify (files + function signatures)
+- Skeleton reference (minimal correct code)
+- Done criteria (verifiable commands/curl)
+- What NOT to implement in this task
+
+Claude แสดง preview → Lead review done criteria ทุกข้อ → confirm → Claude สร้าง React Artifact พร้อม Download ทีละไฟล์
+
+### L-STEP 4 — Generate CLAUDE.md สำหรับ Code Repo
+
+ก่อน draft CLAUDE.md เช็ค **CI/CD gate checklist** ก่อน (ข้ามถ้า Provider = none): lint/analyze รันอัตโนมัติบน PR ไหม, test suite รันอัตโนมัติไหม, มี coverage gate ไหม, build check บล็อก merge ไหม — ข้อไหนไม่มี ไม่ generate CI config เอง (เสี่ยงผิดต่อ provider) แต่ใส่เป็น Open TODO ให้ Lead คุยกับ ops แทน
+
+Claude draft `CLAUDE.md` จาก STACK_CONTEXT.md + Solution Doc constraints
+
+**Lead ต้อง commit CLAUDE.md เข้า repo root ก่อน Dev เริ่ม task แรก**
+
+---
+
+## Workflow ของ Lead — PR Review
+
+### R-STEP 1 — อ่าน TASK_LOG
+
+อ่าน `TASK_LOG.md` entries ของ tasks ใน PR นี้:
+- Dev ทำตาม spec หรือไม่?
+- มี deviation? ถ้ามี justified ไหม?
+- มี open TODO ที่ block merge หรือไม่?
+
+### R-STEP 2 — Review Code ใน Claude Code
+
+**เปิด session ใหม่** สำหรับ review นี้ (ไม่ใช่ session เดิมที่ Dev ใช้ implement) — paste เฉพาะ review prompt, ไฟล์ที่เปลี่ยน, task spec, CLAUDE.md เท่านั้น ห้าม paste ประวัติของ Dev เข้าไปด้วย เพื่อไม่ให้ผล review bias จาก reasoning เดิม
+
+Claude generate review prompt สำหรับ Lead รันใน **Claude Code** (ไม่ใช่ claude.ai chat)
+
+Checklist ที่ review:
+1. Correctness — code match spec ไหม
+2. Conventions — ตาม CLAUDE.md ไหม
+3. Error handling — ครบทุก error code ใน spec ไหม
+4. Security (Option B) — hardcoded secrets, missing input validation, sensitive data in response, auth checks, error message leaks
+5. Test coverage — done criteria ถูก cover ด้วย tests ไหม
+6. Duplication — มี function/method ใหม่ที่ duplicate logic ที่มีอยู่แล้วในโปรเจกต์ไหม — เช็ค utility functions, validation helpers, formatters, error builders โดย grep ชื่อ/signature คล้ายกันในไฟล์อื่นก่อนยืนยันว่า code นี้ใหม่จริง
+
+Output format: Must fix / Should fix / Consider / Verdict: APPROVE or REQUEST CHANGES
+
+### R-STEP 3 — อัปเดต CLAUDE.md (ถ้าจำเป็น)
+
+ถ้า PR นี้แนะนำ pattern หรือ convention ใหม่ → Claude ถาม Lead → Lead confirm → update CLAUDE.md
+
+---
+
+## การส่งไฟล์ให้ Dev และ QA
+
+**ส่งให้ Dev:**
+- `Task_[ID]_[title].md` ทีละไฟล์ตาม dependency order
+- `CLAUDE.md` (commit เข้า repo ก่อน Dev เริ่ม)
+- `STACK_CONTEXT.md`
+
+**ส่งให้ QA (Phase A setup):**
+- `STACK_CONTEXT.md`
+- `PRD_[feature].md`
+- `DECISION_LOG_[feature]_TODO.md` และ `DECISION_LOG_[feature]_RESOLVED.md`
+- Task prompt files ทุกไฟล์ (ชุดเดียวกับ Dev)
+
+---
+
+## Hotfix Flow
+
+### รับ BugIntake จาก PO
+
+PO สร้าง `BugIntake_BR-[NNN]_[title].md` แล้วส่งมาให้ Lead — Lead **ประเมิน severity** เท่านั้น ไม่ใช่ Dev หรือ Ops
+
+| Severity | เงื่อนไข | Path |
+|----------|---------|------|
+| **P1** | Service down / data loss / security breach | Lead ออก HotfixTask ตรง — ไม่ต้องรอ SA sign-off |
+| **P2** | Functional bug, มี workaround | Lead ออก HotfixTask ตรง — ไม่ต้องรอ SA sign-off |
+| **P3** | Minor bug | ใส่ backlog — ใช้ normal pipeline ปกติ |
+
+**กฎ:** escalate ถึง SA หลัง merge — ไม่ใช่ก่อน (P1/P2 speed over process) — แต่หลัง merge ทุก hotfix ต้องผ่าน **Retroactive Tier Tagging** จาก SA เสมอ ไม่ใช่ optional (ดู §Post-merge Checklist ด้านล่าง และ `ai/SA_PROJECT_INSTRUCTIONS.md` §Retroactive Hotfix Triage)
+
+### Lead ออก HotfixTask ให้ Dev
+
+ส่ง HotfixTask prompt ให้ Dev เหมือน normal task — Dev paste ทั้งไฟล์เป็น message แรกใน Claude Code session header: `## HOTFIX — [HF-ID]`
+
+### Post-merge Checklist (หลัง hotfix merge)
+
+หลัง hotfix merge และ Dev deploy สู่ Staging:
+
+- [ ] Dev อัปเดต `TASK_LOG.md` ด้วย `HF-[NNN]` entry
+- [ ] Lead แจ้ง QA ให้ run **Phase HF smoke test บน Staging** (ดู QA_GUIDE.md §Phase HF)
+- [ ] QA smoke test **ผ่านบน Staging** → Lead จึง deploy สู่ Production (ห้าม deploy Production ก่อน QA ผ่าน Staging)
+- [ ] Lead แจ้ง QA ให้ run **Production smoke check** (P1 cases เท่านั้น)
+- [ ] Production smoke check ผ่าน → Lead สร้าง `HotfixNotification_HF-[NNN].md` ส่งให้ PO
+- [ ] PO ส่งต่อ HF summary ให้ SA ทำ **Retroactive Tier Tagging** — บังคับทุก hotfix (ดู `ai/SA_PROJECT_INSTRUCTIONS.md` §Retroactive Hotfix Triage) — SA บันทึกผลกลับเข้า `TASK_LOG.md` ที่ entry เดิมของ `HF-[NNN]`
+- [ ] ถ้า fix เบี่ยงจาก Solution Doc / ADR → Lead สร้าง ADR Amendment
+- [ ] ถ้า fix เผย architectural gap → Lead ส่ง Issue Report ให้ SA
+
+---
+
+## Direct SA Communication
+
+Lead ส่ง Issue Report ตรงถึง SA ได้ (ไม่ต้องผ่าน PO) สำหรับ:
+- Technical clarification ที่ไม่กระทบ PRD requirements
+- Implementation-level questions ใน Solution Doc
+
+ใช้ format Issue Report (ดู SA_GUIDE.md) เพื่อให้ SA ประเมิน impact ได้ถูกต้อง
+
+---
+
+## Checklist ก่อนเริ่ม Task Breakdown
+
+- [ ] `LEAD_HANDOFF_[feature].md` อัปโหลดเข้า Lead Project แล้ว
+- [ ] `STACK_CONTEXT.md` มีและครบทุก field
+- [ ] Solution Doc ครบทุก section (9 required sections + section 10 ถ้ามี UX/UI)
+- [ ] Version header ของทุกไฟล์ตรงกับ Lead Handoff date
+
+## Checklist ก่อนส่ง Task Prompts ให้ Dev
+
+- [ ] Task board confirmed แล้ว
+- [ ] Done criteria ทุกข้อ verifiable (ด้วย command จริง ไม่ใช่ "code looks right")
+- [ ] `CLAUDE.md` committed เข้า repo root แล้ว
+- [ ] ส่ง task prompts ทีละไฟล์ตาม dependency order
+- [ ] ทุก task มี Lane assigned ใน Parallel metadata block
+- [ ] Task ที่แตะไฟล์ร่วมกันถูกทำเป็น sequence แล้ว — ไม่มีสอง task ในไฟล์เดียวกันที่ยัง mark เป็น parallel
+- [ ] Assigned Dev ระบุครบทุก lane (หรือ "unassigned")
+- [ ] Cross-lane utility scan ผ่านแล้ว — shared utility ที่พบถูก extract เป็น task แยก และ lane ที่ใช้มี dependency ชี้มาหา task นั้น

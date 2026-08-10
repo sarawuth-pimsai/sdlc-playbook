@@ -2,26 +2,34 @@
 
 # STACK_CONTEXT.md — [Project Name]
 
-> SA เป็นเจ้าของไฟล์นี้ อัปเดตทุกครั้งที่ stack เปลี่ยน และ copy ไปที่ `docs/roles/po/STACK_CONTEXT.md` หลัง finalize
+> SA owns this file. Update every time the stack changes, and copy to `docs/roles/po/STACK_CONTEXT.md` after finalizing.
 
 ---
 
-> **ไฟล์นี้คือ blank schema** — ใช้เมื่อไม่มี stack template ที่ตรงกับ project ของคุณ
+> **This file is a blank schema** — use it when no stack template matches your project.
 >
-> ถ้ามี template ที่ match — ใช้ template จาก `docs/roles/sa/stack-templates/` แทน (เริ่มได้เร็วกว่า)
-> ดูรายการ templates ที่ [stack-templates/README.md](stack-templates/README.md)
+> If a matching template exists — use the template from `docs/roles/sa/stack-templates/` instead (faster to start).
+> See the list of templates at [stack-templates/README.md](stack-templates/README.md)
 
 ---
 
 ## Purpose
 
-[ระบุ project name และสรุป tech stack family ที่เลือก — 1-2 ประโยค]
+[State the project name and summarize the chosen tech stack family — 1-2 sentences]
+
+---
+
+## Project Settings
+
+| Field | Value | Note |
+|-------|-------|------|
+| Output language | `en` | `en` = English (default) \| `th` = Thai — change to `th` for Thai-language teams |
 
 ---
 
 ## Versioning Principle
 
-[ระบุนโยบาย versioning — เช่น "ใช้ latest stable เสมอ" หรือ "pin ทุก version เพราะ production constraint"]
+[State the versioning policy — e.g. "always use latest stable" or "pin every version due to production constraints"]
 
 ---
 
@@ -31,24 +39,24 @@
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
-| Language | [Go / Python / Node.js / Java / อื่น] | [version] |
+| Language | [Go / Python / Node.js / Java / other] | [version] |
 | Web Framework | [framework] | [version] |
 | Validation | [library] | [version] |
 | Config | [library] | [version] |
 
 ### Architecture Pattern
 
-[ระบุ pattern: Clean Architecture / Hexagonal / Layered / MVC / อื่น]
+[State the pattern: Clean Architecture / Hexagonal / Layered / MVC / other]
 
 **Directory structure:**
 
 ```
-[วาด directory structure ที่ใช้จริง]
+[draw the actual directory structure used]
 ```
 
 **Layer responsibilities:**
 
-[อธิบาย responsibility ของแต่ละ layer และ dependency direction]
+[Describe the responsibility of each layer and the dependency direction]
 
 ### API Conventions
 
@@ -56,19 +64,19 @@
 
 ### Constraints
 
-[กฎที่ Dev และ SA ต้องปฏิบัติตามเสมอ — เขียนเฉพาะที่ non-obvious]
+[Rules that Dev and SA must always follow — write only what is non-obvious]
 
 ---
 
-## 2. Frontend (ลบ section นี้ถ้าไม่มี frontend)
+## 2. Frontend (remove this section if there is no frontend)
 
 ### Stack
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
-| Framework | [Next.js / Vite+React / Vue / Angular / อื่น] | [version] |
+| Framework | [Next.js / Vite+React / Vue / Angular / other] | [version] |
 | Language | [TypeScript / JavaScript] | [version] |
-| Styling | [Tailwind / CSS Modules / Styled Components / อื่น] | [version] |
+| Styling | [Tailwind / CSS Modules / Styled Components / other] | [version] |
 | Package Manager | [pnpm / npm / yarn] | [version] |
 
 ### Conventions
@@ -77,7 +85,7 @@
 
 ### Constraints
 
-[กฎสำคัญที่ Dev ต้องรู้]
+[Key rules Dev must know]
 
 ---
 
@@ -85,15 +93,15 @@
 
 | Level | Technology | Use case | Location |
 |-------|-----------|---------|---------|
-| L1 Local | [library / plain map] | per-instance state ที่ไม่ shared | `internal/local/` |
-| L2 Cache | [Redis / Memcached / อื่น] | shared state ข้าม instance | `internal/cache/` |
-| L3 Persistence | [PostgreSQL / MySQL / MongoDB / อื่น] | source of truth | `internal/[driver]/` |
+| L1 Local | [library / plain map] | per-instance state that is not shared | `internal/local/` |
+| L2 Cache | [Redis / Memcached / other] | shared state across instances | `internal/cache/` |
+| L3 Persistence | [PostgreSQL / MySQL / MongoDB / other] | source of truth | `internal/[driver]/` |
 
-[ลบ row ที่ project ไม่ใช้]
+[Remove rows the project does not use]
 
 ### Primary Database Conventions
 
-**[ชื่อ database engine]:**
+**[database engine name]:**
 
 | Item | Value |
 |------|-------|
@@ -105,7 +113,7 @@
 
 **Constraints:**
 
-[กฎสำคัญเกี่ยวกับ persistence]
+[Key rules about persistence]
 
 ---
 
@@ -113,23 +121,23 @@
 
 ### Authentication & Authorization
 
-- Protocol: [OAuth2 + OIDC + PKCE (แนะนำ) / อื่น + เหตุผล]
-- IdP: [Keycloak / Azure AD / Okta / อื่น] — ระบุใน ADR
+- Protocol: [OAuth2 + OIDC + PKCE (recommended) / other + reason]
+- IdP: [Keycloak / Azure AD / Okta / other] — specify in ADR
 
 **Backend packages:**
 
-| Package | Version | ใช้สำหรับ |
-|---------|---------|----------|
+| Package | Version | Used for |
+|---------|---------|---------|
 | [package] | [version] | [purpose] |
 
-**Frontend packages (ถ้ามี):**
+**Frontend packages (if applicable):**
 
-| Package | Version | ใช้สำหรับ |
-|---------|---------|----------|
+| Package | Version | Used for |
+|---------|---------|---------|
 | [package] | [version] | [purpose] |
 
 **Constraints:**
-- [ระบุ security constraints ที่สำคัญ]
+- [List important security constraints]
 
 ### Observability
 
@@ -138,63 +146,63 @@
 
 **Backend packages:**
 
-| Package | Version | ใช้สำหรับ |
-|---------|---------|----------|
+| Package | Version | Used for |
+|---------|---------|---------|
 | [package] | [version] | [purpose] |
 
-**Frontend packages (ถ้ามี):**
+**Frontend packages (if applicable):**
 
-| Package | Version | ใช้สำหรับ |
-|---------|---------|----------|
+| Package | Version | Used for |
+|---------|---------|---------|
 | [package] | [version] | [purpose] |
 
 **Constraints:**
-- ห้าม log PII — ใช้ masked หรือ hashed value
+- Do not log PII — use masked or hashed values
 
 ### Environment Variables
 
-| Prefix | ใช้สำหรับ |
+| Prefix | Used for |
 |--------|---------|
 | `APP_` | Application config |
 | `DB_` | Database connection |
-| [เพิ่มตามที่ project ใช้] | — |
+| [add as the project uses] | — |
 
-- ทุก secret ต้องใช้ environment variable — ห้าม hardcode
+- Every secret must use an environment variable — no hardcoding
 
-### PDPA (ระบุถ้า project เก็บ personal data)
+### PDPA (fill in if the project stores personal data)
 
-- Personal data ที่เก็บ: [ระบุ fields]
-- Retention period: [ระบุ]
-- Consent mechanism: [ระบุ]
+- Personal data stored: [list fields]
+- Retention period: [specify]
+- Consent mechanism: [specify]
 
 ---
 
 ## 5. SA Decision Fields
 
-SA ต้องระบุค่าต่อไปนี้ให้ชัดเจนใน Solution Doc ของแต่ละ feature:
+SA must specify the following values clearly in the Solution Doc for each feature:
 
-| Field | ค่าที่เลือก | หมายเหตุ |
+| Field | Chosen value | Note |
 |-------|-----------|---------|
-| [decision 1] | [value] | [เหตุผลถ้า non-obvious] |
+| [decision 1] | [value] | [reason if non-obvious] |
 | [decision 2] | [value] | — |
 
-[เพิ่ม rows ตาม technology decisions ที่ SA ต้องระบุต่อ feature]
+[Add rows for technology decisions SA must specify per feature]
 
 ---
 
 ## 6. Stack Deviations
 
-หาก feature ใดจำเป็นต้องเบี่ยงเบนจาก stack นี้ SA ต้อง:
-1. เขียน ADR ระบุเหตุผลและ trade-off
-2. แจ้ง PO ก่อนส่ง Solution Doc
-3. อัปเดต STACK_CONTEXT.md ถ้า deviation นั้นกลายเป็น standard ใหม่
+If any feature requires deviating from this stack, SA must:
+1. Write an ADR stating the reason and trade-offs
+2. Notify PO before sending the Solution Doc
+3. Update STACK_CONTEXT.md if the deviation becomes the new standard
 
 ---
 
 ## Stack Versions (verified [date])
 
-> SA ต้อง fill section นี้ด้วย version จริงที่ verify ผ่าน WebSearch ก่อนส่ง PO
-> ห้าม fill จาก training data — ข้อมูลอาจล้าสมัย
+> SA must fill this section with real versions verified via WebSearch before sending to PO.
+> Do not fill from training data — information may be outdated.
 
 | Package / Runtime | Version | Verified date |
 |------------------|---------|--------------|

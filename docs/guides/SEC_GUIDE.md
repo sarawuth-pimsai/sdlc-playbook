@@ -1,59 +1,59 @@
-# คู่มือ Security Engineer (SEC)
+# Security Engineer (SEC) Guide
 
-**Option A เท่านั้น** — SEC Project ใช้งานเฉพาะเมื่อ `Security role: yes` ใน `PROJECT_CONTEXT.md`
+**Option A only** — The SEC Project is used only when `Security role: yes` is set in `PROJECT_CONTEXT.md`.
 
-ถ้าทีมไม่มี Security Engineer → ใช้ **Option B** โดย security checkpoints ฝังอยู่ใน SA / Lead / QA instructions แล้ว ไม่ต้องติดตั้ง SEC Project
+If the team has no Security Engineer → use **Option B** where security checkpoints are already embedded in the SA / Lead / QA instructions — no need to set up a SEC Project.
 
 ---
 
-## การติดตั้ง
+## Setup
 
 ### Option A — claude.ai Projects
 
-ใช้ผ่าน claude.ai web interface
+Via the claude.ai web interface
 
-#### ขั้นตอนที่ 1 — สร้าง Project
+#### Step 1 — Create a Project
 
-1. เปิด [claude.ai](https://claude.ai) → **Projects** → **New project**
-2. ตั้งชื่อ เช่น `[ชื่อโปรเจกต์] — Security`
-3. เปิด **Project Instructions** → Copy เนื้อหาจาก `ai/SEC_PROJECT_INSTRUCTIONS.md` → Paste → บันทึก
+1. Open [claude.ai](https://claude.ai) → **Projects** → **New project**
+2. Name it, e.g. `[Project Name] — Security`
+3. Open **Project Instructions** → Copy content from `ai/SEC_PROJECT_INSTRUCTIONS.md` → Paste → Save
 
-#### ขั้นตอนที่ 2 — อัปโหลด Project Knowledge
+#### Step 2 — Upload Project Knowledge
 
-| ไฟล์ | เมื่อไหร่ |
-|------|----------|
-| `STACK_CONTEXT.md` | ได้รับจาก PO พร้อม Phase A package |
-| `PRD_[feature].md` | ได้รับจาก PO |
-| `Solution_Doc_[feature].md` | ได้รับจาก PO (จาก SA) — ต้องมีก่อนเริ่ม Phase A |
-| `PROJECT_CONTEXT.md` | ได้รับจาก PO พร้อม Solution Doc — อ่าน Environment default + override (ดู [CORE_POLICY.md](../CORE_POLICY.md) §5) |
+| File | When |
+|------|------|
+| `STACK_CONTEXT.md` | Received from PO with Phase A package |
+| `PRD_[feature].md` | Received from PO |
+| `Solution_Doc_[feature].md` | Received from PO (from SA) — must be present before starting Phase A |
+| `PROJECT_CONTEXT.md` | Received from PO with Solution Doc — read Environment default + override (see [CORE_POLICY.md](../CORE_POLICY.md) §5) |
 
-**SEC ถาม Environment override ของตัวเองแค่ครั้งแรกที่เริ่มทำงานในโปรเจกต์นี้** (เหมือน SA/Lead/QA) แล้วเช็ค pairwise ก่อนส่งไฟล์กลับทุกครั้ง — Phase A เทียบกับ PO, Phase B เทียบกับ Lead (ดู `ai/SEC_PROJECT_INSTRUCTIONS.md` §Environment override + §Handoff Environment Check)
+**SEC asks for its own Environment override only once when first starting work on this project** (same as SA/Lead/QA), then performs a pairwise check before sending files back each time — Phase A compared against PO, Phase B compared against Lead (see `ai/SEC_PROJECT_INSTRUCTIONS.md` §Environment override + §Handoff Environment Check)
 
-SEC ไม่มี Option B setup ของตัวเอง — ในทีมที่ใช้ Option B (Claude Code), security checkpoints ฝังอยู่ใน SA/Lead/QA instructions โดยตรงแทน (ไม่มี `/sec` slash command หรือ `docs/roles/sec/` แยกต่างหาก) ดู `templates/option-b/README.md`
+SEC has no Option B setup of its own — for teams using Option B (Claude Code), security checkpoints are embedded directly in SA/Lead/QA instructions instead (no `/sec` slash command or separate `docs/roles/sec/`). See `templates/option-b/README.md`
 
 ---
 
 ## Phase A — Solution Doc Security Review
 
-**Trigger:** PO ส่ง `Solution_Doc_[feature].md` ให้ SEC หลังได้รับจาก SA
+**Trigger:** PO sends `Solution_Doc_[feature].md` to SEC after receiving it from SA
 
-### A-STEP 1 — วิเคราะห์ Architecture ด้าน Security
+### A-STEP 1 — Analyse Architecture for Security
 
-Review Solution Doc ใน 7 categories:
+Review the Solution Doc in 7 categories:
 
-| Category | สิ่งที่ตรวจ |
-|----------|------------|
-| Authentication | Auth ถูก define ทุก endpoint ไหม? ใครเรียกอะไรได้บ้าง? |
-| Authorization | Role/permission check ระบุต่อ operation ชัดเจนไหม? |
-| Data exposure | API response รวม fields ที่ไม่ควร public ไหม? |
-| Input validation | User inputs ทุก field ถูก validate/sanitise ก่อนใช้ไหม? |
-| PDPA / Data sensitivity | Feature เก็บหรือ process personal data ไหม? มี retention period กำหนดไหม? |
-| Secrets management | Credentials ใช้ environment variables ทั้งหมดไหม? ไม่มี hardcoded? |
-| New dependencies | มี library ใหม่ไหม? ถ้ามี — มี known CVE ไหม? |
+| Category | What to check |
+|----------|---------------|
+| Authentication | Is auth defined for every endpoint? Who can call what? |
+| Authorization | Are role/permission checks specified per operation? |
+| Data exposure | Does the API response include fields that should not be public? |
+| Input validation | Are all user input fields validated/sanitised before use? |
+| PDPA / Data sensitivity | Does the feature collect or process personal data? Is a retention period defined? |
+| Secrets management | Are all credentials using environment variables? No hardcoded values? |
+| New dependencies | Are there new libraries? If so — any known CVEs? |
 
 ### A-STEP 2 — Output Security Requirements
 
-Claude produce `Security_Requirements_[feature].md`:
+Claude produces `Security_Requirements_[feature].md`:
 
 ```markdown
 # Security Requirements — [Feature name]
@@ -63,45 +63,45 @@ Version: 1.0 | Date: [date] | Author: SEC
 | Risk | Severity | Mitigation required |
 
 ## Implementation requirements
-[รายการ requirements ที่ verifiable ได้ใน Phase B code review]
-1. [e.g. ทุก /admin endpoint ต้อง validate JWT และ assert role = "admin"]
-2. [e.g. User email ต้องไม่ปรากฏใน response body หรือ application logs]
+[List of requirements that are verifiable in Phase B code review]
+1. [e.g. Every /admin endpoint must validate JWT and assert role = "admin"]
+2. [e.g. User email must not appear in the response body or application logs]
 
 ## PDPA considerations
-[Data collected, retention policy, consent — หรือ "none identified"]
+[Data collected, retention policy, consent — or "none identified"]
 
 ## Open questions for SA/PO
-[Items ที่ต้อง clarify ก่อน requirements จะ finalise]
+[Items that need clarification before requirements can be finalised]
 ```
 
-Preview → SEC review → confirm → export → **ส่งให้ PO**
+Preview → SEC reviews → confirms → exports → **sends to PO**
 
-PO รวมไฟล์นี้เข้า Lead Handoff → Lead ฝังใน task prompts
+PO includes this file in the Lead Handoff → Lead embeds it in task prompts
 
 ### A-STEP 3 — Blocking Risk
 
-ถ้าพบ risk ที่ทำให้ implementation ไม่ปลอดภัยโดยไม่มี architecture redesign:
-- **STOP** → อธิบาย risk และ Solution Doc section ที่เกี่ยวข้อง
-- SEC notify PO + SA ก่อน implementation เริ่ม
-- **ห้าม output partial requirements** — complete review ทั้งหมดก่อนแล้ว flag ทุกปัญหาพร้อมกัน
+If a risk is found that makes the implementation unsafe without an architecture redesign:
+- **STOP** → explain the risk and the relevant Solution Doc section
+- SEC notifies PO + SA before implementation begins
+- **Never output partial requirements** — complete the full review first, then flag all issues together
 
 ---
 
-## Phase B — Code Review (ต่อ PR)
+## Phase B — Code Review (per PR)
 
-**Trigger:** Dev raise PR → Lead ส่ง changed files + task prompt ให้ SEC
+**Trigger:** Dev raises a PR → Lead sends changed files + task prompt to SEC
 
 ### B-STEP 1 — Review Changed Files
 
-ตรวจ 7 ด้าน:
+Check 7 dimensions:
 
-1. **Auth/authorization** — Security Requirements จาก Phase A ผ่านใน code ไหม?
-2. **Input validation** — inputs ถูก sanitise ก่อนใช้ใน DB queries, shell commands, responses ไหม?
-3. **Data exposure** — response body รวม sensitive fields (passwords, tokens, PII) ไหม?
+1. **Auth/authorization** — Do the Security Requirements from Phase A pass in the code?
+2. **Input validation** — Are inputs sanitised before use in DB queries, shell commands, responses?
+3. **Data exposure** — Does the response body include sensitive fields (passwords, tokens, PII)?
 4. **Injection risks** — SQL injection, command injection, path traversal
-5. **Secrets** — ไม่มี hardcoded credentials, API keys, env values ใน code หรือ config files
-6. **Error messages** — error responses leak internal details (stack traces, DB schema, internal paths) ไหม?
-7. **New packages** — dependency ใหม่มี known CVE ไหม?
+5. **Secrets** — No hardcoded credentials, API keys, or env values in code or config files
+6. **Error messages** — Do error responses leak internal details (stack traces, DB schema, internal paths)?
+7. **New packages** — Do any new dependencies have known CVEs?
 
 ### B-STEP 2 — Output Security Review
 
@@ -121,42 +121,42 @@ Date: [date] | Reviewer: SEC
 ## Verdict: APPROVED / REQUEST CHANGES / ESCALATE TO SA
 ```
 
-Preview → SEC confirm → export `Security_Review_[TaskID].md` → **ส่งให้ Lead**
+Preview → SEC confirms → exports `Security_Review_[TaskID].md` → **sends to Lead**
 
-Lead อ่านและตัดสิน: merge หรือขอ Dev แก้ก่อน re-review
+Lead reads and decides: merge or ask Dev to fix before re-review
 
-ถ้า verdict **ESCALATE TO SA** → Lead notify SA + PO ก่อน merge ใดๆ
+If verdict is **ESCALATE TO SA** → Lead notifies SA + PO before any merge
 
 ---
 
-## Flow ของ Files
+## File Flow
 
 ```
 PO ──► SEC    Solution_Doc_[feature].md
 SEC ──► PO    Security_Requirements_[feature].md  (Phase A output)
-              PO รวมเข้า Lead Handoff
+              PO includes in Lead Handoff
 
-Lead ──► SEC  changed files + task prompt (ต่อ PR)
+Lead ──► SEC  changed files + task prompt (per PR)
 SEC ──► Lead  Security_Review_[TaskID].md  (Phase B output)
 ```
 
 ---
 
-## กฎ SEC
+## SEC Rules
 
-- **SEC ตัดสิน security verdict** — Claude ไม่ approve PR หรือ clear security risk โดยไม่มี SEC confirm
-- Phase A → ส่ง Security Requirements ให้ PO เสมอ (ไม่ส่งตรง Lead)
-- Phase B → ส่ง Security Review ให้ Lead เสมอ
-- ถ้าพบ critical vulnerability (auth bypass, data leak, injection) ใน Phase B → **STOP** notify Lead ทันที ห้าม approve
+- **SEC decides the security verdict** — Claude does not approve a PR or clear a security risk without SEC confirmation
+- Phase A → always send Security Requirements to PO (not directly to Lead)
+- Phase B → always send Security Review to Lead
+- If a critical vulnerability is found in Phase B (auth bypass, data leak, injection) → **STOP** notify Lead immediately, do not approve
 
 ---
 
-## Option B — Security Checkpoints (ถ้าไม่มี SEC Engineer)
+## Option B — Security Checkpoints (when no SEC Engineer)
 
-เมื่อ `Security role: no` security ถูกจัดการใน 3 จุด:
+When `Security role: no`, security is handled at 3 points:
 
-| จุด | ใคร | อะไร |
-|----|-----|------|
+| Point | Who | What |
+|-------|-----|------|
 | SA Solution Doc Section 6 | SA | Security checklist: auth, authorization, input validation, data exposure, secrets, PDPA |
 | Lead PR Review (R-STEP 2) | Lead | Hardcoded secrets, missing input validation, sensitive data in response, auth checks, error message leaks |
 | QA Phase B TestSuite (B-STEP 1) | QA | Security test cases: unauth access, expired token, SQL injection, sensitive fields in response |

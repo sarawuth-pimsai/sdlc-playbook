@@ -1,108 +1,108 @@
 # Stack Template Library
 
-Stack templates คือ `STACK_CONTEXT.md` ที่ pre-filled สำหรับ stack family ที่ใช้บ่อย
-SA ใช้เป็น baseline แล้ว customize สำหรับ project — ไม่ต้องสร้างจากศูนย์
+Stack templates are pre-filled `STACK_CONTEXT.md` files for commonly used stack families.
+SA uses them as a baseline and customizes for the project — no need to build from scratch.
 
 ---
 
-## วิธีใช้ (SA)
+## How to use (SA)
 
-### 1. ตรวจสอบว่า PO ส่ง PE org template มาไหม
+### 1. Check whether PO sent a PE org template
 
-หาก PO แนบ `STACK_CONTEXT_[OrgName].md` มาพร้อม Stack Setup Request — ใช้ไฟล์นั้นเป็น baseline ได้เลย (PE ของ org นั้น validate แล้ว) ข้ามขั้นตอน 2-3
+If PO attached a `STACK_CONTEXT_[OrgName].md` with the Stack Setup Request — use that file as the baseline directly (it has already been validated by that org's PE). Skip steps 2–3.
 
-### 2. เลือก template ที่ตรงกับ stack family
+### 2. Choose the template that matches the stack family
 
-| Template | เมื่อไหร่ควรเลือก |
+| Template | When to choose |
 |----------|-----------------|
-| [STACK_CONTEXT_go_clean_arch.md](STACK_CONTEXT_go_clean_arch.md) | Backend Go + Clean Architecture + PostgreSQL/Redis + Next.js หรือ Vite frontend |
-| _(เพิ่มตามที่ใช้จริงในองค์กร)_ | — |
+| [STACK_CONTEXT_go_clean_arch.md](STACK_CONTEXT_go_clean_arch.md) | Backend Go + Clean Architecture + PostgreSQL/Redis + Next.js or Vite frontend |
+| _(add more as the org adopts new stacks)_ | — |
 
-ถ้าไม่มี template ที่ match — ใช้ blank schema ที่ `docs/roles/sa/STACK_CONTEXT.md` แทน
+If no template matches — use the blank schema at `docs/roles/sa/STACK_CONTEXT.md` instead.
 
-### 3. Copy template → เปลี่ยนชื่อเป็น `STACK_CONTEXT.md`
+### 3. Copy template → rename to `STACK_CONTEXT.md`
 
 ```
 cp docs/roles/sa/stack-templates/STACK_CONTEXT_go_clean_arch.md  docs/roles/sa/STACK_CONTEXT.md
 ```
 
-### 4. Customize สำหรับ project
+### 4. Customize for the project
 
-สิ่งที่ต้องตรวจสอบและ fill in ทุกครั้ง:
+Things to check and fill in every time:
 
-- [ ] **Header** — เปลี่ยน `[Project Name]` และ date
-- [ ] **IdP** — ระบุ Identity Provider จริงของ project (Keycloak / Azure AD / อื่น)
-- [ ] **Version verification** — WebSearch ทุก package ก่อน finalize (ดู Version Verification rule ใน `ai/SA_PROJECT_INSTRUCTIONS.md`)
-- [ ] **SA Decision Fields** — fill in ค่าที่เลือกสำหรับ project นี้
-- [ ] **ลบ section ที่ไม่ใช้** — เช่น ถ้าไม่มี frontend ให้ลบ §2-3 ออก
-- [ ] **เพิ่ม org-specific constraints** (ถ้า PE มี requirements เพิ่มเติม)
+- [ ] **Header** — update `[Project Name]` and date
+- [ ] **IdP** — specify the actual Identity Provider for this project (Keycloak / Azure AD / other)
+- [ ] **Version verification** — WebSearch every package before finalizing (see Version Verification rule in `ai/SA_PROJECT_INSTRUCTIONS.md`)
+- [ ] **SA Decision Fields** — fill in the chosen values for this project
+- [ ] **Remove unused sections** — e.g. if there is no frontend, remove §2-3
+- [ ] **Add org-specific constraints** (if PE has additional requirements)
 
-### 5. ส่งกลับ PO
+### 5. Send back to PO
 
-SA อัปโหลด `STACK_CONTEXT.md` ที่ filled-in เข้า SA Project Knowledge → export → ส่ง PO → PO อัปโหลดเข้า PO Project
+SA uploads the filled-in `STACK_CONTEXT.md` to SA Project Knowledge → exports → sends to PO → PO uploads to PO Project.
 
 ---
 
-## วิธีใช้ (Platform Engineering — สร้าง org template)
+## How to use (Platform Engineering — creating an org template)
 
-PE ดูแล standard tech stack ขององค์กร สามารถ fork template เพื่อสร้าง org-specific baseline ที่ทุก project ในองค์กรใช้
+PE manages the organisation's standard tech stack and can fork a template to create an org-specific baseline for every project in the organisation to use.
 
-### ขั้นตอนการสร้าง Org Template
+### Steps to create an Org Template
 
-1. **Copy template ที่ตรงกับ org stack**
+1. **Copy the template that matches the org stack**
 
    ```
    cp docs/roles/sa/stack-templates/STACK_CONTEXT_go_clean_arch.md  \
       STACK_CONTEXT_[OrgName].md
    ```
 
-2. **ระบุ org constraints** ที่ทุก project ต้องใช้ ตัวอย่าง:
+2. **Specify org constraints** that every project must follow. Example:
 
    ```markdown
    ## Org-specific Constraints ([OrgName])
-   > Maintained by Platform Engineering — ห้ามแก้โดยไม่ผ่าน PE
+   > Maintained by Platform Engineering — do not modify without going through PE
    
-   - DB: Aurora PostgreSQL 16 เท่านั้น (managed service — ห้ามใช้ self-hosted)
-   - IdP: Azure AD B2C (กำหนดโดย IT Security)
-   - Container runtime: Kubernetes on EKS (ไม่ใช้ docker-compose ใน production)
-   - Secret management: AWS Secrets Manager — ห้าม hardcode ใน env file
+   - DB: Aurora PostgreSQL 16 only (managed service — do not use self-hosted)
+   - IdP: Azure AD B2C (mandated by IT Security)
+   - Container runtime: Kubernetes on EKS (no docker-compose in production)
+   - Secret management: AWS Secrets Manager — no hardcoding in env files
    ```
 
-3. **Version lock ที่ org approve แล้ว** — ระบุ version จริงแทน `latest` หรือ range
+3. **Lock versions that the org has approved** — specify real versions instead of `latest` or ranges
 
-4. **ลบ SA Decision Fields ที่ PE ตัดสินใจแทน SA แล้ว** — เช่น ถ้า org ใช้ Aurora เสมอ ไม่ต้องให้ SA เลือก DB
+4. **Remove SA Decision Fields that PE has already decided** — e.g. if the org always uses Aurora, SA doesn't need to choose the DB
 
-5. **Distribute ให้ SA** — ส่งไฟล์ให้ PO ของแต่ละ project แนบมาพร้อม Stack Setup Request
+5. **Distribute to SA** — send the file to the PO of each project to attach with the Stack Setup Request
 
-### สิ่งที่ PE ควรระบุชัดเจนใน Org Template
+### What PE should specify clearly in the Org Template
 
-| หมวด | ตัวอย่างที่ PE lock ได้ | ตัวอย่างที่ยังให้ SA เลือกได้ |
+| Category | Examples PE can lock | Examples SA can still decide |
 |------|----------------------|---------------------------|
 | Infrastructure | DB engine, IdP, secret manager, container runtime | DB schema design, cache key pattern |
 | Security | Auth protocol, token storage policy | Role/permission structure per feature |
-| Observability | OTel collector endpoint, trace sampling rate | Signal ที่ instrument per service |
+| Observability | OTel collector endpoint, trace sampling rate | Signals to instrument per service |
 | Networking | API gateway, load balancer | Internal service communication pattern |
 
 ---
 
-## การเพิ่ม Template ใหม่
+## Adding a New Template
 
-เมื่อ org เริ่มใช้ stack family ใหม่ (เช่น Python FastAPI หรือ Node.js NestJS) และมีโอกาสใช้กับหลาย project:
+When the org starts using a new stack family (e.g. Python FastAPI or Node.js NestJS) and it will be used across multiple projects:
 
-1. Copy `STACK_CONTEXT_go_clean_arch.md` เป็น starting point สำหรับโครงสร้าง
-2. เปลี่ยน §1-4 ให้ตรงกับ stack ใหม่
-3. คง §5 Cross-cutting concerns — ส่วนใหญ่ reuse ได้ (Auth protocol, PDPA)
-4. อัปเดตตารางในไฟล์นี้ (README.md)
-5. ทดสอบกับ 1 project จริงก่อน promote เป็น official template
+1. Copy `STACK_CONTEXT_go_clean_arch.md` as a starting point for the structure
+2. Change §1-4 to match the new stack
+3. Keep §4 cross-cutting concerns — most parts are reusable (Auth protocol, PDPA)
+4. Update the table in this file (README.md)
+5. Test with 1 real project before promoting to an official template
 
-**กฎ:** อย่าสร้าง template จาก stack สมมติ — สร้างเฉพาะเมื่อมี project จริงที่ต้องใช้
+**Rule:** do not create templates for hypothetical stacks — only create when a real project in the organisation actually needs it.
 
 ---
 
-## ไฟล์ใน directory นี้
+## Files in This Directory
 
-| ไฟล์ | ประเภท | ครอบคลุม |
+| File | Type | Covers |
 |------|--------|---------|
-| `README.md` | คู่มือ | วิธีใช้ทั้งหมด |
-| `STACK_CONTEXT_base_crosscutting.md` | Reference | Cross-cutting concerns (Auth protocol, OTel standard, PDPA) — ไม่มี stack-specific packages |
+| `README.md` | Guide | All usage instructions |
+| `STACK_CONTEXT_base_crosscutting.md` | Reference | Cross-cutting concerns (Auth protocol, OTel standard, PDPA) — no stack-specific packages |
 | `STACK_CONTEXT_go_clean_arch.md` | Template | Go + Clean Architecture + PostgreSQL + Redis + Next.js / Vite |

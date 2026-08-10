@@ -1,129 +1,129 @@
-# คู่มือ QA Engineer
+# QA Engineer Guide
 
-> ดูภาพรวม workflow และการ setup → [WORKFLOW_OVERVIEW.md](../WORKFLOW_OVERVIEW.md)
+> For workflow overview and setup → [WORKFLOW_OVERVIEW.md](../WORKFLOW_OVERVIEW.md)
 
-QA ทำงาน 4 phases โดย Phase 0 เริ่มได้เลย parallel กับ SA — ไม่ต้องรอ Lead หรือ STACK_CONTEXT.md
+QA works in 4 phases. Phase 0 can start in parallel with SA — no need to wait for Lead or STACK_CONTEXT.md.
 
 ---
 
-## การติดตั้ง
+## Setup
 
 ### Option A — claude.ai Projects
 
-ใช้ผ่าน claude.ai web interface
+Via the claude.ai web interface
 
-#### ขั้นตอนที่ 1 — สร้าง Project
+#### Step 1 — Create a Project
 
-1. เปิด [claude.ai](https://claude.ai) → **Projects** → **New project**
-2. ตั้งชื่อ เช่น `[ชื่อโปรเจกต์] — QA`
-3. เปิด **Project Instructions** → Copy เนื้อหาจาก `ai/QA_PROJECT_INSTRUCTIONS.md` → Paste → บันทึก
+1. Open [claude.ai](https://claude.ai) → **Projects** → **New project**
+2. Name it, e.g. `[Project Name] — QA`
+3. Open **Project Instructions** → Copy content from `ai/QA_PROJECT_INSTRUCTIONS.md` → Paste → Save
 
-#### ขั้นตอนที่ 2 — อัปโหลด Project Knowledge ตาม Phase
+#### Step 2 — Upload Project Knowledge by Phase
 
-**Phase 0** (ได้รับจาก PO หลัง STEP 2):
-| ไฟล์ | จำเป็น |
-|------|--------|
+**Phase 0** (received from PO after STEP 2):
+| File | Required |
+|------|----------|
 | `PRD_[feature].md` | ✅ |
 | `DECISION_LOG_[feature]_TODO.md` | ✅ |
-| `DECISION_LOG_[feature]_RESOLVED.md` | ถ้ามี |
+| `DECISION_LOG_[feature]_RESOLVED.md` | If exists |
 
-**Phase A** (ได้รับจาก Lead ก่อน SIT test):
-| ไฟล์ | จำเป็น |
-|------|--------|
+**Phase A** (received from Lead before SIT testing):
+| File | Required |
+|------|----------|
 | `STACK_CONTEXT.md` | ✅ |
-| `Task_[ID]_[title].md` | ✅ ทุก task |
-| PRD + DECISION_LOG files | ✅ (อัปเดตจาก Phase 0 ถ้ามีการเปลี่ยนแปลง) |
+| `Task_[ID]_[title].md` | ✅ all tasks |
+| PRD + DECISION_LOG files | ✅ (updated from Phase 0 if changes were made) |
 
 ---
 
 ### Option B — Claude Code
 
-ใช้ผ่าน Claude Code CLI, Desktop App, หรือ IDE Extension แทน claude.ai Projects
+Via Claude Code CLI, Desktop App, or IDE Extension instead of claude.ai Projects
 
-#### ขั้นตอนที่ 1 — Setup workspace (ทำครั้งเดียว)
+#### Step 1 — Setup workspace (one-time)
 
-ดูรายละเอียดการ setup ที่ [templates/option-b/README.md](../../templates/option-b/README.md) — ใช้ `/setup` command เพื่อสร้าง directory structure และ copy ไฟล์ที่จำเป็นทั้งหมดอัตโนมัติ
+See setup details at [templates/option-b/README.md](../../templates/option-b/README.md) — use the `/setup` command to automatically create the directory structure and copy all required files
 
-#### ขั้นตอนที่ 2 — เริ่ม QA session
+#### Step 2 — Start a QA session
 
 ```
 /qa
 ```
 
-พิมพ์ `/qa` ใน Claude Code — Claude จะอ่าน `ai/QA_PROJECT_INSTRUCTIONS.md` และโฟกัสที่ `docs/roles/qa/` และ `docs/shared/`
+Type `/qa` in Claude Code — Claude will read `ai/QA_PROJECT_INSTRUCTIONS.md` and focus on `docs/roles/qa/` and `docs/shared/`
 
-#### ขั้นตอนที่ 3 — วางไฟล์ใน directory ของ QA
+#### Step 3 — Place files in the QA directory
 
-วางไฟล์ knowledge ใน `docs/roles/qa/` แทนการ upload เข้า Project Knowledge  
-เพิ่มไฟล์ใหม่เมื่อขึ้น phase ใหม่ (Phase 0 → Phase A)
+Place knowledge files in `docs/roles/qa/` instead of uploading to Project Knowledge  
+Add new files when moving to a new phase (Phase 0 → Phase A)
 
 ---
 
-## Phase 0 — Early Preparation (parallel กับ SA design)
+## Phase 0 — Early Preparation (parallel with SA design)
 
-**Trigger:** PO ส่ง PRD + DECISION_LOG มาให้ QA หลัง STEP 2 เสร็จ
+**Trigger:** PO sends PRD + DECISION_LOG to QA after STEP 2 is complete
 
-**ทำได้โดยไม่ต้องรอ:** Lead, STACK_CONTEXT.md, task prompts
+**Can proceed without waiting for:** Lead, STACK_CONTEXT.md, task prompts
 
-### P-STEP 1 — Draft Test Cases จาก PRD
+### P-STEP 1 — Draft Test Cases from PRD
 
 - User stories → happy path test cases
 - Business rules → edge case scenarios
 - Error handling section → error path test cases
-- NFR section → note performance/load scenarios สำหรับ Phase B
+- NFR section → note performance/load scenarios for Phase B
 
-Mark ทุก test case เป็น `[DRAFT — pending task breakdown]`
+Mark every test case as `[DRAFT — pending task breakdown]`
 
 ### P-STEP 2 — Test Data Requirements
 
-Claude generate test data request ส่งให้ Lead ก่อน Phase A:
+Claude generates a test data request to send to Lead before Phase A:
 
 ```markdown
 # Test Data Requirements — [Feature name]
 ## User accounts needed
 ## Sample data records
-## External system mocks (ถ้ามี integrations)
+## External system mocks (if integrations exist)
 ## Environment access
 - SIT URL, Staging URL
-- Credentials (ขอจาก Lead)
+- Credentials (request from Lead)
 ```
 
-Lead provision test data ก่อน Phase A เริ่ม
+Lead provisions test data before Phase A begins
 
 ---
 
-## Phase A — SIT Testing (ทีละ task)
+## Phase A — SIT Testing (per task)
 
-**Trigger:** Dev ส่ง Deploy Notification หลัง deploy task ถึง SIT
+**Trigger:** Dev sends a Deploy Notification after deploying a task to SIT
 
-> ห้ามเริ่ม test ก่อนได้รับ Deploy Notification จาก Dev
+> Do not start testing before receiving a Deploy Notification from Dev
 
-### A-STEP 1 — อ่าน Task Prompt + PRD
+### A-STEP 1 — Read Task Prompt + PRD
 
 Extract:
-- Done criteria จาก task prompt (minimum pass bar)
-- User stories ที่เกี่ยวข้องจาก PRD
-- Error codes และ edge cases จาก PRD
+- Done criteria from the task prompt (minimum pass bar)
+- Relevant user stories from the PRD
+- Error codes and edge cases from the PRD
 
 ### A-STEP 2 — Generate Test Cases
 
-Claude สร้าง test case table:
+Claude creates a test case table:
 - Happy path
 - Edge cases
 - Error cases
-- Security cases (ถ้า applicable)
+- Security cases (if applicable)
 
-Preview → QA review → confirm → export `TestCases_[TaskID].md`
+Preview → QA reviews → confirms → exports `TestCases_[TaskID].md`
 
 ### A-STEP 3 — Generate Claude Code Test Prompt
 
-Claude สร้าง prompt สำหรับ QA paste ใน Claude Code เพื่อ write + run automated tests ใน SIT environment
+Claude creates a prompt for QA to paste in Claude Code to write + run automated tests in the SIT environment
 
 Export `Prompt_SIT_[TaskID].md`
 
-### A-STEP 4 — Bug Report (ถ้า test fail)
+### A-STEP 4 — Bug Report (if test fails)
 
-Claude draft bug entries แต่ละรายการ:
+Claude drafts each bug entry:
 
 ```markdown
 ## BUG-[NNN] — [Short description]
@@ -140,148 +140,148 @@ Export `BugReport_[TaskID].md`
 
 ### A-STEP 5 — Task Test Summary
 
-Claude สรุป metrics + verdict → React Artifact พร้อม Download → ส่ง Lead + Dev
+Claude summarises metrics + verdict → React Artifact with Download → send to Lead + Dev
 
 **Verdict routing:**
-| Verdict | ส่งให้ | เพื่อ |
-|---------|--------|-------|
-| PASS | Lead | Unblock task ถัดไป |
-| FAIL | Lead + Dev | Dev แก้ bug ก่อน re-test |
-| BLOCKED | Lead เท่านั้น | Lead ตัดสินใจ escalate |
+| Verdict | Send to | For |
+|---------|---------|-----|
+| PASS | Lead | Unblock next task |
+| FAIL | Lead + Dev | Dev fixes bug before re-test |
+| BLOCKED | Lead only | Lead decides whether to escalate |
 
-Dev แก้ bug → QA re-test เฉพาะ failed cases เท่านั้น
+Dev fixes bug → QA re-tests only the failed cases
 
 ---
 
 ## Phase B — Staging Full Test Suite
 
-**Trigger:** Dev deploy ทุก task ถึง Staging แล้ว
+**Trigger:** Dev has deployed all tasks to Staging
 
 ### B-STEP 0 — Regression Scope Check
 
-ตรวจว่า feature นี้กระทบ existing functionality อะไรบ้าง
+Verify what existing functionality this feature may affect
 
-**Default regression scope (ถ้าไม่มี Critical paths ใน STACK_CONTEXT):**
-- Authentication / login flow (ถ้า auth middleware ถูกแก้)
-- ทุก endpoint ที่ feature ใหม่เรียกหรือ depends on
-- ทุก DB table ที่ถูก modified หรือ extended
+**Default regression scope (if no Critical paths in STACK_CONTEXT):**
+- Authentication / login flow (if auth middleware was changed)
+- Every endpoint that the new feature calls or depends on
+- Every DB table that was modified or extended
 
-> ถ้า regression case fail ใน Phase B → **STOP ทันที** แจ้ง Lead ก่อน — ห้าม continue Phase B
+> If a regression case fails in Phase B → **STOP immediately** and notify Lead before proceeding — do not continue Phase B
 
 ### B-STEP 1 — Compile Full Test Suite
 
-Merge `TestCases_[TaskID].md` ทุกไฟล์เป็น master test suite
+Merge all `TestCases_[TaskID].md` files into a master test suite
 
-รวม **Security test cases** เสมอ (Option B — ถ้าไม่มี SEC Engineer):
-- Access endpoint โดยไม่มี auth token → HTTP 401
-- Access endpoint ด้วย expired token → HTTP 401
-- SQL injection payload ใน text fields → HTTP 400 หรือ sanitised response
-- Response body ไม่รวม sensitive fields (password, token, PII)
-- + feature-specific security cases จาก PRD NFR
+Always include **Security test cases** (Option B — if no SEC Engineer):
+- Access endpoint without auth token → HTTP 401
+- Access endpoint with expired token → HTTP 401
+- SQL injection payload in text fields → HTTP 400 or sanitised response
+- Response body does not include sensitive fields (password, token, PII)
+- + feature-specific security cases from the PRD NFR
 
 Export `TestSuite_[Feature].md`
 
 ### B-STEP 2 — Generate Claude Code Automated Test Prompt
 
-Claude สร้าง prompt สำหรับรัน full automated test suite ใน Staging
+Claude creates a prompt to run the full automated test suite on Staging
 
 Export `Prompt_Staging_[Feature].md`
 
 ### B-STEP 3 — Test Report
 
-Claude draft report พร้อม verdict:
+Claude drafts a report with a verdict:
 - **APPROVED FOR PRODUCTION**
 - **FAILED — DO NOT DEPLOY**
 - **CONDITIONAL** (list conditions)
 
-React Artifact พร้อม Download → QA + Lead sign-off → **Lead แจ้ง PO** (ไม่ใช่ QA แจ้งโดยตรง)
+React Artifact with Download → QA + Lead sign-off → **Lead notifies PO** (not QA directly)
 
 ---
 
 ## Phase C — Production Deployment
 
-**Trigger:** Lead + QA sign-off บน TestReport ด้วย verdict APPROVED
+**Trigger:** Lead + QA sign-off on a TestReport with verdict APPROVED
 
 ### C-STEP 2 — Post-deployment Smoke Test
 
-รัน P1 test cases เท่านั้นใน production environment
+Run only P1 test cases in the production environment
 
-- ทุก P1 ต้องผ่านภายใน timeout ที่กำหนด (default: 15 นาที)
-- ถ้า P1 fail → **trigger rollback ทันที** — diagnose หลัง rollback ไม่ใช่ก่อน
+- All P1 cases must pass within the configured timeout (default: 15 minutes)
+- If P1 fails → **trigger rollback immediately** — diagnose after rollback, not before
 
 ### Rollback Triggers
 
-| เงื่อนไข | Action |
-|---------|--------|
-| P1 smoke test fail | Lead rollback ทันที |
-| Deployment hang > timeout | Lead rollback |
-| Critical error ใน production logs ภายใน 15 นาที | Lead + QA assess → rollback ถ้า user-facing |
+| Condition | Action |
+|-----------|--------|
+| P1 smoke test fails | Lead rolls back immediately |
+| Deployment hangs > timeout | Lead rolls back |
+| Critical error in production logs within 15 minutes | Lead + QA assess → rollback if user-facing |
 
 ---
 
 ## Phase HF — Hotfix Smoke Test (Staging → Production)
 
-Trigger: Lead แจ้ง QA ว่า hotfix deploy สู่ Staging แล้ว พร้อมระบุ HF-ID และ scope ที่ต้องทดสอบ
+Trigger: Lead notifies QA that a hotfix has been deployed to Staging, specifying the HF-ID and the scope to test
 
-**เวลาที่ให้:** P1 = 30 นาที / P2 = 2 ชั่วโมง — QA ต้อง prioritize ทันที
+**Time allowed:** P1 = 30 minutes / P2 = 2 hours — QA must prioritise immediately
 
-### HF-STEP 1 — รับ scope จาก Lead
+### HF-STEP 1 — Receive scope from Lead
 
-Lead แจ้งมาพร้อม HotfixTask:
-- Bug ที่ fix คืออะไร (อ้างอิง BugIntake BR-[NNN])
-- Critical paths ที่ต้องตรวจ
+Lead provides with the HotfixTask:
+- What the bug fix was (reference BugIntake BR-[NNN])
+- Critical paths to check
 
-ถ้า Lead ไม่ระบุ critical paths → ใช้ Default regression scope จาก STACK_CONTEXT หรือ TestSuite ที่มีอยู่
+If Lead does not specify critical paths → use the Default regression scope from STACK_CONTEXT or the existing TestSuite
 
-### HF-STEP 2 — Run smoke test บน Staging
+### HF-STEP 2 — Run smoke test on Staging
 
-Run critical paths เท่านั้น — **ไม่ run full test suite**:
-- Flow ที่ fix ตรงๆ (จาก Bug Intake)
-- Critical paths ที่ fix อาจกระทบ
+Run critical paths only — **do not run the full test suite**:
+- The flow that was directly fixed (from Bug Intake)
+- Critical paths that the fix may have affected
 
-บันทึกผลเป็น `HotfixSmokeTest_HF-[NNN].md`
+Record results as `HotfixSmokeTest_HF-[NNN].md`
 
-### HF-STEP 3 — รายงานผลให้ Lead (Staging)
+### HF-STEP 3 — Report results to Lead (Staging)
 
-| ผล | ทำอะไร |
-|---|---|
-| ทุก TC PASS | แจ้ง Lead: "Hotfix HF-[NNN] smoke test ผ่านบน Staging ครับ" พร้อมแนบไฟล์ — Lead ดำเนิน deploy สู่ Production |
-| มี TC FAIL | แจ้ง Lead ทันที — Lead fix และ re-deploy Staging ก่อน — **ห้าม deploy Production จนกว่าจะผ่าน** |
+| Result | Action |
+|--------|--------|
+| All TCs PASS | Notify Lead: "Hotfix HF-[NNN] smoke test passed on Staging" and attach the file — Lead proceeds to deploy to Production |
+| Any TC FAIL | Notify Lead immediately — Lead fixes and re-deploys Staging first — **do not deploy to Production until it passes** |
 
-### HF-STEP 4 — Production smoke check (หลัง Lead deploy สู่ Production)
+### HF-STEP 4 — Production smoke check (after Lead deploys to Production)
 
-Trigger: Lead แจ้ง QA ว่า deploy สู่ Production แล้ว
+Trigger: Lead notifies QA that Production deployment is done
 
-Run **P1 test cases เท่านั้น** — ใช้ชุดเดิมจาก HF-STEP 2
+Run **P1 test cases only** — use the same set from HF-STEP 2
 
-**เวลาที่ให้:** P1 = 15 นาที / P2 = 1 ชั่วโมง
+**Time allowed:** P1 = 15 minutes / P2 = 1 hour
 
-| ผล | ทำอะไร |
-|---|---|
-| ทุก P1 PASS | แจ้ง Lead: "Production smoke check ผ่านครับ HF-[NNN]" |
-| มี P1 FAIL | แจ้ง Lead ทันที — Lead ตัดสินใจ rollback ทันที |
+| Result | Action |
+|--------|--------|
+| All P1 PASS | Notify Lead: "Production smoke check passed — HF-[NNN]" |
+| Any P1 FAIL | Notify Lead immediately — Lead decides to rollback immediately |
 
-**กฎ:** QA รายงาน Lead เสมอ — ไม่รายงาน PO โดยตรง (Lead เป็นคนแจ้ง PO ผ่าน HotfixNotification)
-
----
-
-## ไฟล์ที่ QA Maintain
-
-| ไฟล์ | เมื่อไหร่ | เก็บที่ |
-|------|----------|--------|
-| `TestCases_[TaskID].md` | หลัง A-STEP 2 ต่อ task | `docs/qa/[feature]/` |
-| `BugReport_[TaskID].md` | หลัง A-STEP 4 ต่อ task | `docs/qa/[feature]/` |
-| `TestSuite_[Feature].md` | หลัง B-STEP 1 | `docs/qa/[feature]/` |
-| `TestReport_[Feature].md` | หลัง B-STEP 3 | `docs/qa/[feature]/` |
-| `HotfixSmokeTest_HF-[NNN].md` | หลัง HF-STEP 2 ต่อ hotfix | `docs/qa/hotfix/` |
-
-Lead commit ไฟล์เหล่านี้เข้า repo ระหว่าง PR merge
+**Rule:** QA always reports to Lead — never directly to PO (Lead notifies PO via HotfixNotification)
 
 ---
 
-## กฎ QA
+## Files QA maintains
 
-- **QA เป็นคนตัดสิน verdict** — Claude ไม่ mark pass/fail หรือ approve feature โดยไม่มี QA confirm
-- **Test Report Phase B → Lead แจ้ง PO เสมอ** ไม่ใช่ QA แจ้งโดยตรง
-- ถ้า environment ไม่ reachable → **STOP** แจ้ง Lead/Dev ทันที อย่า assume
-- ถ้า test result ambiguous → **STOP** แสดง raw response ให้ QA ตัดสิน
+| File | When | Stored at |
+|------|------|-----------|
+| `TestCases_[TaskID].md` | After A-STEP 2 per task | `docs/qa/[feature]/` |
+| `BugReport_[TaskID].md` | After A-STEP 4 per task | `docs/qa/[feature]/` |
+| `TestSuite_[Feature].md` | After B-STEP 1 | `docs/qa/[feature]/` |
+| `TestReport_[Feature].md` | After B-STEP 3 | `docs/qa/[feature]/` |
+| `HotfixSmokeTest_HF-[NNN].md` | After HF-STEP 2 per hotfix | `docs/qa/hotfix/` |
+
+Lead commits these files to the repo during PR merge
+
+---
+
+## QA Rules
+
+- **QA decides the verdict** — Claude does not mark pass/fail or approve a feature without QA confirmation
+- **Phase B Test Report → Lead always notifies PO** — QA does not notify PO directly
+- If the environment is unreachable → **STOP** notify Lead/Dev immediately, do not assume
+- If test results are ambiguous → **STOP** show the raw response for QA to decide

@@ -1,139 +1,139 @@
-# คู่มือ Platform Engineering (PE)
+# Platform Engineering (PE) Guide
 
-> ดูภาพรวม workflow และการ setup → [WORKFLOW_OVERVIEW.md](../WORKFLOW_OVERVIEW.md)
+> For workflow overview and setup → [WORKFLOW_OVERVIEW.md](../WORKFLOW_OVERVIEW.md)
 
-PE ดูแล standard tech stack ขององค์กร สร้างและ maintain **org template** ที่ทุก project ใช้เป็น baseline แทนที่จะให้แต่ละ SA สร้างจากศูนย์
-
----
-
-## บทบาทของ PE ใน SDLC Playbook
-
-PE ไม่ได้อยู่ใน SDLC workflow โดยตรง — PE ทำงาน "ก่อน" workflow เริ่ม:
-
-```
-PE สร้าง Org Template
-        ↓
-PO แนบ Org Template ใน Stack Setup Request → SA
-        ↓
-SA customize สำหรับ project → STACK_CONTEXT.md
-        ↓
-SDLC Workflow ปกติ (SA → PO → Lead → Dev → QA)
-```
-
-เมื่อ org template มีอยู่แล้ว SA ไม่ต้องตัดสินใจ technology choices ที่ PE lock ไว้แล้ว — ลด cognitive load และ enforce consistency
+PE manages the organisation's standard tech stack and creates and maintains **org templates** that every project uses as a baseline — instead of each SA building from scratch.
 
 ---
 
-## การสร้าง Org Template (ครั้งแรก)
+## PE's role in the SDLC Playbook
 
-### ขั้นตอนที่ 1 — เลือก base template
+PE is not directly in the SDLC workflow — PE works "before" the workflow starts:
+
+```
+PE creates Org Template
+        ↓
+PO attaches Org Template in Stack Setup Request → SA
+        ↓
+SA customises for the project → STACK_CONTEXT.md
+        ↓
+Normal SDLC Workflow (SA → PO → Lead → Dev → QA)
+```
+
+When an org template exists, SA does not need to make the technology choices that PE has already locked — reducing cognitive load and enforcing consistency.
+
+---
+
+## Creating the Org Template (first time)
+
+### Step 1 — Choose a base template
 
 ```
 docs/roles/sa/stack-templates/
-  STACK_CONTEXT_go_clean_arch.md   ← Go fullstack (แนะนำถ้า org ใช้ Go)
-  [template อื่นๆ ที่จะเพิ่มในอนาคต]
+  STACK_CONTEXT_go_clean_arch.md   ← Go fullstack (recommended if the org uses Go)
+  [other templates to be added in future]
 ```
 
-copy template ที่ตรงกับ org stack family มากที่สุด:
+Copy the template that best matches the org's stack family:
 
 ```bash
 cp docs/roles/sa/stack-templates/STACK_CONTEXT_go_clean_arch.md \
    STACK_CONTEXT_[OrgName].md
 ```
 
-### ขั้นตอนที่ 2 — เพิ่ม Org Constraints section
+### Step 2 — Add an Org Constraints section
 
-เพิ่ม section นี้ต่อจาก `## Purpose` ในไฟล์:
+Add this section after `## Purpose` in the file:
 
 ```markdown
 ## Org-specific Constraints — [OrgName]
 
 > Maintained by Platform Engineering
-> SA ห้ามแก้ไข section นี้โดยไม่ผ่าน PE
+> SA must not edit this section without going through PE
 
 ### Infrastructure (locked by PE)
 
-| Component | Org Standard | หมายเหตุ |
-|-----------|-------------|---------|
-| Database | [เช่น Aurora PostgreSQL 16] | managed — ห้ามใช้ self-hosted |
-| Cache | [เช่น ElastiCache Redis 7] | managed |
-| Container | [เช่น Kubernetes on EKS] | production เท่านั้น |
-| Secret management | [เช่น AWS Secrets Manager] | ห้าม .env ใน production |
-| CI/CD | [เช่น GitHub Actions + ArgoCD] | — |
+| Component | Org Standard | Note |
+|-----------|-------------|------|
+| Database | [e.g. Aurora PostgreSQL 16] | managed — do not use self-hosted |
+| Cache | [e.g. ElastiCache Redis 7] | managed |
+| Container | [e.g. Kubernetes on EKS] | production only |
+| Secret management | [e.g. AWS Secrets Manager] | no .env in production |
+| CI/CD | [e.g. GitHub Actions + ArgoCD] | — |
 
 ### Security (locked by PE)
 
 | Requirement | Value |
 |-------------|-------|
-| IdP | [เช่น Azure AD B2C tenant: xxx] |
-| Auth protocol | OAuth2 + OIDC + PKCE (ห้าม deviate) |
-| Token storage (SPA) | HttpOnly cookie via BFF — ห้าม localStorage |
-| Vulnerability scanning | [เช่น Snyk ทุก PR] |
+| IdP | [e.g. Azure AD B2C tenant: xxx] |
+| Auth protocol | OAuth2 + OIDC + PKCE (no deviations) |
+| Token storage (SPA) | HttpOnly cookie via BFF — no localStorage |
+| Vulnerability scanning | [e.g. Snyk on every PR] |
 
 ### Observability (locked by PE)
 
 | Item | Value |
 |------|-------|
 | OTel Collector endpoint | [internal endpoint] |
-| Trace sampling | [เช่น 10% production, 100% staging] |
-| Log destination | [เช่น CloudWatch / Elastic] |
+| Trace sampling | [e.g. 10% production, 100% staging] |
+| Log destination | [e.g. CloudWatch / Elastic] |
 
 ### Network (locked by PE)
 
 | Item | Value |
 |------|-------|
-| API Gateway | [เช่น AWS API Gateway / Kong] |
-| Internal service discovery | [เช่น AWS Cloud Map] |
+| API Gateway | [e.g. AWS API Gateway / Kong] |
+| Internal service discovery | [e.g. AWS Cloud Map] |
 ```
 
-### ขั้นตอนที่ 3 — Lock SA Decision Fields ที่ PE ตัดสินใจแล้ว
+### Step 3 — Lock SA Decision Fields that PE has already decided
 
-ใน section `## SA Decision Fields` — เปลี่ยน fields ที่ PE lock แล้วจาก "SA เลือก" เป็นค่า fixed:
+In the `## SA Decision Fields` section — change fields that PE has locked from "SA chooses" to a fixed value:
 
-**ตัวอย่าง:**
+**Example:**
 
 ```markdown
 ## SA Decision Fields
 
-> Fields ที่ marked [PE LOCKED] — SA ไม่ต้องตัดสินใจ PE กำหนดให้แล้ว
+> Fields marked [PE LOCKED] — SA does not need to decide, PE has already set these
 
-| Field | Value | สถานะ |
-|-------|-------|-------|
+| Field | Value | Status |
+|-------|-------|--------|
 | Auth Method | OAuth2 + OIDC + PKCE via Azure AD B2C | [PE LOCKED] |
 | PostgreSQL Driver | pgx/v5 | [PE LOCKED] |
 | Migration Tool | golang-migrate | [PE LOCKED] |
-| HTTP Router | SA เลือก — Fiber v3 (default) / Chi / Echo | SA decides |
-| SPA State Management | SA เลือก — Zustand (default) / TanStack Query | SA decides |
+| HTTP Router | SA chooses — Fiber v3 (default) / Chi / Echo | SA decides |
+| SPA State Management | SA chooses — Zustand (default) / TanStack Query | SA decides |
 ```
 
-### ขั้นตอนที่ 4 — Verify versions
+### Step 4 — Verify versions
 
-**ห้าม fill version จาก memory** — verify ผ่าน package registry ก่อน finalize org template ทุกครั้ง
+**Never fill versions from memory** — verify through the package registry before finalising the org template each time
 
-ระบุ verified date ใน Stack Versions table ที่ท้าย template
+Include the verified date in the Stack Versions table at the bottom of the template
 
-### ขั้นตอนที่ 5 — Distribute
+### Step 5 — Distribute
 
-ส่ง `STACK_CONTEXT_[OrgName].md` ให้ PO ทุก project ที่ใช้ org stack นี้
-PO แนบมาพร้อม Stack Setup Request เมื่อส่งให้ SA
+Send `STACK_CONTEXT_[OrgName].md` to PO for every project using this org stack.  
+PO attaches it with the Stack Setup Request when sending to SA.
 
 ---
 
-## การ Maintain Org Template
+## Maintaining the Org Template
 
-### เมื่อไหร่ต้อง update
+### When to update
 
-| เหตุการณ์ | Action |
-|---------|--------|
-| Infrastructure upgrade (DB version, K8s version) | อัปเดต version ใน template + bump version header |
-| Security policy เปลี่ยน (IdP, token policy) | อัปเดต Security section + notify SA ทุก project ที่ active |
-| New approved package | เพิ่มใน template + ระบุ use case |
-| Package deprecated หรือ CVE critical | ลบออก / เปลี่ยน + notify urgently |
-| SA ขอ deviation (กระทบ org standard) | พิจารณา ADR → ถ้า approve อัปเดต template |
+| Event | Action |
+|-------|--------|
+| Infrastructure upgrade (DB version, K8s version) | Update version in template + bump version header |
+| Security policy changes (IdP, token policy) | Update Security section + notify SA for every active project |
+| New approved package | Add to template + specify use case |
+| Package deprecated or critical CVE | Remove / replace + notify urgently |
+| SA requests a deviation (affects org standard) | Review ADR → if approved, update template |
 
 ### Version bump convention
 
-Template version ใช้ integer เพิ่มทีละ 1 ตาม header:
+Template version uses an integer incrementing by 1, in the header:
 
 ```
 # Last updated: YYYY-MM-DD | Version: N | Status: [OrgName] Org Standard
@@ -141,48 +141,48 @@ Template version ใช้ integer เพิ่มทีละ 1 ตาม heade
 
 ### Notify SA
 
-เมื่อ update org template → แจ้ง SA ทุก project ที่กำลัง active พร้อมระบุ:
-- Version เก่า → Version ใหม่
-- สิ่งที่เปลี่ยน
-- ว่า project ปัจจุบันต้องอัปเดต `STACK_CONTEXT.md` ของตัวเองหรือไม่
+When the org template is updated → notify SA for every currently active project, specifying:
+- Old version → New version
+- What changed
+- Whether the project's own `STACK_CONTEXT.md` needs to be updated
 
 ---
 
-## การเพิ่ม Stack Template ใหม่ใน Playbook
+## Adding a new Stack Template to the Playbook
 
-เมื่อ org เริ่มใช้ stack family ใหม่ที่จะ apply กับหลาย project (เช่น Python FastAPI):
+When the org starts using a new stack family that will apply to multiple projects (e.g. Python FastAPI):
 
-1. Copy template ที่ใกล้เคียงที่สุดจาก `docs/roles/sa/stack-templates/`
-2. เปลี่ยน §1-4 ให้ตรงกับ stack ใหม่
-3. คง §4 cross-cutting structure — เปลี่ยนเฉพาะ packages ที่ stack-specific
-4. เพิ่ม row ในตารางใน [stack-templates/README.md](../roles/sa/stack-templates/README.md)
-5. ทดสอบกับ 1 project จริงก่อน promote เป็น official template
+1. Copy the closest existing template from `docs/roles/sa/stack-templates/`
+2. Change §1–4 to match the new stack
+3. Keep the §4 cross-cutting structure — change only the stack-specific packages
+4. Add a row to the table in [stack-templates/README.md](../roles/sa/stack-templates/README.md)
+5. Test with 1 real project before promoting to an official template
 
-**กฎ:** สร้างเฉพาะ stack ที่มี project จริงในองค์กรใช้แล้ว — template สมมติที่ไม่มีคนใช้กลายเป็น maintenance burden
+**Rule:** only create templates for stacks that real projects in the organisation actually use — hypothetical templates with no users become a maintenance burden.
 
 ---
 
-## Checklist ก่อน Distribute Org Template
+## Pre-Distribution Checklist
 
-- [ ] Version header ครบ (`Last updated`, `Version`, `Status`)
-- [ ] Org Constraints section ครบ (Infrastructure / Security / Observability)
-- [ ] [PE LOCKED] fields ระบุชัดเจน — SA รู้ว่าอะไรที่ตัดสินใจได้เอง
-- [ ] Versions ทุกตัว verify ผ่าน package registry แล้ว
-- [ ] Stack Versions table fill in ครบพร้อม verified date
-- [ ] ทดสอบกับ 1 real project ก่อน distribute วงกว้าง
+- [ ] Version header is complete (`Last updated`, `Version`, `Status`)
+- [ ] Org Constraints section is complete (Infrastructure / Security / Observability)
+- [ ] `[PE LOCKED]` fields are clearly marked — SA knows what it can decide on its own
+- [ ] All versions verified through the package registry
+- [ ] Stack Versions table filled in with verified dates
+- [ ] Tested with 1 real project before broad distribution
 
 ---
 
 ## FAQ
 
-**Q: PE ต้องใช้ claude.ai หรือ Claude Code ไหม?**
-A: ไม่จำเป็น — PE ทำงานกับ Markdown files โดยตรง ไม่มี AI workflow เฉพาะ PE ใน playbook นี้
+**Q: Does PE need to use claude.ai or Claude Code?**  
+A: Not necessarily — PE works directly with Markdown files. There is no AI workflow specific to PE in this playbook.
 
-**Q: ถ้า project มีข้อยกเว้นจาก org standard ทำอย่างไร?**
-A: SA เขียน ADR → PE review → ถ้า approve SA customize `STACK_CONTEXT.md` ของ project นั้น โดยระบุ deviation ชัดเจน ไม่กระทบ org template
+**Q: What if a project needs an exception from the org standard?**  
+A: SA writes an ADR → PE reviews → if approved, SA customises that project's `STACK_CONTEXT.md` with the deviation clearly stated — the org template is not affected.
 
-**Q: Org template ควรเก็บไว้ที่ไหน?**
-A: ใน private repository ขององค์กร — ไม่ควร commit ลง playbook repo เพราะมี internal infrastructure details (endpoints, tenant IDs, internal service names)
+**Q: Where should the org template be stored?**  
+A: In the organisation's private repository — not committed to the playbook repo, as it contains internal infrastructure details (endpoints, tenant IDs, internal service names).
 
-**Q: PE ต้อง create Claude Project แยกไหม?**
-A: ไม่จำเป็น สำหรับ playbook version นี้ PE ทำงานกับไฟล์ Markdown โดยตรง
+**Q: Does PE need to create a separate Claude Project?**  
+A: Not for this version of the playbook — PE works directly with Markdown files.

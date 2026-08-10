@@ -1,75 +1,75 @@
-# คู่มือ Developer
+# Developer Guide
 
-> ดูภาพรวม workflow และการ setup → [WORKFLOW_OVERVIEW.md](../WORKFLOW_OVERVIEW.md)
+> For workflow overview and setup → [WORKFLOW_OVERVIEW.md](../WORKFLOW_OVERVIEW.md)
 
-Developer ใช้ **Claude Code** (CLI หรือ App) — ไม่ใช่ claude.ai Project
+Developer uses **Claude Code** (CLI or App) — not claude.ai Projects.
 
 ---
 
-## การติดตั้ง Claude Code
+## Installing Claude Code
 
-### Option A — CLI (แนะนำ)
+### Option A — CLI (recommended)
 
 ```bash
 npm install -g @anthropic-ai/claude-code
 ```
 
-ตรวจสอบ:
+Verify:
 ```bash
 claude --version
 ```
 
 ### Option B — Desktop App
 
-ดาวน์โหลดจาก [claude.ai/download](https://claude.ai/download)
+Download from [claude.ai/download](https://claude.ai/download)
 
 ### Option C — IDE Extension
 
-ติดตั้ง extension สำหรับ VS Code หรือ JetBrains จาก marketplace
+Install the extension for VS Code or JetBrains from the marketplace
 
 ---
 
-## Input ที่รับจาก Lead
+## Input received from Lead
 
-Lead ส่งทีละไฟล์ตาม dependency order:
+Lead sends files one at a time in dependency order:
 
-| ไฟล์ | หมายเหตุ |
-|------|---------|
-| `CLAUDE.md` | Lead commit เข้า repo root ก่อนเริ่ม — อ่านก่อนทุกครั้ง |
+| File | Note |
+|------|------|
+| `CLAUDE.md` | Lead commits to repo root before starting — read every time before anything else |
 | `STACK_CONTEXT.md` | Tech stack, build/test commands |
-| `Task_[ID]_[title].md` | Task prompt ทีละ task — ห้ามเริ่ม task ถัดไปจนกว่า done criteria ทุกข้อจะผ่าน |
+| `Task_[ID]_[title].md` | Task prompt one task at a time — do not start the next task until all done criteria for the current task pass |
 
 ---
 
-## การ Resume task session (session ขาดกลางคัน)
+## Resuming a task session (session interrupted mid-way)
 
-ถ้าต้องกลับมาทำ task ที่ทำค้างไว้จาก session ก่อน:
+If you need to return to a task left from a previous session:
 
-1. เปิด `TASK_LOG.md` ก่อน — หา entry ของ task ID นั้น
-   - Done criteria ทุกข้อติ๊ก `[x]` ครบแล้ว → task เสร็จแล้ว ไม่ต้อง implement ซ้ำ
-   - Done criteria ยังไม่ครบ → อ่าน Deviations และ Notes ก่อนดำเนินการต่อ
-2. รัน build และ test ก่อนเสมอ — อย่า assume ว่า repo ยัง clean
-3. ทำต่อจากจุดที่ค้าง — ไม่ต้องเริ่มใหม่จากศูนย์
+1. Open `TASK_LOG.md` first — find the entry for that task ID
+   - All done criteria ticked `[x]` → task is complete, no need to implement again
+   - Done criteria not yet complete → read Deviations and Notes before continuing
+2. Always run build and tests first — do not assume the repo is still clean
+3. Continue from where you left off — no need to start from scratch
 
 ---
 
-## วิธีเริ่ม Task
+## Starting a Task
 
-### ขั้นตอนที่ 1 — เตรียม Claude Code
+### Step 1 — Prepare Claude Code
 
 ```bash
-# เปิด terminal ใน root ของ code repo
+# Open a terminal at the root of the code repo
 cd /path/to/my-project
 claude
 ```
 
-### ขั้นตอนที่ 2 — อ่าน CLAUDE.md ก่อนเสมอ
+### Step 2 — Read CLAUDE.md first
 
-CLAUDE.md มี project conventions ที่ต้องตาม เช่น error shape, logging rules, context passing
+CLAUDE.md contains project conventions to follow, e.g. error shape, logging rules, context passing
 
-### ขั้นตอนที่ 3 — สร้าง branch
+### Step 3 — Create a branch
 
-สร้าง branch ตาม `### Branch setup` ใน task prompt ก่อนเริ่มเขียน code:
+Create the branch from `### Branch setup` in the task prompt before starting to write code:
 
 ```bash
 git checkout [base branch from task prompt]
@@ -77,69 +77,69 @@ git pull
 git checkout -b [branch name from task prompt]
 ```
 
-### ขั้นตอนที่ 4 — Paste Task Prompt
+### Step 4 — Paste the Task Prompt
 
-Paste **เนื้อหาทั้งหมด** ของ `Task_[ID]_[title].md` ลงใน Claude Code session ใหม่
+Paste **the entire content** of `Task_[ID]_[title].md` into a new Claude Code session
 
-> ห้าม summarize หรือตัดเนื้อหาออก — paste verbatim
+> Do not summarise or cut the content — paste verbatim
 
-### ขั้นตอนที่ 5 — Implement
+### Step 5 — Implement
 
-Claude Code implement ตาม spec ใน task prompt
+Claude Code implements according to the spec in the task prompt
 
-**ขอบเขตที่ทำได้:**
-- Implement code ตาม task spec
-- Refactor ภายใน scope ของ task
-- Fix bugs ที่เกิดจาก code ใน task นี้
-- ถามเพื่อทำความเข้าใจ code ที่มีอยู่
+**Within scope:**
+- Implement code per task spec
+- Refactor within the scope of this task
+- Fix bugs caused by code in this task
+- Ask questions to understand existing code
 
-**ห้ามทำ:**
-- เพิ่ม feature นอก task spec
-- เริ่ม task ถัดไปก่อน done criteria ทุกข้อผ่าน
-- เปลี่ยน architecture, data models, หรือ API contracts โดยไม่ปรึกษา Lead
-- ติดต่อ SA โดยตรง — escalate ผ่าน Lead ก่อนเสมอ
+**Not allowed:**
+- Add features outside the task spec
+- Start the next task before all done criteria pass
+- Change architecture, data models, or API contracts without consulting Lead
+- Contact SA directly — always escalate through Lead first
 
 ---
 
-## Done Criteria — ต้องรันด้วยตัวเองก่อน raise PR
+## Done Criteria — must run yourself before raising a PR
 
 ```bash
-# 1. Build ต้องผ่าน
-[build command จาก STACK_CONTEXT.md]
+# 1. Build must pass
+[build command from STACK_CONTEXT.md]
 
-# 2. Tests ต้องผ่าน
-[test command จาก STACK_CONTEXT.md]
+# 2. Tests must pass
+[test command from STACK_CONTEXT.md]
 
-# 3. ตรวจสอบ done criteria แต่ละข้อ
-# รัน curl/command ตามที่ระบุใน task prompt
+# 3. Verify each done criterion
+# Run curl/commands as specified in the task prompt
 ```
 
-> "Claude บอกว่า looks correct" ≠ done — ต้องรัน command จริง
+> "Claude says it looks correct" ≠ done — run the real commands
 
 ---
 
-## Self-check ก่อน raise PR (เกินกว่า build/test ผ่าน)
+## Self-check before raising a PR (beyond build/test passing)
 
-Build ผ่านและ test ผ่าน ไม่ได้แปลว่า code พร้อม — รันก่อนทุกครั้ง:
+Build passing and tests passing does not mean code is ready — run before every PR:
 
-1. **Static analysis แบบเข้ม** — strict lint/analyze command จาก STACK_CONTEXT.md ต้องผ่านแบบ zero warning ไม่ใช่แค่ zero error
-2. **Verify API ที่ใช้มีอยู่จริง** — เช็คกับ lockfile version จริงก่อนเชื่อว่า method/class มีอยู่ — ห้าม assume จาก training knowledge
-3. **Error handling ครบ** — ทุก async call มี error path และเช็ค null/undefined ก่อนใช้งาน
-4. **Resource cleanup** — controller/stream/listener ที่เปิดใหม่ ต้อง dispose ชัดเจน
-5. **Self-review diff** — ไฟล์ที่แก้เกินขอบเขต task ไหม เพิ่ม dependency ใหม่โดยไม่จำเป็นไหม
-6. **Test assert ของจริง** — test ที่เขียนเองต้อง assertion ผูกกับ behavior จริง ไม่ใช่ placeholder (เช่น `expect(true, true)`)
-7. **Existing function check** — grep/search codebase หา function หรือ method ที่มี signature หรือ behavior คล้ายกับที่เพิ่งเขียน (เช่น validation, formatting, error building) — ถ้าเจอให้ reuse แทน ถ้าเลือกสร้างใหม่ต้องบันทึกเหตุผลใน TASK_LOG ใต้ "Deviations"
+1. **Strict static analysis** — strict lint/analyze command from STACK_CONTEXT.md must pass with zero warnings, not just zero errors
+2. **Verify APIs exist** — check against the real lockfile version before trusting that a method/class exists — never assume from training knowledge
+3. **Error handling complete** — every async call has an error path, and null/undefined is checked before use
+4. **Resource cleanup** — any controller/stream/listener opened must be explicitly disposed
+5. **Self-review diff** — did you change files outside the task scope? did you add unnecessary new dependencies?
+6. **Test asserts real behavior** — tests you wrote must have assertions tied to real behavior, not placeholders (e.g. `expect(true, true)`)
+7. **Existing function check** — grep/search the codebase for functions or methods with a similar signature or behavior to what you just wrote (e.g. validation, formatting, error building) — if found, reuse instead; if you choose to create new code, record the reason in TASK_LOG under "Deviations"
 
-ข้อใดไม่ผ่าน → กลับไปแก้ก่อน ไม่ raise PR
+Any item that fails → go back and fix before raising a PR
 
 ---
 
-## TASK_LOG.md — อัปเดตหลังทุก task
+## TASK_LOG.md — update after every task
 
 ```markdown
 ## Task [ID] — [title]
 Date completed    : [date]
-STACK_CONTEXT ver : [Version N จาก STACK_CONTEXT.md header]
+STACK_CONTEXT ver : [Version N from STACK_CONTEXT.md header]
 Deviations        : none / [description and reason]
 Files changed     : [list]
 
@@ -148,40 +148,40 @@ Done criteria:
 - [x] [specific test/curl] returns [expected]
 - [x] [other criteria]
 
-Notes: [อะไรที่ Lead ควรรู้ — edge cases, assumptions, open questions]
+Notes: [anything Lead should know — edge cases, assumptions, open questions]
 ```
 
-Lead อ่าน TASK_LOG ก่อน review PR ทุกครั้ง — เขียนให้ครบและตรงไปตรงมา
+Lead reads TASK_LOG before reviewing every PR — write it completely and honestly
 
 ---
 
 ## PR Checklist
 
-ก่อน raise PR ตรวจ:
+Before raising a PR, verify:
 
-- [ ] Done criteria ทุกข้อผ่าน (รันแล้ว ไม่ใช่แค่ดู)
-- [ ] Self-check 7 ข้อผ่านครบ (static analysis, API verification, error handling, resource cleanup, self-review diff, real test assertions, existing function check)
-- [ ] `TASK_LOG.md` อัปเดตสำหรับ task นี้แล้ว
-- [ ] ตาม conventions ใน `CLAUDE.md` (error shape, logging, context passing)
-- [ ] ไม่มี hardcoded values ที่ควรมาจาก environment variables
-- [ ] ไม่มีไฟล์ที่ควรอยู่ใน `.gitignore` ติดมาใน commit
+- [ ] All done criteria passed (run, not just read)
+- [ ] All 7 self-check items passed (static analysis, API verification, error handling, resource cleanup, self-review diff, real test assertions, existing function check)
+- [ ] `TASK_LOG.md` updated for this task
+- [ ] Follows conventions in `CLAUDE.md` (error shape, logging, context passing)
+- [ ] No hardcoded values that should come from environment variables
+- [ ] No files that should be in `.gitignore` included in the commit
 
 ---
 
-## Deploy Notification ให้ QA
+## Deploy Notification to QA
 
-หลัง deploy ถึง SIT (หรือ Staging) → รัน deploy command จาก STACK_CONTEXT ก่อน → verify service up → ส่ง notification นี้ให้ QA:
+After deploying to SIT (or Staging) → run the deploy command from STACK_CONTEXT first → verify service is up → send this notification to QA:
 
 ```markdown
 [DEPLOY NOTIFICATION]
 Feature   : [feature name]
-Task      : [Task ID] — [title]     (เขียน "All tasks" สำหรับ Staging deploy)
+Task      : [Task ID] — [title]     (write "All tasks" for Staging deploy)
 Target    : SIT / Staging
 Date/time : [date and time]
-URL       : [SIT_URL หรือ STAGING_URL จาก STACK_CONTEXT]
+URL       : [SIT_URL or STAGING_URL from STACK_CONTEXT]
 
 Changed endpoints / features:
-- [list endpoints หรือ features ที่ deploy ใน build นี้]
+- [list endpoints or features deployed in this build]
 
 Done criteria verified by Dev:
 - [x] [criterion 1]
@@ -193,45 +193,45 @@ Build passes     : yes
 Ready for QA Phase A / Phase B ✓
 ```
 
-> **กฎ:** ห้ามส่ง notification จนกว่า done criteria ทุกข้อจะผ่านแล้ว
+> **Rule:** do not send the notification until all done criteria have passed
 
 ---
 
 ## Hotfix Task
 
-Lead ส่ง HotfixTask prompt ให้ Dev เหมือน normal task — **paste เนื้อหาทั้งหมดเป็น message แรกใน Claude Code session** task จะมี header `## HOTFIX — [HF-ID]` และ `Severity: P1 / P2`
+Lead sends a HotfixTask prompt to Dev like a normal task — **paste the entire content as the first message in a Claude Code session**. The task will have the header `## HOTFIX — [HF-ID]` and `Severity: P1 / P2`
 
 ### Branch discipline
 
-- Branch **จาก production/main branch เสมอ** — ห้าม branch จาก dev หรือ feature branch
-- ชื่อ branch: ใช้รูปแบบ `Hotfix branch` จาก STACK_CONTEXT.md เช่น `hotfix/HF-001-short-desc`
-- PR target: production/main branch — ไม่ใช่ dev
+- Branch **always from the production/main branch** — never from dev or a feature branch
+- Branch name: use the `Hotfix branch` format from STACK_CONTEXT.md, e.g. `hotfix/HF-001-short-desc`
+- PR target: production/main branch — not dev
 
-### Minimal change rule — กฎสำคัญที่สุดของ hotfix
+### Minimal change rule — the most important rule of a hotfix
 
-**แก้เฉพาะ root cause ที่ระบุใน "Fix scope" เท่านั้น ไม่มีข้อยกเว้น**
+**Fix only the root cause specified in "Fix scope" — no exceptions**
 
-- ห้าม refactor code รอบข้าง
-- ห้ามทำ "while I'm here" improvements
-- ถ้า fix ต้องแตะ code นอก "Fix scope" → **STOP** แจ้ง Lead ก่อนทุกครั้ง
+- Do not refactor surrounding code
+- Do not make "while I'm here" improvements
+- If the fix needs to touch code outside "Fix scope" → **STOP** notify Lead before proceeding
 
-### TASK_LOG.md สำหรับ hotfix
+### TASK_LOG.md for hotfixes
 
-ใช้ `HF-[NNN]` เป็น task ID:
+Use `HF-[NNN]` as the task ID:
 
 ```markdown
 ## HF-[NNN] — [title]
 Date completed    : [date]
 STACK_CONTEXT ver : [Version N]
 Severity          : P1 / P2
-Root cause        : [หนึ่งประโยค]
-Deviations        : none / [อธิบาย — แจ้ง Lead ทันทีถ้ามี]
-Files changed     : [list — ควรสั้นมากสำหรับ hotfix]
+Root cause        : [one sentence]
+Deviations        : none / [explain — notify Lead immediately if any]
+Files changed     : [list — should be very short for a hotfix]
 ```
 
-### Deploy Notification สำหรับ hotfix
+### Deploy Notification for hotfixes
 
-Hotfix deploy ไปที่ **Staging ก่อนเสมอ** — QA ต้อง smoke test ผ่านบน Staging ก่อน Lead จึง deploy ต่อสู่ Production ส่ง notification ให้ **Lead และ QA** (ไม่ใช่ QA อย่างเดียว):
+Hotfix deploys to **Staging first** — QA must pass a smoke test on Staging before Lead deploys to Production. Send notification to **both Lead and QA** (not QA only):
 
 ```markdown
 [HOTFIX DEPLOY NOTIFICATION]
@@ -241,41 +241,41 @@ Target    : Staging
 Date/time : [date and time]
 
 Fix deployed:
-- [สิ่งที่เปลี่ยน]
+- [what was changed]
 
 Done criteria verified:
 - [x] Build passes
 - [x] [fix criterion]
-- [x] No regression on: [critical paths ที่ test locally]
+- [x] No regression on: [critical paths tested locally]
 
 TASK_LOG updated : yes
 ```
 
-### PR Checklist เพิ่มเติมสำหรับ hotfix
+### Additional PR Checklist for hotfixes
 
-นอกจาก normal PR checklist:
+In addition to the normal PR checklist:
 
-- [ ] Branch มาจาก production/main — ไม่ใช่ dev/feature
-- [ ] แก้เฉพาะ code ใน "Fix scope" เท่านั้น
-- [ ] "Do NOT change" items ใน task prompt ไม่ถูกแตะ
-- [ ] ไม่มี dependency ใหม่ถูกเพิ่ม
-
----
-
-## เมื่อ Task Prompt ไม่ครอบคลุมสถานการณ์
-
-1. เลือก assumption ที่ conservative ที่สุด (prefer no-op over side effects)
-2. บันทึกใน `TASK_LOG.md` ใต้ "Deviations": เกิดอะไร, ตัดสินใจอะไร, ทำไม
-3. Implement ต่อ
-4. Lead review assumption ใน PR — ถ้าผิดจะขอให้แก้ก่อน merge
+- [ ] Branch is from production/main — not dev/feature
+- [ ] Fix touches only code in "Fix scope"
+- [ ] "Do NOT change" items in the task prompt were not touched
+- [ ] No new dependencies were added
 
 ---
 
-## หยุดและรอ Lead ในกรณีเหล่านี้
+## When the Task Prompt doesn't cover a situation
 
-| Level | เมื่อไหร่ | Action |
-|-------|----------|--------|
-| STOP | Task prompt ขัดกับ CLAUDE.md conventions | หยุด แสดง conflict ให้ Dev รู้ รอ Lead resolve |
-| STOP | Done criteria ไม่สามารถ verify ได้ (environment ไม่ reachable) | หยุด แจ้ง Dev ให้ notify Lead รอ |
-| PAUSE | Scope ของ task ใหญ่กว่าที่คาดหลังอ่าน code จริง | แสดง scope difference — ดำเนินการต่อหลัง Dev confirm เท่านั้น |
-| PAUSE | Assumption ที่ต้องทำกระทบงานของ developer คนอื่นที่ทำ parallel | Flag ก่อน บันทึกใน TASK_LOG |
+1. Choose the most conservative assumption (prefer no-op over side effects)
+2. Record in `TASK_LOG.md` under "Deviations": what happened, what was decided, why
+3. Continue implementing
+4. Lead reviews the assumption in the PR — if wrong will ask you to fix before merge
+
+---
+
+## Stop and wait for Lead in these situations
+
+| Level | When | Action |
+|-------|------|--------|
+| STOP | Task prompt conflicts with CLAUDE.md conventions | Stop, show the conflict, wait for Lead to resolve |
+| STOP | Done criteria cannot be verified (environment unreachable) | Stop, notify Dev to contact Lead, wait |
+| PAUSE | Task scope is larger than expected after reading the actual code | Show the scope difference — proceed only after Dev confirms |
+| PAUSE | An assumption you need to make affects another developer's parallel work | Flag first, record in TASK_LOG |
