@@ -156,6 +156,14 @@ Show task board preview → Lead reviews → confirm task list before generating
 
 1. **สร้าง Dependency Graph** — ใช้ `Depends on` / `Blocks` จาก L-STEP 2 เป็น edges ระหว่าง task nodes
 2. **เช็ค file overlap** — สำหรับทุกคู่ task ที่ยังไม่มี dependency ประกาศไว้ ให้ตรวจว่าแตะไฟล์เดียวกันหรือไม่ (ดู "What to create / modify" ที่ร่างไว้)
+3. **Cross-lane utility scan** — สำรวจ "What to create / modify" ของทุก task ข้าม lane แล้วถามว่า: มี helper/utility ที่ 2 lane ขึ้นไปจะต้องใช้ร่วมกันไหม?
+
+   ตัวอย่างที่มักพบ: validation (phone, email, ID), formatting (date, currency), error builder, config reader
+
+   **ถ้าพบ shared utility:**
+   - สร้าง task แยกต่างหากสำหรับ utility นั้น (เช่น `PREFIX-00 — Create shared validation helpers`)
+   - ตั้ง `Depends on: PREFIX-00` ให้ทุก task ใน lane ที่ใช้ utility นั้น
+   - task นี้ต้อง complete และ merge ก่อน lane เหล่านั้นเริ่ม
 
 **กติกา:**
 
@@ -169,6 +177,7 @@ Show task board preview → Lead reviews → confirm task list before generating
 **Ask Lead before proceeding** if:
 
 - Task สอง lane ที่ดูอิสระกัน แต่จริงๆ แตะไฟล์ร่วมกันที่ Claude ตรวจไม่พบจาก spec (เช่น shared config file, shared migration) → PAUSE: "อาจมี file overlap ที่ตรวจไม่พบจาก spec — Lead ช่วยยืนยันว่า lane เหล่านี้แยกกันจริงก่อนดำเนินการต่อ"
+- Cross-lane utility scan พบ helper ที่หลาย lane น่าจะใช้ร่วมกัน แต่ Lead ไม่แน่ใจว่าควร extract → PAUSE: "พบ [utility name] ที่อาจใช้ร่วมกันใน [lane A] และ [lane B] — ต้องการ extract เป็น shared task ก่อน หรือให้แต่ละ lane implement แยกกันครับ?"
 
 ### L-STEP 3 — Generate Claude Code prompts (one per task)
 
@@ -240,6 +249,7 @@ Show all prompts as preview → Lead reviews each done criteria → confirm → 
 - [ ] Task ที่แตะไฟล์ร่วมกัน ถูกทำเป็น sequence แล้ว (ไม่มีสอง task ในไฟล์เดียวกันที่ยัง mark เป็น parallel)
 - [ ] ไม่มีสอง task ใน lane เดียวกันที่ตั้งใจให้รันขนานกัน (lane เดียว = sequential ภายใน lane)
 - [ ] Assigned Dev ระบุครบทุก lane (หรือ "unassigned" ถ้ายังไม่มอบหมาย — solo ใส่ "unassigned" ได้ทั้งหมด)
+- [ ] Cross-lane utility scan ผ่านแล้ว — shared utility ที่พบถูก extract เป็น task แยก และ lane ที่ใช้มี dependency ชี้มาหา task นั้น
 
 **หลัง export: Lead ส่ง Task\_[ID].md ให้ Dev โดยตรงทีละไฟล์ตามลำดับ dependency — Dev ไม่ต้อง access SDLC playbook repo**
 
@@ -554,6 +564,7 @@ Read the following files and check for:
    - Error messages leak internal details (stack traces, DB schema, file paths)?
    [If Security role: yes → skip this checklist; SEC runs Phase B review separately]
 5. Test coverage — are all done criteria covered by tests?
+6. Duplication — does any new function/method duplicate logic already in the codebase? Check: utility functions, validation helpers, formatters, error builders — grep for similar names or signatures in existing files before confirming this is new code.
 
 Files to review: [list of changed files]
 Task spec: [paste task prompt]

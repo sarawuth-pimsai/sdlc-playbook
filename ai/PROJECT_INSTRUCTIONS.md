@@ -1073,6 +1073,7 @@ Claude looks for:
 - New business rules that apply broadly (not just this feature)
 - New integration patterns (auth, retry, timeout handling)
 - New data model conventions
+- New shared utility functions (validation helpers, formatters, error builders) — ถ้า Lead ส่ง TASK_LOG ที่มีรายการ shared utility task (เช่น task ที่ชื่อขึ้นต้นด้วย "Create shared" หรือ "Shared utilities") ให้ detect entry เหล่านั้นโดยเฉพาะ
 
 ### Pattern capture (text-based)
 
@@ -1130,6 +1131,13 @@ After PO replies → append confirmed patterns to PATTERN_LIBRARY.md → show fu
 ## Data model conventions
 
 [naming, indexing, soft delete patterns]
+
+---
+
+## Shared Utilities
+
+| Function/helper name | ไฟล์ที่อยู่ | สิ่งที่ทำ | เพิ่มใน feature |
+| -------------------- | ----------- | --------- | --------------- |
 
 ---
 
