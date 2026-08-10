@@ -1,218 +1,220 @@
-# คู่มือ Solution Architect (SA)
+# Solution Architect (SA) Guide
 
-> ดูภาพรวม workflow และการ setup → [WORKFLOW_OVERVIEW.md](../WORKFLOW_OVERVIEW.md)
+> For workflow overview and setup → [WORKFLOW_OVERVIEW.md](../WORKFLOW_OVERVIEW.md)
 
-SA รับผิดชอบวิเคราะห์ PRD ด้านเทคนิค ออกแบบ Solution และเป็นเจ้าของ `STACK_CONTEXT.md`
+SA is responsible for analysing PRDs from a technical perspective, designing solutions, and owning `STACK_CONTEXT.md`.
 
-**SA เป็นเจ้าของการตัดสินใจ tier เสมอ** — ไม่มี role ไหนข้าม SA ได้ ดู [CORE_POLICY.md](../CORE_POLICY.md) §1
+**SA is always the owner of tier decisions** — no role can bypass SA. See [CORE_POLICY.md](../CORE_POLICY.md) §1
 
 ---
 
-## การติดตั้ง
+## Setup
 
 ### Option A — claude.ai Projects
 
-ใช้ผ่าน claude.ai web interface
+Via the claude.ai web interface
 
-#### ขั้นตอนที่ 1 — สร้าง Project
+#### Step 1 — Create a Project
 
-1. เปิด [claude.ai](https://claude.ai) → **Projects** → **New project**
-2. ตั้งชื่อ เช่น `[ชื่อโปรเจกต์] — SA`
-3. เปิด **Project Instructions** → Copy เนื้อหาจาก `ai/SA_PROJECT_INSTRUCTIONS.md` → Paste → บันทึก
+1. Open [claude.ai](https://claude.ai) → **Projects** → **New project**
+2. Name it, e.g. `[Project Name] — SA`
+3. Open **Project Instructions** → Copy content from `ai/SA_PROJECT_INSTRUCTIONS.md` → Paste → Save
 
-#### ขั้นตอนที่ 2 — อัปโหลด Project Knowledge
+#### Step 2 — Upload Project Knowledge
 
-| ไฟล์ | เมื่อไหร่ | หมายเหตุ |
-|------|----------|---------|
-| `STACK_CONTEXT.md` | ✅ ก่อน session แรก | SA สร้างและเป็นเจ้าของ |
-| `SOLUTION_PATTERNS.md` | ✅ ก่อน session แรก | SA สร้างและ maintain เอง |
-| `DECISION_LOG_[feature]_TODO.md` | เมื่อได้รับจาก PO | ส่งมาพร้อม SA Handoff |
-| `DECISION_LOG_[feature]_RESOLVED.md` | เมื่อได้รับจาก PO | ส่งมาพร้อม SA Handoff |
-| `PATTERN_LIBRARY.md` | เมื่อได้รับจาก PO | ส่งมาพร้อม SA Handoff |
+| File | When | Note |
+|------|------|------|
+| `STACK_CONTEXT.md` | ✅ Before first session | SA creates and owns this file |
+| `SOLUTION_PATTERNS.md` | ✅ Before first session | SA creates and maintains this file |
+| `DECISION_LOG_[feature]_TODO.md` | When received from PO | Sent with SA Handoff |
+| `DECISION_LOG_[feature]_RESOLVED.md` | When received from PO | Sent with SA Handoff |
+| `PATTERN_LIBRARY.md` | When received from PO | Sent with SA Handoff |
 
 ---
 
 ### Option B — Claude Code
 
-ใช้ผ่าน Claude Code CLI, Desktop App, หรือ IDE Extension แทน claude.ai Projects
+Via Claude Code CLI, Desktop App, or IDE Extension instead of claude.ai Projects
 
-#### ขั้นตอนที่ 1 — Setup workspace (ทำครั้งเดียว)
+#### Step 1 — Setup workspace (one-time)
 
-ดูรายละเอียดการ setup ที่ [templates/option-b/README.md](../../templates/option-b/README.md) — ใช้ `/setup` command เพื่อสร้าง directory structure และ copy ไฟล์ที่จำเป็นทั้งหมดอัตโนมัติ
+See setup details at [templates/option-b/README.md](../../templates/option-b/README.md) — use the `/setup` command to automatically create the directory structure and copy all required files
 
-#### ขั้นตอนที่ 2 — เริ่ม SA session
+#### Step 2 — Start an SA session
 
 ```
 /sa
 ```
 
-พิมพ์ `/sa` ใน Claude Code — Claude จะอ่าน `ai/SA_PROJECT_INSTRUCTIONS.md` และโฟกัสที่ `docs/roles/sa/`
+Type `/sa` in Claude Code — Claude will read `ai/SA_PROJECT_INSTRUCTIONS.md` and focus on `docs/roles/sa/`
 
-#### ขั้นตอนที่ 3 — วางไฟล์ใน directory ของ SA
+#### Step 3 — Place files in the SA directory
 
-วางไฟล์ knowledge ใน `docs/roles/sa/` แทนการ upload เข้า Project Knowledge
+Place knowledge files in `docs/roles/sa/` instead of uploading to Project Knowledge
 
 ---
 
-## Input ที่รับจาก PO
+## Input received from PO
 
-### กรณี A — Stack Setup Request (feature แรก หรือ stack ยังไม่มี)
+### Case A — Stack Setup Request (first feature, or no stack yet)
 
-PO ส่งไฟล์ `SA_STACK_SETUP_REQUEST_[ProjectName].md`
+PO sends the file `SA_STACK_SETUP_REQUEST_[ProjectName].md`
 
 **Action:**
-1. ตรวจสอบว่า PO แนบ PE org template (`STACK_CONTEXT_[OrgName].md`) มาด้วยหรือไม่
-   - **ถ้ามี** → ใช้ org template เป็น baseline ข้ามขั้นตอน 2-3
-   - **ถ้าไม่มี** → ไปขั้นตอน 2
-2. **Interview SA ก่อน** — สรุปข้อจำกัดจาก Stack Setup Request ให้ SA เห็น แล้วถาม SA ว่าต้องการ template ไหน หรือจะ customize อย่างไร (ห้ามเลือก template ให้ SA โดยอัตโนมัติ)
-3. เลือก template จาก `docs/roles/sa/stack-templates/` ที่ SA ยืนยันแล้ว
-4. Fill in ค่าที่ขาด + verify versions ทุกตัวผ่าน WebSearch (ดู Version Verification rule ใน `ai/SA_PROJECT_INSTRUCTIONS.md`)
-5. บันทึกเป็น `STACK_CONTEXT.md`
-6. อัปโหลดเข้า SA Project Knowledge
-7. ส่งไฟล์กลับให้ PO → PO อัปโหลดเข้า PO Project
+1. Check whether PO has attached a PE org template (`STACK_CONTEXT_[OrgName].md`)
+   - **If attached** → use the org template as the baseline, skip steps 2–3
+   - **If not attached** → proceed to step 2
+2. **Interview SA first** — summarise the constraints from the Stack Setup Request for SA, then ask which template SA wants or how to customise (do not choose a template for SA automatically)
+3. Select a template from `docs/roles/sa/stack-templates/` that SA has confirmed
+4. Fill in any missing values + verify all versions via WebSearch (see Version Verification rule in `ai/SA_PROJECT_INSTRUCTIONS.md`)
+5. Save as `STACK_CONTEXT.md`
+6. Upload to SA Project Knowledge
+7. Send file back to PO → PO uploads to PO Project
 
-ดู stack templates ที่มีอยู่: [docs/roles/sa/stack-templates/README.md](../roles/sa/stack-templates/README.md)
+See available stack templates: [docs/roles/sa/stack-templates/README.md](../roles/sa/stack-templates/README.md)
 
-### กรณี B — SA Handoff (มี STACK_CONTEXT.md แล้ว)
+### Case B — SA Handoff (STACK_CONTEXT.md already exists)
 
-PO ส่งไฟล์ `SA_HANDOFF_[feature].md`
+PO sends the file `SA_HANDOFF_[feature].md`
 
-**ต้องมาพร้อม:**
-- PRD content (embed ใน handoff)
+**Must come with:**
+- PRD content (embedded in handoff)
 - `DECISION_LOG_[feature]_TODO.md`
-- `DECISION_LOG_[feature]_RESOLVED.md` (ถ้ามี)
-- `PATTERN_LIBRARY.md` (ถ้ามี)
+- `DECISION_LOG_[feature]_RESOLVED.md` (if exists)
+- `PATTERN_LIBRARY.md` (if exists)
 
 ---
 
-## Workflow ของ SA
+## SA Workflow
 
-### STEP 1 — อ่าน Context (silent)
+### STEP 1 — Read Context (silently)
 
-Claude อ่านไฟล์ทั้งหมดก่อน แล้ว extract จาก SA Handoff:
+Claude reads all files first, then extracts from the SA Handoff:
 - PRD content
-- Epics จาก PO STEP 2
-- Open TODO items ที่กระทบ architectural decisions
+- Epics from PO STEP 2
+- Open TODO items that affect architectural decisions
 
-### STEP 1.5 — Tier Triage (SA เท่านั้น — ก่อนเริ่ม STEP 2)
+### STEP 1.5 — Tier Triage (SA only — before starting STEP 2)
 
-SA ประเมิน 4 คำถาม (แตะ data model ใหม่? เพิ่ม integration ใหม่? ตรงกับ pattern เดิมใน SOLUTION_PATTERNS.md? STACK_CONTEXT.md รองรับอยู่แล้วไหม?) แล้วตัดสินใจ tier:
+SA evaluates 4 questions (does it touch a new data model? add a new integration? match an existing pattern in SOLUTION_PATTERNS.md? is it already covered by STACK_CONTEXT.md?) then decides the tier:
 
-| Tier | เกณฑ์ | Path |
-|---|---|---|
-| 1 — Micro | ไม่แตะ data model, ไม่มี integration ใหม่, ตรงกับ pattern เดิม | Fast Path — เขียนแค่ Triage Summary สั้น (10-15 บรรทัด) ข้าม STEP 2-6 |
-| 2 — Standard | แตะ data model/logic ปานกลาง | STEP 2-7 ปกติ พร้อม Solution Doc เต็ม |
-| 3 — Full | กระทบมาก หรือ business-risk flag จาก PO ≥ 1 รายการ | STEP 2-7 + บังคับเรียก SEC |
+| Tier | Criteria | Path |
+|------|----------|------|
+| 1 — Micro | No new data model, no new integration, matches existing pattern | Fast Path — write only a short Triage Summary (10–15 lines), skip STEP 2–6 |
+| 2 — Standard | Moderate data model / logic changes | STEP 2–7 normally with full Solution Doc |
+| 3 — Full | Large impact, or ≥ 1 business-risk flag from PO | STEP 2–7 + mandatory SEC review |
 
-**กฎ:** business-risk flag จาก PO ไม่ auto-set tier แต่บังคับ tier ต่ำสุด = Tier 3 เสมอ ดู [CORE_POLICY.md](../CORE_POLICY.md) §1 และ `ai/SA_PROJECT_INSTRUCTIONS.md` §STEP 1.5
+**Rule:** A business-risk flag from PO does not auto-set the tier, but forces a minimum tier of Tier 3. See [CORE_POLICY.md](../CORE_POLICY.md) §1 and `ai/SA_PROJECT_INSTRUCTIONS.md` §STEP 1.5
 
-### STEP 2 — วิเคราะห์ PRD ด้านเทคนิค (Tier 2/3 เท่านั้น)
+### STEP 2 — Technical PRD Analysis (Tier 2/3 only)
 
-- Summarise feature (2-3 ประโยค มุมมองเทคนิค)
-- ระบุ data flows, integration points, external dependencies, constraints
+- Summarise the feature (2–3 sentences, technical perspective)
+- Identify data flows, integration points, external dependencies, constraints
 - List technical risks (HIGH/MED/LOW)
 
-ถ้าต้องการ clarification จาก PO → Claude สร้าง **HTML Artifact dialog**
+If clarification from PO is needed → Claude creates an **HTML Artifact dialog**
 
-### STEP 3 — เสนอ Solution Options (Tier 2/3 เท่านั้น)
+### STEP 3 — Propose Solution Options (Tier 2/3 only)
 
-Claude เสนอ 2-3 options พร้อม pros/cons/complexity
+Claude proposes 2–3 options with pros/cons/complexity
 
-**กฎ:** Claude ไม่เลือก option เอง — SA เป็นคนตัดสินใจ
+**Rule:** Claude does not choose an option — SA decides
 
-### STEP 4 — Draft Solution Doc (Tier 2/3 เท่านั้น)
+### STEP 4 — Draft Solution Doc (Tier 2/3 only)
 
-หลัง SA เลือก option → Claude draft `Solution_Doc_[feature].md` (9 sections required + section 10 ถ้า PROJECT_CONTEXT.md มี `UX/UI required: yes`)
+After SA selects an option → Claude drafts `Solution_Doc_[feature].md` (9 required sections + section 10 if PROJECT_CONTEXT.md has `UX/UI required: yes`)
 
-**9 sections ที่ต้องครบ (+ section 10 ถ้ามี UI):**
+**9 required sections (+ section 10 if UI):**
 1. Overview
 2. Architecture
 3. Tech decisions
 4. API / Interface design
 5. Data model changes
-6. Non-functional considerations (รวม security checklist Option B)
+6. Non-functional considerations (including security checklist for Option B)
 7. Risks and mitigations
 8. Open questions
-9. PoC scope (ถ้าจำเป็น)
-10. UX/UI considerations (เฉพาะเมื่อ `UX/UI required: yes` — ดู `ai/PROJECT_INSTRUCTIONS.md` §Security role & UX/UI check)
+9. PoC scope (if needed)
+10. UX/UI considerations (only when `UX/UI required: yes` — see `ai/PROJECT_INSTRUCTIONS.md` §Security role & UX/UI check)
 
-SA review draft ใน chat → confirm → Claude create HTML Artifact พร้อม Download button
+SA reviews the draft in chat → confirms → Claude creates an HTML Artifact with a Download button
 
-### STEP 5 — Draft ADRs (Tier 2/3 เท่านั้น — Tier 1 ยกเว้นมี significant decision จริง)
+### STEP 5 — Draft ADRs (Tier 2/3 only — Tier 1 unless there is a genuinely significant decision)
 
-สำหรับทุก tech decision ที่ "significant":
-- เลือก technology ที่ต่างจาก STACK_CONTEXT.md defaults
-- เปลี่ยน data model ที่กระทบมากกว่า 1 service
-- Trade-off ที่ต้องเก็บ rationale ไว้
-- Decision ที่ Lead ไม่สามารถ infer จาก code ได้เอง
+For every tech decision that is "significant":
+- Chooses a technology that differs from STACK_CONTEXT.md defaults
+- Changes a data model that affects more than 1 service
+- Trade-off where rationale must be preserved
+- Decision that Lead cannot infer from the code alone
 
-**ADR numbering:** ใช้ global index `docs/adr/INDEX.md` — SA จอง number ก่อน draft
+**ADR numbering:** Use the global index `docs/adr/INDEX.md` — SA reserves a number before drafting
 
-### STEP 6 — PoC Planning (Tier 2/3 เท่านั้น — ถ้ามี PoC scope ใน STEP 4)
+### STEP 6 — PoC Planning (Tier 2/3 only — if PoC scope in STEP 4)
 
-Claude generate PoC prompts สำหรับ Lead ไปรัน spike
+Claude generates PoC prompts for Lead to run as a spike
 
-**ผล PoC:**
-- **PASS** → mark assumption "validated" → ไปต่อ STEP 7
-- **FAIL** → กลับ STEP 3 พร้อม evidence → ถ้ากระทบ PRD requirement → notify PO ก่อน
-- **PARTIAL** → SA ตัดสินใจว่า partial result เพียงพอหรือไม่
+**PoC outcomes:**
+- **PASS** → mark assumption "validated" → proceed to STEP 7
+- **FAIL** → return to STEP 3 with evidence → if PRD requirements are affected → notify PO first
+- **PARTIAL** → SA decides whether the partial result is sufficient
 
 ### STEP 7 — Handoff Package
 
-Claude compile handoff summary พร้อม distribution plan
+Claude compiles a handoff summary with a distribution plan
 
-**ส่งทุก artifact ให้ PO** (ไม่ส่งตรงให้ Lead):
+**Send all artifacts to PO** (not directly to Lead):
 - Tier 1: `Triage_Summary_[feature].md`
 - Tier 2/3: `Solution_Doc_[feature].md`
-- `ADR_[NNN]_[title].md` (x N, ถ้ามี)
-- PoC prompts (ถ้ามี)
-- `STACK_CONTEXT.md` (ถ้า PO ส่ง Stack Setup Request มาด้วย)
-- `SOLUTION_PATTERNS.md` (ถ้า update session นี้)
+- `ADR_[NNN]_[title].md` (× N, if any)
+- PoC prompts (if any)
+- `STACK_CONTEXT.md` (if PO sent a Stack Setup Request)
+- `SOLUTION_PATTERNS.md` (if updated this session)
 
 ---
 
-## STACK_CONTEXT.md — กฎการ Maintain
+## STACK_CONTEXT.md — Maintenance Rules
 
-- SA **เป็นเจ้าของแต่เพียงผู้เดียว** — ห้าม PO แก้ไข
-- เมื่อ stack เปลี่ยน → SA อัปเดตใน SA Project → increment version → notify PO ให้ re-upload เข้า PO Project
-- ทุกครั้งที่ส่งไฟล์ให้ PO ระบุ version ใน message: เช่น `STACK_CONTEXT.md Version 2`
-- ถ้าองค์กรมี PE และ org template เปลี่ยน → PE จะแจ้ง SA ว่า project ต้อง sync อะไรบ้าง
+- SA is the **sole owner** — PO must not edit it
+- When the stack changes → SA updates it in the SA Project → increments the version → notifies PO to re-upload to the PO Project
+- Every time a file is sent to PO, state the version in the message: e.g. `STACK_CONTEXT.md Version 2`
+- If the organisation has PE and the org template changes → PE will notify SA about what the project needs to sync
 
 ---
 
 ## Lead Issue Report (Lead → SA)
 
-Lead ส่ง Issue Report ตรงถึง SA ได้ (ไม่ต้องผ่าน PO) สำหรับ technical clarification ที่ไม่กระทบ PRD
+Lead can send an Issue Report directly to SA (bypassing PO) for:
+- Technical clarification that does not affect PRD requirements
+- Implementation-level questions in the Solution Doc
 
-**SA วินิจฉัย impact:**
-- **Small** → SA ออก ADR Amendment + update Solution Doc → ส่งให้ Lead ตรงได้
-- **Large** (กระทบ PRD scope / data model ร่วม) → SA notify PO ก่อน → PO approve → SA revise → ส่ง PO → PO re-enters STEP 3
+**SA diagnoses impact:**
+- **Small** → SA issues an ADR Amendment + updates Solution Doc → can send directly to Lead
+- **Large** (affects PRD scope / shared data model) → SA notifies PO first → PO approves → SA revises → sends to PO → PO re-enters STEP 3
 
 ---
 
 ## Retroactive Hotfix Triage (PO → SA)
 
-หลัง hotfix (P1/P2) merge แล้ว PO ส่ง HF summary ให้ SA ทำ retroactive tier tagging แบบสั้น (5-10 นาที) — **บังคับทุก hotfix ไม่มีข้อยกเว้น** (ดู [CORE_POLICY.md](../CORE_POLICY.md) §4)
+After a hotfix (P1/P2) is merged, PO sends an HF summary to SA for a brief retroactive tier tagging (5–10 min) — **mandatory for every hotfix, no exceptions** (see [CORE_POLICY.md](../CORE_POLICY.md) §4)
 
-SA ประเมิน Tier ย้อนหลังด้วยเกณฑ์เดียวกับ STEP 1.5 Tier Triage แล้วบันทึกกลับเข้า `TASK_LOG.md` ที่ entry ของ `HF-[NNN]` (ไม่สร้างไฟล์ใหม่) — ถ้าผลออกมาเป็น Tier 2/3 ให้สร้าง follow-up task เข้า queue ปกติของ Lead ทันที
-
----
-
-## SOLUTION_PATTERNS.md — Maintain
-
-หลัง PO accept feature → SA review ว่ามี architectural pattern ที่ควรเก็บไว้ใช้ซ้ำหรือไม่
-
-Claude ถาม: "Feature นี้มี [pattern] — บันทึกลง SOLUTION_PATTERNS.md ไหม?"
-
-SA confirm → Claude append → export → SA อัปโหลดกลับเข้า SA Project
+SA evaluates the Tier retrospectively using the same criteria as STEP 1.5 Tier Triage, then records the result back into `TASK_LOG.md` at the `HF-[NNN]` entry (no new file) — if the result is Tier 2/3, immediately create a follow-up task in Lead's normal queue
 
 ---
 
-## Checklist ก่อนส่ง SA Handoff ให้ PO
+## SOLUTION_PATTERNS.md — Maintenance
 
-- [ ] Solution Doc ครบทุก 9 sections (+ section 10 ถ้ามี UX/UI) (ไม่มี section ที่เป็นแค่ "TBD")
-- [ ] ADR files ครบตาม reference ใน Solution Doc
-- [ ] ADR numbers sequential ใน `docs/adr/INDEX.md`
-- [ ] PoC prompts พร้อม (ถ้ามี PoC scope)
-- [ ] `STACK_CONTEXT.md` version ระบุใน message
-- [ ] ส่งทุก artifact ให้ PO — ไม่ส่งตรงให้ Lead
+After PO accepts a feature → SA reviews whether there is an architectural pattern worth keeping for reuse
+
+Claude asks: "This feature has [pattern] — record in SOLUTION_PATTERNS.md?"
+
+SA confirms → Claude appends → exports → SA re-uploads to SA Project
+
+---
+
+## Pre-Handoff Checklist (before sending SA Handoff to PO)
+
+- [ ] Solution Doc is complete with all 9 sections (+ section 10 if UX/UI) (no section is just "TBD")
+- [ ] ADR files are complete as referenced in the Solution Doc
+- [ ] ADR numbers are sequential in `docs/adr/INDEX.md`
+- [ ] PoC prompts are ready (if PoC scope exists)
+- [ ] `STACK_CONTEXT.md` version is stated in the message
+- [ ] All artifacts sent to PO — not directly to Lead

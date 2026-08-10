@@ -1,62 +1,62 @@
 # SDLC Playbook — AI-Assisted Development Workflow
 
-ชุด Claude Project Instructions สำหรับทีมพัฒนา software ที่ใช้ AI เป็นผู้ช่วยในแต่ละ role ตลอด SDLC
+A set of Claude Project Instructions for software development teams using AI as a role-specific assistant throughout the SDLC.
 
-ไฟล์ใน `ai/` คือ **system prompt** สำหรับแต่ละ role — ใช้ได้ 2 วิธี:
+Files in `ai/` are **system prompts** for each role — usable in two ways:
 
-- **Option A** — อัปโหลดเป็น Claude Project Instructions บน claude.ai (web interface)
-- **Option B** — วางเป็น `CLAUDE.md` แล้วรัน Claude Code (CLI/App/IDE Extension)
+- **Option A** — upload as Claude Project Instructions on claude.ai (web interface)
+- **Option B** — place as `CLAUDE.md` and run Claude Code (CLI/App/IDE Extension)
 
-ไม่มี application ที่รันได้ใน repo นี้
+There is no runnable application in this repo.
 
-> **หมายเหตุ:** `/CLAUDE.md` ที่ root ของ repo นี้เป็นคนละไฟล์กับ `CLAUDE.md` ที่พูดถึงข้างบน — ไฟล์ root นี้ให้ guidance กับ Claude Code สำหรับคนที่มาแก้ไข/ดูแล playbook เอง ส่วน `CLAUDE.md` ที่ Dev ใช้งานจริงคือไฟล์ที่ Lead generate ขึ้นมาใหม่ในแต่ละ feature repo (มาจาก `ai/DEV_PROJECT_INSTRUCTIONS.md`)
-
----
-
-## 🚀 Quick Start (5 นาที)
-
-อยากลองใช้งานจริงก่อนอ่านทุกอย่าง? ทำตามนี้ (Option B — Claude Code):
-
-1. Clone `sdlc-playbook` ไว้ที่ไหนก็ได้บนเครื่อง
-2. ใน project repo ที่จะใช้งานจริง: `mkdir -p .claude/commands && cp sdlc-playbook/templates/option-b/commands/setup.md .claude/commands/`
-3. เปิด Claude Code ใน project repo แล้วพิมพ์ `/setup` — Claude สร้างโครงสร้างทั้งหมดให้อัตโนมัติ
-4. พิมพ์ `/po` แล้วเริ่มตอบคำถามได้เลย
-
-**ไม่ต้องอ่าน CORE_POLICY.md, WORKFLOW_OVERVIEW.md หรือ role guide ไหนก่อนก็ได้** — Claude จะถามสิ่งที่จำเป็นเอง (tier, environment, security role ฯลฯ) ตามจังหวะที่ต้องใช้จริง ค่อยกลับมาอ่านทีหลังตอนอยากรู้ว่า "ทำไม Claude ถึงถามแบบนี้" หรือถ้าทำงานเป็นทีมและอยากเห็นภาพรวมทั้งระบบก่อนเริ่ม
-
-> 👤 ทำงานคนเดียว? ดู [docs/guides/SOLO_GUIDE.md](docs/guides/SOLO_GUIDE.md) ประกอบ — มี flow ย่อสำหรับ solo dev โดยเฉพาะ
-> 📖 รายละเอียด setup เต็ม (role isolation, manual copy แบบไม่ใช้ `/setup`) → [templates/option-b/README.md](templates/option-b/README.md)
-> 🌐 ใช้ Option A (claude.ai Projects) แทน? ดูหัวข้อ "การติดตั้งครั้งแรก (First-time Setup — Option A)" ด้านล่างในไฟล์นี้
+> **Note:** The `/CLAUDE.md` at the root of this repo is a different file from the `CLAUDE.md` mentioned above — the root file provides guidance to Claude Code for people who maintain or edit the playbook itself. The `CLAUDE.md` that Dev actually uses is the one Lead generates fresh for each feature repo (derived from `ai/DEV_PROJECT_INSTRUCTIONS.md`).
 
 ---
 
-## ภาพรวม
+## 🚀 Quick Start (5 minutes)
 
-> 📊 ดู Workflow Diagrams แบบครบถ้วน → [docs/WORKFLOW_OVERVIEW.md](docs/WORKFLOW_OVERVIEW.md)
-> 🏷️ ไฟล์ `ai/*.md` ที่ copy ไปใช้อยู่เก่ากว่าเวอร์ชันล่าสุดหรือเปล่า? เช็คได้ที่ → [Releases](https://github.com/sarawuth-pimsai/sdlc-playbook/releases)
+Want to try it before reading everything? Follow these steps (Option B — Claude Code):
+
+1. Clone `sdlc-playbook` anywhere on your machine
+2. In the project repo you want to use it in: `mkdir -p .claude/commands && cp sdlc-playbook/templates/option-b/commands/setup.md .claude/commands/`
+3. Open Claude Code in the project repo and type `/setup` — Claude builds the entire structure automatically
+4. Type `/po` and start answering questions
+
+**No need to read CORE_POLICY.md, WORKFLOW_OVERVIEW.md, or any role guide first** — Claude will ask for what it needs (tier, environment, security role, etc.) at the right moments. Come back to read them later when you want to understand "why Claude asked that" or if you're working as a team and want to see the full system before starting.
+
+> 👤 Working solo? See [docs/guides/SOLO_GUIDE.md](docs/guides/SOLO_GUIDE.md) — a condensed flow designed specifically for solo devs.
+> 📖 Full setup details (role isolation, manual copy without `/setup`) → [templates/option-b/README.md](templates/option-b/README.md)
+> 🌐 Using Option A (claude.ai Projects) instead? See "First-time Setup — Option A" below in this file.
+
+---
+
+## Overview
+
+> 📊 See full Workflow Diagrams → [docs/WORKFLOW_OVERVIEW.md](docs/WORKFLOW_OVERVIEW.md)
+> 🏷️ Are the `ai/*.md` files you copied older than the latest version? Check → [Releases](https://github.com/sarawuth-pimsai/sdlc-playbook/releases)
 
 
 
 ```
-PO (hub) ──────► SA      SA Handoff → Triage Summary (Tier 1) หรือ Solution Doc + ADRs + PoC prompts (Tier 2/3)
-         ──────► SEC     Solution Doc → Security Requirements  (Option A + บังคับถ้า Tier 3)
+PO (hub) ──────► SA      SA Handoff → Triage Summary (Tier 1) or Solution Doc + ADRs + PoC prompts (Tier 2/3)
+         ──────► SEC     Solution Doc → Security Requirements  (Option A + mandatory if Tier 3)
          ──────► Lead    Lead Handoff = PRD + Tier + Triage Summary/Solution Doc + Epics + Stack
 
-Lead ───────────► Dev    Task_[ID].md prompts ทีละไฟล์ตาม lane
-Dev ────────────► QA     Deploy Notification หลัง deploy SIT/Staging
+Lead ───────────► Dev    Task_[ID].md prompts one file at a time per lane
+Dev ────────────► QA     Deploy Notification after deploying to SIT/Staging
 Lead ───────────► QA     PRD + DECISION_LOG + task files (Phase A setup)
-SEC ────────────► Lead   Security_Review_[TaskID].md ต่อ PR  (Option A เท่านั้น)
-Lead ◄─────────► SA      Escalation Request (ตรง ไม่ผ่าน PO — ดูเหตุผลใน CORE_POLICY.md §6)
+SEC ────────────► Lead   Security_Review_[TaskID].md per PR  (Option A only)
+Lead ◄─────────► SA      Escalation Request (direct, not through PO — see reason in CORE_POLICY.md §6)
 ```
 
-**PO เป็น hub กลางสำหรับ planning-phase handoff** (SA/SEC ↔ Lead) — ส่วน execution-phase interaction ที่เกิดถี่ (Lead↔SA escalation, Lead↔SEC Phase B, Lead↔Dev/QA) ตัดตรงไม่ผ่าน PO ดูหลักการเต็มที่ [docs/CORE_POLICY.md](docs/CORE_POLICY.md) §6
+**PO is the central hub for planning-phase handoffs** (SA/SEC ↔ Lead) — execution-phase interactions that happen frequently (Lead↔SA escalation, Lead↔SEC Phase B, Lead↔Dev/QA) route directly without going through PO. See full principle in [docs/CORE_POLICY.md](docs/CORE_POLICY.md) §6
 
 ---
 
-## โครงสร้าง Repository
+## Repository Structure
 
 ```
-CLAUDE.md                        → guidance สำหรับ Claude Code เมื่อแก้ไข playbook repo นี้เอง (ไม่ใช่ Dev role file)
+CLAUDE.md                        → guidance for Claude Code when editing this playbook repo itself (not the Dev role file)
 ai/
   PROJECT_INSTRUCTIONS.md        → PO Claude Project (Option A) / /po command (Option B)
   SA_PROJECT_INSTRUCTIONS.md     → SA Claude Project / /sa command
@@ -68,61 +68,63 @@ docs/
   CORE_POLICY.md    → single source of truth: tier ownership, escalation, parallel execution,
                        hotfix flow, environment default+override, routing principle
   WORKFLOW_OVERVIEW.md → Mermaid diagrams: role-to-role flow, tier/escalation overview, hotfix flow
-  roles/            → ตัวอย่าง knowledge files (STACK_CONTEXT.md, ADR INDEX.md)
-                       (SA Stack Setup Request ไม่ใช่ static template — PO generate อัตโนมัติทุกครั้งจาก ai/PROJECT_INSTRUCTIONS.md §SA Stack Setup Request)
+  roles/            → example knowledge files (STACK_CONTEXT.md, ADR INDEX.md)
+                       (SA Stack Setup Request is not a static template — PO generates it
+                        automatically each time from ai/PROJECT_INSTRUCTIONS.md §SA Stack Setup Request)
   guides/
-    PO_GUIDE.md       → คู่มือ Product Owner
-    SA_GUIDE.md       → คู่มือ Solution Architect
-    LEAD_GUIDE.md     → คู่มือ Tech Lead
-    DEV_GUIDE.md      → คู่มือ Developer
-    QA_GUIDE.md       → คู่มือ QA Engineer
-    SEC_GUIDE.md      → คู่มือ Security Engineer
-    PE_GUIDE.md       → คู่มือ Platform Engineering (org template)
-    SOLO_GUIDE.md     → คู่มือ Solo Developer (ทำงานคนเดียว หลาย role)
+    PO_GUIDE.md       → Product Owner guide
+    SA_GUIDE.md       → Solution Architect guide
+    LEAD_GUIDE.md     → Tech Lead guide
+    DEV_GUIDE.md      → Developer guide
+    QA_GUIDE.md       → QA Engineer guide
+    SEC_GUIDE.md      → Security Engineer guide
+    PE_GUIDE.md       → Platform Engineering guide (org template)
+    SOLO_GUIDE.md     → Solo Developer guide (one person wearing multiple hats)
+    th/               → Thai language versions of all guides above
   roles/
     sa/
-      STACK_CONTEXT.md              → blank schema (ใช้เมื่อไม่มี template ที่ match)
+      STACK_CONTEXT.md              → blank schema (use when no matching template exists)
       stack-templates/
-        README.md                   → คู่มือการเลือกและใช้ template + PE workflow
+        README.md                   → guide for choosing and using templates + PE workflow
         STACK_CONTEXT_base_crosscutting.md  → cross-cutting reference (Auth, OTel, PDPA)
         STACK_CONTEXT_go_clean_arch.md      → Go + Clean Architecture + PostgreSQL/Redis
 templates/
   option-b/
-    README.md         → setup guide สำหรับ Option B (role isolation)
+    README.md         → setup guide for Option B (role isolation)
     commands/
-      setup.md        → slash command template สำหรับ /setup (สร้าง directory structure อัตโนมัติ)
-      po.md           → slash command template สำหรับ /po
-      sa.md           → slash command template สำหรับ /sa
-      lead.md         → slash command template สำหรับ /lead
-      qa.md           → slash command template สำหรับ /qa
+      setup.md        → slash command template for /setup (auto-creates directory structure)
+      po.md           → slash command template for /po
+      sa.md           → slash command template for /sa
+      lead.md         → slash command template for /lead
+      qa.md           → slash command template for /qa
 ```
 
 ---
 
 ## Security Options
 
-| Option       | เงื่อนไข                | ผล                                                              |
-| ------------ | ----------------------- | --------------------------------------------------------------- |
-| **Option A** | ทีมมี Security Engineer | SEC Project ใช้งาน, SEC review Solution Doc + ทุก PR            |
-| **Option B** | ไม่มี Security Engineer | Security checkpoints ฝังอยู่ใน SA / Lead / QA instructions แล้ว |
+| Option | Condition | Result |
+|--------|-----------|--------|
+| **Option A** | Team has a Security Engineer | SEC Project active, SEC reviews Solution Doc + every PR |
+| **Option B** | No Security Engineer | Security checkpoints are already embedded in SA / Lead / QA instructions |
 
-PO ตั้งค่านี้ใน `PROJECT_CONTEXT.md` (`Security role: yes / no`) ครั้งเดียวตอนเริ่มโปรเจกต์
+PO sets this once in `PROJECT_CONTEXT.md` (`Security role: yes / no`) when starting the project.
 
 ---
 
 ## Option B — Claude Code (CLI/App/IDE Extension)
 
-Option B ให้แต่ละ role ใช้ slash command แทนการ copy prompt เข้า claude.ai Project
+Option B lets each role use slash commands instead of copying prompts into a claude.ai Project.
 
-### โครงสร้าง directory ที่แนะนำ (role isolation)
+### Recommended directory structure (role isolation)
 
 ```
 my-project/
-  CLAUDE.md                    ← Dev instructions (Lead generate)
-  ai/                          ← copy จาก sdlc-playbook/ai/
+  CLAUDE.md                    ← Dev instructions (Lead generates)
+  ai/                          ← copy from sdlc-playbook/ai/
   .claude/
-    commands/                  ← copy จาก sdlc-playbook/templates/option-b/commands/
-      setup.md → /setup  ← รันครั้งแรกเพื่อสร้าง structure ทั้งหมดอัตโนมัติ
+    commands/                  ← copy from sdlc-playbook/templates/option-b/commands/
+      setup.md → /setup  ← run first to auto-create the entire structure
       po.md    → /po
       sa.md    → /sa
       lead.md  → /lead
@@ -133,50 +135,50 @@ my-project/
       sa/                      ← SA knowledge files (STACK_CONTEXT, Solution_Doc, adr/)
       lead/                    ← Lead knowledge files (LEAD_HANDOFF)
       qa/                      ← QA knowledge files (TestCases, BugReports)
-    shared/                    ← ทุก role เห็น (tasks/, TASK_LOG.md)
+    shared/                    ← visible to all roles (tasks/, TASK_LOG.md)
 ```
 
-ดูรายละเอียดการ setup ที่ [templates/option-b/README.md](templates/option-b/README.md)
+See setup details at [templates/option-b/README.md](templates/option-b/README.md)
 
 ---
 
 ## Solo Developer
 
-ถ้าทำงานคนเดียวและต้องสวมหมวกหลาย role ดูที่ [docs/guides/SOLO_GUIDE.md](docs/guides/SOLO_GUIDE.md)
+Working alone and wearing multiple role hats? See [docs/guides/SOLO_GUIDE.md](docs/guides/SOLO_GUIDE.md)
 
 ---
 
-## การติดตั้งครั้งแรก (First-time Setup — Option A)
+## First-time Setup — Option A
 
-> ส่วนนี้อธิบาย **Option A** (claude.ai Projects) สำหรับ **Option B** (Claude Code) ดูที่ [templates/option-b/README.md](templates/option-b/README.md)
+> This section describes **Option A** (claude.ai Projects). For **Option B** (Claude Code) see [templates/option-b/README.md](templates/option-b/README.md)
 
-### ขั้นตอนที่ 1 — สร้าง Claude Projects บน claude.ai
+### Step 1 — Create Claude Projects on claude.ai
 
-สร้าง Claude Project แยกต่อ role ตามตาราง:
+Create a separate Claude Project per role:
 
-| Project name (แนะนำ) | Instruction file                  | ใครใช้                       |
-| -------------------- | --------------------------------- | ---------------------------- |
-| `[Project] — PO`     | `ai/PROJECT_INSTRUCTIONS.md`      | Product Owner                |
-| `[Project] — SA`     | `ai/SA_PROJECT_INSTRUCTIONS.md`   | Solution Architect           |
-| `[Project] — Lead`   | `ai/LEAD_PROJECT_INSTRUCTIONS.md` | Tech Lead                    |
-| `[Project] — Dev`    | `ai/DEV_PROJECT_INSTRUCTIONS.md`  | Developer (ดูหมายเหตุ)       |
-| `[Project] — QA`     | `ai/QA_PROJECT_INSTRUCTIONS.md`   | QA Engineer                  |
-| `[Project] — SEC`    | `ai/SEC_PROJECT_INSTRUCTIONS.md`  | Security Engineer (Option A) |
+| Project name (recommended) | Instruction file | Who uses it |
+|----------------------------|------------------|-------------|
+| `[Project] — PO` | `ai/PROJECT_INSTRUCTIONS.md` | Product Owner |
+| `[Project] — SA` | `ai/SA_PROJECT_INSTRUCTIONS.md` | Solution Architect |
+| `[Project] — Lead` | `ai/LEAD_PROJECT_INSTRUCTIONS.md` | Tech Lead |
+| `[Project] — Dev` | `ai/DEV_PROJECT_INSTRUCTIONS.md` | Developer (see note) |
+| `[Project] — QA` | `ai/QA_PROJECT_INSTRUCTIONS.md` | QA Engineer |
+| `[Project] — SEC` | `ai/SEC_PROJECT_INSTRUCTIONS.md` | Security Engineer (Option A) |
 
-> **Developer:** `DEV_PROJECT_INSTRUCTIONS.md` ใช้กับ **Claude Code** (CLI/App) ไม่ใช่ claude.ai Project
-> ดูรายละเอียดใน [DEV_GUIDE.md](docs/guides/DEV_GUIDE.md)
+> **Developer:** `DEV_PROJECT_INSTRUCTIONS.md` is used with **Claude Code** (CLI/App), not a claude.ai Project.
+> See details in [DEV_GUIDE.md](docs/guides/DEV_GUIDE.md)
 
-### ขั้นตอนที่ 2 — อัปโหลด Instruction File เข้า Project
+### Step 2 — Upload Instruction File to each Project
 
-สำหรับแต่ละ Claude Project:
+For each Claude Project:
 
-1. เปิด Project Settings → **Project Instructions**
-2. Copy เนื้อหาจาก instruction file → วางลงในช่อง Instructions
-3. บันทึก
+1. Open Project Settings → **Project Instructions**
+2. Copy content from the instruction file → paste into the Instructions field
+3. Save
 
-### ขั้นตอนที่ 3 — สร้าง PROJECT_CONTEXT.md
+### Step 3 — Create PROJECT_CONTEXT.md
 
-สร้างไฟล์ `PROJECT_CONTEXT.md` แล้วอัปโหลดเข้า **PO Project Knowledge**:
+Create a `PROJECT_CONTEXT.md` file and upload it to **PO Project Knowledge**:
 
 ```markdown
 # PROJECT_CONTEXT.md
@@ -189,118 +191,118 @@ Security role: yes / no
 UX/UI required: yes / no
 Environment (default): cli / claude.ai
 Environment overrides:
-  SA: [ไม่ระบุ = ใช้ default]
-  Lead: [ไม่ระบุ = ใช้ default]
-  Dev: cli   # fixed เสมอ — ห้าม override
-  QA: [ไม่ระบุ = ใช้ default]
-  SEC: [ไม่ระบุ = ใช้ default]   # เฉพาะ Option A (Security role: yes)
+  SA: [not specified = use default]
+  Lead: [not specified = use default]
+  Dev: cli   # always fixed — cannot be overridden
+  QA: [not specified = use default]
+  SEC: [not specified = use default]   # Option A only (Security role: yes)
 ```
 
-- `Security role: yes` → Option A: SEC Engineer ใช้งานใน workflow
-- `Security role: no` → Option B: security checkpoints ฝังใน roles อื่นแล้ว
-- `UX/UI required: yes` → SA ต้องได้ UI reference ก่อนเริ่มออกแบบ architecture (มีผลต่อ decision เช่น offline-first, real-time) / `no` → SA ข้าม UX/UI considerations ทั้งหมด (เช่น backend service, internal API, cron job)
-- `Environment (default)` คือค่าตั้งต้นของโปรเจกต์ — แต่ละ role (SA/Lead/QA/SEC) override เป็นช่องทางอื่นได้ตอนเริ่ม session แรกของตัวเอง ส่วน Dev fix เป็น `cli` เสมอ ไม่มีทาง override
-- Handoff แต่ละจุดเช็คแบบ pairwise (ทั้งฝั่งส่งและฝั่งรับ) ว่าจะ save ลง disk ตรงๆ หรือสร้าง Artifact — รายละเอียดเต็มดู [docs/CORE_POLICY.md](docs/CORE_POLICY.md) §5
+- `Security role: yes` → Option A: SEC Engineer is active in the workflow
+- `Security role: no` → Option B: security checkpoints are embedded in other roles
+- `UX/UI required: yes` → SA needs a UI reference before starting architecture design (affects decisions such as offline-first, real-time) / `no` → SA skips all UX/UI considerations (e.g. backend service, internal API, cron job)
+- `Environment (default)` is the project-level default — each role (SA/Lead/QA/SEC) can override to a different channel at the start of its first session. Dev is always fixed to `cli` and cannot be overridden.
+- Each handoff point performs a pairwise check (both sender and receiver sides) to decide whether to save directly to disk or create an Artifact — see full details in [docs/CORE_POLICY.md](docs/CORE_POLICY.md) §5
 
-### ขั้นตอนที่ 4 — SA สร้าง STACK_CONTEXT.md
+### Step 4 — SA creates STACK_CONTEXT.md
 
-PO ส่ง `SA_STACK_SETUP_REQUEST_[ProjectName].md` ให้ SA
-(ดู template ที่ `docs/roles/po/SA_STACK_SETUP_REQUEST_template.md`)
+PO sends `SA_STACK_SETUP_REQUEST_[ProjectName].md` to SA.
 
-**ถ้าองค์กรมี Platform Engineering และ org template พร้อมแล้ว** → แนบ `STACK_CONTEXT_[OrgName].md` มาพร้อม request
-SA จะใช้ org template เป็น baseline — ลดเวลา setup และ enforce org standard อัตโนมัติ
+**If the organisation has Platform Engineering and an org template is ready** → attach `STACK_CONTEXT_[OrgName].md` with the request. SA will use the org template as a baseline — reduces setup time and enforces org standards automatically.
 
-**ถ้ายังไม่มี org template** → SA เลือก stack template จาก `docs/roles/sa/stack-templates/` ที่ match stack family
+**If no org template exists yet** → SA selects a stack template from `docs/roles/sa/stack-templates/` that matches the stack family.
 
-เมื่อได้รับ `STACK_CONTEXT.md` จาก SA → อัปโหลดเข้า:
+Once `STACK_CONTEXT.md` is received from SA → upload it to:
 
 - **PO Project Knowledge**
 - **SA Project Knowledge**
 
-> ดูรายละเอียด Platform Engineering workflow ที่ [docs/guides/PE_GUIDE.md](docs/guides/PE_GUIDE.md)
+> See Platform Engineering workflow details at [docs/guides/PE_GUIDE.md](docs/guides/PE_GUIDE.md)
 
 ---
 
-## SDLC Flow ภาพรวม
+## SDLC Flow Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  1. PO เริ่ม session ใหม่                                           │
-│     Welcome Wizard → ตรวจสอบไฟล์ → STEP 1 (วิเคราะห์ PRD)         │
-│     → STEP 1.5 (ชี้แจง) → STEP 1.6 (scan business-risk keywords)   │
-│     → STEP 2 (Epics) → สร้าง SA Handoff อัตโนมัติ                  │
+│  1. PO starts a new session                                         │
+│     Welcome Wizard → check files → STEP 1 (analyse PRD)            │
+│     → STEP 1.5 (clarify) → STEP 1.6 (scan business-risk keywords)  │
+│     → STEP 2 (Epics) → auto-create SA Handoff                       │
 ├─────────────────────────────────────────────────────────────────────┤
-│  2. SA รับ SA Handoff                                               │
-│     STEP 1.5 — Tier Triage (บังคับเสมอ, SA เป็นคนตัดสิน ไม่ใช่ PO) │
-│     Tier 1 → Triage Summary สั้น (fast path)                        │
-│     Tier 2/3 → เสนอ options → draft Solution Doc (มี Tier: header) │
-│       → ADRs → PoC (ถ้าจำเป็น) → ส่งทุก artifact กลับ PO           │
+│  2. SA receives SA Handoff                                          │
+│     STEP 1.5 — Tier Triage (always required, SA decides, not PO)    │
+│     Tier 1 → short Triage Summary (fast path)                       │
+│     Tier 2/3 → propose options → draft Solution Doc (with Tier:     │
+│       header) → ADRs → PoC (if needed) → send all artifacts to PO  │
 ├─────────────────────────────────────────────────────────────────────┤
-│  3. SEC รับ Solution Doc (Option A + บังคับถ้า Tier 3)              │
-│     Phase A review → Security_Requirements → ส่ง PO (ผ่าน PO เสมอ) │
+│  3. SEC receives Solution Doc (Option A + mandatory if Tier 3)      │
+│     Phase A review → Security_Requirements → send to PO (always     │
+│     through PO)                                                     │
 ├─────────────────────────────────────────────────────────────────────┤
-│  4. PO รัน STEP 3 + STEP 4                                          │
-│     ตรวจ stack + Triage Summary/Solution Doc (hard block ถ้ายังไม่มี) │
-│     → สร้าง Lead Handoff                                            │
+│  4. PO runs STEP 3 + STEP 4                                         │
+│     Check stack + Triage Summary/Solution Doc (hard block if not    │
+│     yet received) → create Lead Handoff                             │
 ├─────────────────────────────────────────────────────────────────────┤
-│  5. Lead รับ Lead Handoff                                           │
-│     L-STEP 1 cross-check → L-STEP 1.5 Escalation Check              │
-│       (scope เกินเอกสาร → escalate ตรงไป SA ไม่ผ่าน PO)            │
-│     → L-STEP 2 task breakdown → L-STEP 2.5 Dependency Graph +       │
-│       Lane Assignment + Cross-lane Utility Scan → generate prompts │
-│     → CLAUDE.md → ส่ง task prompts ให้ Dev + setup files ให้ QA    │
+│  5. Lead receives Lead Handoff                                      │
+│     L-STEP 1 cross-check → L-STEP 1.5 Escalation Check             │
+│       (scope exceeds doc → escalate directly to SA, not through PO) │
+│     → L-STEP 2 task breakdown → L-STEP 2.5 Dependency Graph +      │
+│       Lane Assignment + Cross-lane Utility Scan → generate prompts  │
+│     → CLAUDE.md → send task prompts to Dev + setup files to QA     │
 ├─────────────────────────────────────────────────────────────────────┤
-│  6. Dev implement (ทีละ task ตาม lane)                              │
-│     Paste Task_[ID].md ใน Claude Code → implement → run done criteria │
-│     → update TASK_LOG (Lane + Assigned Dev) → deploy SIT → notify QA │
+│  6. Dev implements (one task at a time per lane)                    │
+│     Paste Task_[ID].md in Claude Code → implement → run done        │
+│     criteria → update TASK_LOG (Lane + Assigned Dev)                │
+│     → deploy SIT → notify QA                                        │
 ├─────────────────────────────────────────────────────────────────────┤
-│  7. QA test — A-STEP 0 เช็ค tier ก่อนเสมอ                          │
-│     Phase 0: draft test cases จาก PRD (parallel กับ SA)            │
-│     Phase A: Tier 1 → Lightweight Check | Tier 2/3 → full TestCases │
-│       → TaskTestSummary → Dev fix bugs                              │
-│     Phase B: Tier 1 → Smoke Test | Tier 2/3 → full suite            │
+│  7. QA tests — A-STEP 0 always checks tier first                    │
+│     Phase 0: draft test cases from PRD (parallel with SA)           │
+│     Phase A: Tier 1 → Lightweight Check | Tier 2/3 → full           │
+│       TestCases → TaskTestSummary → Dev fixes bugs                  │
+│     Phase B: Tier 1 → Smoke Test | Tier 2/3 → full suite           │
 │       → TestReport → Lead sign-off                                  │
-│     Phase C: Production smoke test → rollback ถ้า P1 fail           │
+│     Phase C: Production smoke test → rollback if P1 fails           │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-> Routing บางจุดผ่าน PO (planning-phase, ความถี่ต่ำ) บางจุดตรงระหว่าง role ปฏิบัติการ (execution-phase, ความถี่สูง) — หลักการเต็มดู [docs/CORE_POLICY.md](docs/CORE_POLICY.md) §6
+> Some routing goes through PO (planning-phase, low frequency) and some routes directly between operational roles (execution-phase, high frequency) — see full principle in [docs/CORE_POLICY.md](docs/CORE_POLICY.md) §6
 
 ---
 
-## กฎการจัดการไฟล์
+## File Management Rules
 
 ### Version Header
 
-ทุก shared file ต้องมี header บรรทัดแรก:
+Every shared file must have this header on the first line:
 
 ```
 # Last updated: YYYY-MM-DD | Version: N
 ```
 
-### DECISION_LOG — สองไฟล์ต่อ feature
+### DECISION_LOG — two files per feature
 
-| ไฟล์                                 | เนื้อหา                       | Re-upload                            |
-| ------------------------------------ | ----------------------------- | ------------------------------------ |
-| `DECISION_LOG_[feature]_TODO.md`     | เฉพาะ items ที่ยังไม่ resolve | ทุก session ใหม่ที่มี TODO คงเหลือ   |
-| `DECISION_LOG_[feature]_RESOLVED.md` | Archive ที่ resolve แล้ว      | เมื่อมี resolved items เพิ่มเท่านั้น |
+| File | Content | Re-upload |
+|------|---------|-----------|
+| `DECISION_LOG_[feature]_TODO.md` | Only unresolved items | Every new session with remaining TODOs |
+| `DECISION_LOG_[feature]_RESOLVED.md` | Archive of resolved items | Only when new resolved items are added |
 
-ห้ามรวมสองไฟล์เป็นไฟล์เดียว
+Never merge the two files into one.
 
 ### One thread per feature (Hard Rule)
 
-ใช้ conversation thread เดียวต่อหนึ่ง feature ตลอดอายุของ feature นั้น
-เปิด conversation ใหม่เฉพาะเมื่อเริ่ม feature ใหม่เท่านั้น
+Use one conversation thread per feature throughout the feature's lifetime.  
+Open a new conversation only when starting a new feature.
 
-### ไฟล์ที่เก็บในโปรเจกต์จริง (code repo)
+### Files stored in the actual project (code repo)
 
-> ⚠️ **ข้อควรระวัง:** `STACK_CONTEXT.md` ในโปรเจกต์จริงจะมีข้อมูล tech stack ภายในองค์กร เช่น IdP endpoint, infrastructure details, internal service names — **ห้าม commit ไฟล์นี้ลง public repository** เพิ่ม `docs/STACK_CONTEXT.md` เข้า `.gitignore` หรือใช้ private repo เท่านั้น
+> ⚠️ **Caution:** `STACK_CONTEXT.md` in a real project will contain internal org information such as IdP endpoints, infrastructure details, and internal service names — **do not commit this file to a public repository**. Add `docs/STACK_CONTEXT.md` to `.gitignore` or use a private repo only.
 
 ```
 my-project/
-  CLAUDE.md               ← Lead สร้าง, commit ก่อน Dev เริ่ม task แรก
+  CLAUDE.md               ← Lead creates, committed before Dev starts first task
   docs/
-    STACK_CONTEXT.md      ← ห้าม commit ลง public repo (ข้อมูล internal stack)
+    STACK_CONTEXT.md      ← do not commit to public repo (internal stack details)
     DECISION_LOG_[feature]_TODO.md
     DECISION_LOG_[feature]_RESOLVED.md
     Solution_Doc_[feature].md
@@ -320,39 +322,39 @@ my-project/
 
 ---
 
-## คู่มือแต่ละ Role
+## Role Guides
 
-| Role                  | คู่มือ                                                         |
-| --------------------- | -------------------------------------------------------------- |
-| **ภาพรวม Workflow**   | [docs/WORKFLOW_OVERVIEW.md](docs/WORKFLOW_OVERVIEW.md)         |
-| Product Owner         | [docs/guides/PO_GUIDE.md](docs/guides/PO_GUIDE.md)             |
-| Solution Architect    | [docs/guides/SA_GUIDE.md](docs/guides/SA_GUIDE.md)             |
-| Tech Lead             | [docs/guides/LEAD_GUIDE.md](docs/guides/LEAD_GUIDE.md)         |
-| Developer             | [docs/guides/DEV_GUIDE.md](docs/guides/DEV_GUIDE.md)           |
-| QA Engineer           | [docs/guides/QA_GUIDE.md](docs/guides/QA_GUIDE.md)             |
-| Security Engineer     | [docs/guides/SEC_GUIDE.md](docs/guides/SEC_GUIDE.md)           |
-| Platform Engineering  | [docs/guides/PE_GUIDE.md](docs/guides/PE_GUIDE.md)             |
-| Solo Developer        | [docs/guides/SOLO_GUIDE.md](docs/guides/SOLO_GUIDE.md)         |
-| **Stack Templates**   | [docs/roles/sa/stack-templates/README.md](docs/roles/sa/stack-templates/README.md) |
+| Role | Guide |
+|------|-------|
+| **Workflow Overview** | [docs/WORKFLOW_OVERVIEW.md](docs/WORKFLOW_OVERVIEW.md) |
+| Product Owner | [docs/guides/PO_GUIDE.md](docs/guides/PO_GUIDE.md) |
+| Solution Architect | [docs/guides/SA_GUIDE.md](docs/guides/SA_GUIDE.md) |
+| Tech Lead | [docs/guides/LEAD_GUIDE.md](docs/guides/LEAD_GUIDE.md) |
+| Developer | [docs/guides/DEV_GUIDE.md](docs/guides/DEV_GUIDE.md) |
+| QA Engineer | [docs/guides/QA_GUIDE.md](docs/guides/QA_GUIDE.md) |
+| Security Engineer | [docs/guides/SEC_GUIDE.md](docs/guides/SEC_GUIDE.md) |
+| Platform Engineering | [docs/guides/PE_GUIDE.md](docs/guides/PE_GUIDE.md) |
+| Solo Developer | [docs/guides/SOLO_GUIDE.md](docs/guides/SOLO_GUIDE.md) |
+| **Stack Templates** | [docs/roles/sa/stack-templates/README.md](docs/roles/sa/stack-templates/README.md) |
 
 ---
 
-## Shared Files — เจ้าของและ Flow
+## Shared Files — Owners and Flow
 
-| ไฟล์                                 | เจ้าของ | ไหลไปถึง                  |
-| ------------------------------------ | ------- | ------------------------- |
-| `STACK_CONTEXT.md`                   | SA      | PO → Lead → Dev / QA      |
-| `DECISION_LOG_[feature]_TODO.md`     | PO      | SA, Lead, QA              |
-| `DECISION_LOG_[feature]_RESOLVED.md` | PO      | SA, Lead, QA              |
-| `PATTERN_LIBRARY.md`                 | PO      | SA, Lead                  |
-| `SOLUTION_PATTERNS.md`               | SA      | SA-internal               |
-| `PROJECT_CONTEXT.md`                 | PO      | PO → SA, Lead, QA, SEC (Environment default + per-role override) |
-| `Triage_Summary_[feature].md` (Tier 1) | SA    | PO → Lead                 |
-| `Solution_Doc_[feature].md` (Tier 2/3) | SA    | PO → Lead, SEC            |
-| `Security_Requirements_[feature].md` | SEC     | PO → Lead                 |
-| `LEAD_HANDOFF_[feature].md`          | PO      | Lead                      |
-| `Task_[ID]_[title].md`               | Lead    | Dev, QA                   |
-| `TASK_LOG.md`                        | Dev     | Lead (อ่านก่อน PR review) |
+| File | Owner | Flows to |
+|------|-------|---------|
+| `STACK_CONTEXT.md` | SA | PO → Lead → Dev / QA |
+| `DECISION_LOG_[feature]_TODO.md` | PO | SA, Lead, QA |
+| `DECISION_LOG_[feature]_RESOLVED.md` | PO | SA, Lead, QA |
+| `PATTERN_LIBRARY.md` | PO | SA, Lead |
+| `SOLUTION_PATTERNS.md` | SA | SA-internal |
+| `PROJECT_CONTEXT.md` | PO | PO → SA, Lead, QA, SEC (Environment default + per-role override) |
+| `Triage_Summary_[feature].md` (Tier 1) | SA | PO → Lead |
+| `Solution_Doc_[feature].md` (Tier 2/3) | SA | PO → Lead, SEC |
+| `Security_Requirements_[feature].md` | SEC | PO → Lead |
+| `LEAD_HANDOFF_[feature].md` | PO | Lead |
+| `Task_[ID]_[title].md` | Lead | Dev, QA |
+| `TASK_LOG.md` | Dev | Lead (reads before PR review) |
 
 ## License
 
@@ -360,12 +362,12 @@ This software is licensed under the **Business Source License 1.1 (BSL 1.1)**.
 
 ### 🛑 Key Terms & Restrictions
 
-- **Allowed Uses (Free Internal Production):** องค์กร บริษัท หรือบุคคลทั่วไป **สามารถนำซอฟต์แวร์นี้ไปติดตั้งและใช้งานจริงในระบบ Production ภายในองค์กรได้ฟรี** โดยไม่มีค่าใช้จ่าย
-- **Commercial & SaaS Restrictions (ข้อห้าม):**
-  - ❌ **ห้าม** นำซอฟต์แวร์นี้ไปเปิดให้บริการในรูปแบบ Managed Service หรือ **Software-as-a-Service (SaaS)** แก่บุคคลภายนอก
-  - ❌ **ห้าม** นำซอฟต์แวร์นี้ไปรวม (Embed) หรือซ้อนไว้ในผลิตภัณฑ์ทางการค้าอื่น ๆ เพื่อนำไปขายต่อ (Resell/Sublicense) ให้กับลูกค้าของคุณ
-- **Automatic Open Source Conversion:** ในวันที่ **July 17, 2029** ซอฟต์แวร์เวอร์ชันนี้จะเปลี่ยนสถานะเป็น Open Source ภายใต้ **GPL v3.0** โดยอัตโนมัติ และจะปลดล็อกข้อจำกัดทางการค้าทั้งหมด
+- **Allowed Uses (Free Internal Production):** Any organisation, company, or individual **may install and use this software in production systems internally at no cost**.
+- **Commercial & SaaS Restrictions:**
+  - ❌ **Prohibited** — using this software to offer a Managed Service or **Software-as-a-Service (SaaS)** to external parties
+  - ❌ **Prohibited** — embedding or wrapping this software in a commercial product to resell or sublicense to your customers
+- **Automatic Open Source Conversion:** On **July 17, 2029**, this version of the software automatically converts to Open Source under **GPL v3.0**, removing all commercial restrictions.
 
 ### 💼 Commercial Partnerships & Special Licensing
 
-หากบริษัทของคุณต้องการนำโปรเจกต์นี้ไปทำระบบ SaaS บริการลูกค้า หรือรวมเข้ากับซอฟต์แวร์ปิดเพื่อจำหน่ายต่อ กรุณาติดต่อ **Sarawuth Pimsai** โดยตรงผ่าน [GitHub Issues](https://github.com/sarawuth-pimsai/sdlc-playbook/issues) เพื่อขอซื้อสิทธิ์การใช้งานเชิงพาณิชย์ (Commercial License)
+If your company wants to build a SaaS system, offer a client service, or embed this software in a closed product for resale, contact **Sarawuth Pimsai** directly via [GitHub Issues](https://github.com/sarawuth-pimsai/sdlc-playbook/issues) to purchase a Commercial License.

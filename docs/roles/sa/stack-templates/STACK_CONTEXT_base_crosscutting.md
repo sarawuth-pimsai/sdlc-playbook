@@ -1,15 +1,15 @@
 # STACK_CONTEXT — Base Cross-cutting Concerns
 
-> **ไฟล์นี้เป็น reference สำหรับ template authors และ PE**
-> SA ที่ใช้ template สำเร็จรูปไม่ต้องอ่านไฟล์นี้ — cross-cutting ถูก embed ใน template แต่ละไฟล์แล้ว
-> ใช้ไฟล์นี้เมื่อ: สร้าง template ใหม่, สร้าง org template, หรือต้องการ verify ว่า template ครอบคลุม concerns ครบ
+> **This file is a reference for template authors and PE**
+> SA using a ready-made template does not need to read this file — cross-cutting concerns are already embedded in each template file.
+> Use this file when: creating a new template, creating an org template, or verifying that a template covers all required concerns.
 
 ---
 
-## Cross-cutting Concerns ที่ทุก stack ต้องมี
+## Cross-cutting Concerns Required by Every Stack
 
-Section เหล่านี้เป็น **universal** — ใช้ได้กับทุก tech stack
-Stack-specific packages ต้องเพิ่มเติมใน template แต่ละตัว
+These sections are **universal** — applicable to every tech stack.
+Stack-specific packages must be added in each individual template.
 
 ---
 
@@ -17,17 +17,17 @@ Stack-specific packages ต้องเพิ่มเติมใน template �
 
 ### Protocol (Universal)
 
-- **OAuth2 + OIDC** (Authorization Code + PKCE) — standard สำหรับ web app และ SPA
-- IdP: SA เลือกต่อ project (Keycloak / Azure AD / Okta / อื่น) — ระบุใน ADR
+- **OAuth2 + OIDC** (Authorization Code + PKCE) — standard for web apps and SPAs
+- IdP: SA chooses per project (Keycloak / Azure AD / Okta / other) — specify in ADR
 
 ### Principles
 
-- **PKCE บังคับสำหรับ SPA และ mobile** — ห้ามใช้ Implicit flow
-- Access token ต้อง validate ผ่าน JWKS endpoint — ห้าม trust โดยไม่ verify signature
-- Token/session ห้าม log และห้าม return ใน error response
-- Refresh token rotation — revoke old token ทุกครั้งที่ rotate
+- **PKCE is mandatory for SPA and mobile** — do not use Implicit flow
+- Access tokens must be validated through the JWKS endpoint — do not trust without verifying the signature
+- Tokens/sessions must never be logged and must never be returned in error responses
+- Refresh token rotation — revoke the old token every time rotation occurs
 
-> **Stack-specific packages:** template แต่ละตัวระบุ packages ที่ใช้ใน §4 Cross-cutting
+> **Stack-specific packages:** each template lists the packages used in §4 Cross-cutting
 
 ---
 
@@ -35,26 +35,26 @@ Stack-specific packages ต้องเพิ่มเติมใน template �
 
 ### Standard (Universal)
 
-- Signal: **Traces + Metrics + Logs** ผ่าน OpenTelemetry
-- Export protocol: **OTLP** (HTTP หรือ gRPC) — ห้าม tie ถึง vendor-specific format โดยตรง
+- Signals: **Traces + Metrics + Logs** via OpenTelemetry
+- Export protocol: **OTLP** (HTTP or gRPC) — do not tie directly to vendor-specific formats
 - Trace context propagation: **W3C TraceContext** standard (`traceparent` header)
-- ทุก service ต้องส่ง `service.name` resource attribute
+- Every service must send the `service.name` resource attribute
 
 ### Log Levels
 
 | Level | Environment |
 |-------|------------|
-| `DEBUG` | Development เท่านั้น |
+| `DEBUG` | Development only |
 | `INFO` | Production default |
-| `WARN` | Degraded behavior ที่ยัง functional |
-| `ERROR` | Critical — ต้องการ attention |
+| `WARN` | Degraded behavior that is still functional |
+| `ERROR` | Critical — requires attention |
 
-### PII Masking (บังคับ)
+### PII Masking (mandatory)
 
-- ห้าม log: email, phone, national ID, address, ข้อมูลสุขภาพ
-- ใช้ masked value: `usr_***@***.com` หรือ hashed identifier แทน
+- Do not log: email, phone, national ID, address, health data
+- Use masked values: `usr_***@***.com` or a hashed identifier instead
 
-> **Stack-specific packages:** template แต่ละตัวระบุ OTel packages ใน §4 Cross-cutting
+> **Stack-specific packages:** each template lists OTel packages in §4 Cross-cutting
 
 ---
 
@@ -62,7 +62,7 @@ Stack-specific packages ต้องเพิ่มเติมใน template �
 
 ### Prefix Conventions
 
-| Prefix | ใช้สำหรับ | ตัวอย่าง |
+| Prefix | Used for | Example |
 |--------|---------|---------|
 | `APP_` | Application config | `APP_PORT`, `APP_ENV`, `APP_LOG_LEVEL` |
 | `DB_` | Database connection | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` |
@@ -71,33 +71,33 @@ Stack-specific packages ต้องเพิ่มเติมใน template �
 
 ### Rules
 
-- ทุก secret ต้องใช้ environment variable — ห้าม hardcode ใน code หรือ config file
-- ห้าม commit `.env` ที่มีค่า real เข้า repository
+- Every secret must use an environment variable — no hardcoding in code or config files
+- Do not commit `.env` files with real values to the repository
 - `APP_ENV` values: `development` / `staging` / `production`
 
 ---
 
-## PDPA (Thailand — พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562)
+## PDPA (Thailand — Personal Data Protection Act B.E. 2562)
 
-### Personal Data ที่ต้องระวัง
+### Personal Data to Handle Carefully
 
-ข้อมูลส่วนบุคคลตาม PDPA: ชื่อ-นามสกุล, เลขบัตรประชาชน, เบอร์โทรศัพท์, email, ที่อยู่, ข้อมูลสุขภาพ, ข้อมูลชีวมาตร
+Personal data under PDPA: full name, national ID, phone number, email, address, health data, biometric data.
 
-### Requirements ต่อทุก feature ที่เก็บ personal data
+### Requirements for Every Feature That Stores Personal Data
 
-- ระบุ **retention period** ใน Solution Doc — ต้องชัดเจน (เช่น 3 ปี, 7 ปี)
-- ต้องมี **deletion mechanism** — ลบข้อมูลเมื่อครบ retention period
-- ต้องมี **consent mechanism** — บันทึกว่า user ให้ consent เมื่อไหร่ และ consent อะไร
-- ห้าม export personal data ออกนอกระบบโดยไม่มี audit trail
+- Specify the **retention period** in the Solution Doc — must be explicit (e.g. 3 years, 7 years)
+- Must have a **deletion mechanism** — delete data when the retention period expires
+- Must have a **consent mechanism** — record when and for what the user gave consent
+- Do not export personal data out of the system without an audit trail
 
 ---
 
 ## Stack Deviations Process (Universal)
 
-หาก feature ใดจำเป็นต้องเบี่ยงเบนจาก stack ที่ระบุใน `STACK_CONTEXT.md` SA ต้อง:
+If any feature requires deviating from the stack specified in `STACK_CONTEXT.md`, SA must:
 
-1. เขียน ADR ระบุเหตุผลและ trade-off
-2. แจ้ง PO ก่อนส่ง Solution Doc
-3. อัปเดต `STACK_CONTEXT.md` ถ้า deviation นั้นกลายเป็น standard ใหม่
+1. Write an ADR stating the reason and trade-offs
+2. Notify PO before sending the Solution Doc
+3. Update `STACK_CONTEXT.md` if the deviation becomes the new standard
 
-หาก deviation กระทบ org template (PE-managed) — SA ต้องแจ้ง PE ด้วย ไม่ใช่แค่ PO
+If the deviation affects an org template (PE-managed) — SA must also notify PE, not just PO.

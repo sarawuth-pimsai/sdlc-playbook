@@ -1,17 +1,15 @@
-# Last updated: YYYY-MM-DD | Version: [รับจาก SA]
+# Last updated: YYYY-MM-DD | Version: [received from SA]
 
 # STACK_CONTEXT.md — [Project Name]
 
-> **ไฟล์นี้ PO รับจาก SA** — ห้ามแก้ไขโดยตรง
-> เมื่อ stack เปลี่ยน SA จะส่ง version ใหม่มาให้ PO re-upload
+> **PO receives this file from SA** — do not edit directly.
+> When the stack changes, SA will send a new version for PO to re-upload.
 
 ---
 
-> **ไฟล์นี้ว่างเปล่าใน playbook** — เนื้อหาจริงถูกสร้างโดย SA ในระหว่าง Stack Setup Flow
+> **This file is empty in the playbook** — the real content is created by SA during the Stack Setup Flow.
 >
-> **วิธีได้รับไฟล์นี้:**
-> 1. PO ส่ง `SA_STACK_SETUP_REQUEST_[ProjectName].md` ให้ SA
-> 2. SA เลือก stack template ที่เหมาะสม → customize → ส่ง `STACK_CONTEXT.md` กลับมา
-> 3. PO อัปโหลดไฟล์ที่ได้รับเข้า PO Project Knowledge แทนที่ไฟล์นี้
->
-> ดูขั้นตอนทั้งหมดที่ [SA_STACK_SETUP_REQUEST_template.md](SA_STACK_SETUP_REQUEST_template.md)
+> **How to receive this file:**
+> 1. PO sends `SA_STACK_SETUP_REQUEST_[ProjectName].md` to SA
+> 2. SA chooses the appropriate stack template → customizes → sends `STACK_CONTEXT.md` back
+> 3. PO uploads the received file into PO Project Knowledge, replacing this file

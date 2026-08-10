@@ -1,234 +1,234 @@
-# คู่มือ Product Owner (PO)
+# Product Owner (PO) Guide
 
-> ดูภาพรวม workflow และการ setup → [WORKFLOW_OVERVIEW.md](../WORKFLOW_OVERVIEW.md)
+> For workflow overview and setup → [WORKFLOW_OVERVIEW.md](../WORKFLOW_OVERVIEW.md)
 
-PO เป็น **hub กลาง** ของ SDLC Playbook — ประสานงานทุก role และเป็นเจ้าของ decision history ของทุก feature
+The PO is the **central hub** of the SDLC Playbook — coordinating all roles and owning the decision history for every feature.
 
-**PO ไม่ตัดสินใจ tier** — ทำได้แค่เก็บรายละเอียด feature และ flag business-risk keyword เป็น context ส่งให้ SA ตัดสินใจ ดู [CORE_POLICY.md](../CORE_POLICY.md) §1
+**PO does not decide tiers** — the PO only collects feature details and flags business-risk keywords as context for SA to decide. See [CORE_POLICY.md](../CORE_POLICY.md) §1
 
 ---
 
-## การติดตั้ง
+## Setup
 
 ### Option A — claude.ai Projects
 
-ใช้ผ่าน claude.ai web interface
+Via the claude.ai web interface
 
-#### ขั้นตอนที่ 1 — สร้าง Project
+#### Step 1 — Create a Project
 
-1. เปิด [claude.ai](https://claude.ai) → **Projects** → **New project**
-2. ตั้งชื่อ เช่น `[ชื่อโปรเจกต์] — PO`
-3. เปิด **Project Instructions** → Copy เนื้อหาจาก `ai/PROJECT_INSTRUCTIONS.md` → Paste → บันทึก
+1. Open [claude.ai](https://claude.ai) → **Projects** → **New project**
+2. Name it, e.g. `[Project Name] — PO`
+3. Open **Project Instructions** → Copy content from `ai/PROJECT_INSTRUCTIONS.md` → Paste → Save
 
-#### ขั้นตอนที่ 2 — อัปโหลด Project Knowledge
+#### Step 2 — Upload Project Knowledge
 
-| ไฟล์ | เมื่อไหร่ | หมายเหตุ |
-|------|----------|---------|
-| `PROJECT_CONTEXT.md` | ✅ ก่อน session แรก | กำหนด `Security role:`, `UX/UI required:` และ `Environment:` — Claude สร้างให้ใน session แรก → re-upload |
-| `STACK_CONTEXT.md` | หลังได้รับจาก SA | ต้องครบก่อน STEP 3 |
-| `DECISION_LOG_[feature]_TODO.md` | ทุก session ที่มี TODO คงเหลือ | Re-upload ทุก session ใหม่ |
-| `DECISION_LOG_[feature]_RESOLVED.md` | เมื่อมี resolved items | Upload ครั้งแรก แล้ว re-upload เฉพาะเมื่อมีเพิ่ม |
-| `PATTERN_LIBRARY.md` | ถ้ามี | SA หรือ PO สร้าง |
+| File | When | Note |
+|------|------|------|
+| `PROJECT_CONTEXT.md` | ✅ Before first session | Sets `Security role:`, `UX/UI required:` and `Environment:` — Claude creates it in the first session → re-upload |
+| `STACK_CONTEXT.md` | After receiving from SA | Required before STEP 3 |
+| `DECISION_LOG_[feature]_TODO.md` | Every session with remaining TODOs | Re-upload each new session |
+| `DECISION_LOG_[feature]_RESOLVED.md` | When resolved items exist | Upload once, re-upload only when new items are added |
+| `PATTERN_LIBRARY.md` | If exists | Created by SA or PO |
 
-> **Session แรก:** Claude จะถาม `Security role`, `UX/UI required` และ `Environment` แล้วสร้าง `PROJECT_CONTEXT.md` ให้อัตโนมัติ → ดาวน์โหลดแล้ว re-upload เข้า Project Knowledge
+> **First session:** Claude will ask for `Security role`, `UX/UI required` and `Environment`, then automatically create `PROJECT_CONTEXT.md` → download and re-upload to Project Knowledge
 
 ---
 
 ### Option B — Claude Code
 
-ใช้ผ่าน Claude Code CLI, Desktop App, หรือ IDE Extension แทน claude.ai Projects
+Via Claude Code CLI, Desktop App, or IDE Extension instead of claude.ai Projects
 
-#### ขั้นตอนที่ 1 — Setup workspace (ทำครั้งเดียว)
+#### Step 1 — Setup workspace (one-time)
 
-ดูรายละเอียดการ setup ที่ [templates/option-b/README.md](../../templates/option-b/README.md) — ใช้ `/setup` command เพื่อสร้าง directory structure และ copy ไฟล์ที่จำเป็นทั้งหมดอัตโนมัติ
+See setup details at [templates/option-b/README.md](../../templates/option-b/README.md) — use the `/setup` command to automatically create the directory structure and copy all required files
 
-#### ขั้นตอนที่ 2 — เริ่ม PO session
+#### Step 2 — Start a PO session
 
 ```
 /po
 ```
 
-พิมพ์ `/po` ใน Claude Code — Claude จะอ่าน `ai/PROJECT_INSTRUCTIONS.md` และโฟกัสที่ `docs/roles/po/`
+Type `/po` in Claude Code — Claude will read `ai/PROJECT_INSTRUCTIONS.md` and focus on `docs/roles/po/`
 
-#### ขั้นตอนที่ 3 — วางไฟล์ใน directory ของ PO
+#### Step 3 — Place files in the PO directory
 
-วางไฟล์ knowledge ใน `docs/roles/po/` แทนการ upload เข้า Project Knowledge
+Place knowledge files in `docs/roles/po/` instead of uploading to Project Knowledge
 
 ---
 
-## SESSION START — ทุกครั้งที่เปิด session ใหม่
+## SESSION START — Every new session
 
-1. Claude อ่านไฟล์ทั้งหมดใน Project Knowledge อัตโนมัติ (ทำ silently)
-2. Claude แสดง **Session Welcome** ใน chat — สรุปไฟล์ที่พบ + ถามสถานะโปรเจกต์หรืองานที่ต้องการทำ
-3. ตอบคำถามทีละข้อ — Claude routing ตาม input ทันที
+1. Claude reads all files in Project Knowledge automatically (silently)
+2. Claude shows a **Session Welcome** in chat — summarises found files + asks for project status or the work you want to do
+3. Answer questions one at a time — Claude routes based on your input immediately
 
-> ถ้ากลับมาใน conversation thread เดิม → Claude ข้าม Welcome และแสดง feature status summary แทน
+> If you return in the same conversation thread → Claude skips the Welcome and shows a feature status summary instead
 
-เมื่อ STACK_CONTEXT มี `Status: Confirmed` Claude จะถาม:
+When STACK_CONTEXT has `Status: Confirmed`, Claude will ask:
 
 ```
-1. เพิ่ม Feature ใหม่
-2. ต่อ Feature ที่ค้างไว้
-3. ดู Decision Log
-4. แจ้ง Bug / ปัญหา Production — รับรายงานและส่งต่อ Lead
+1. Add a new feature
+2. Continue a pending feature
+3. View Decision Log
+4. Report a bug / production issue — capture report and forward to Lead
 ```
 
-เลือก **4** → Claude ถามต่อ: รายงาน Bug ใหม่ หรือ ติดตาม Bug ที่ส่ง BugIntake ไปแล้ว
+Select **4** → Claude asks further: new bug report, or follow up on an already-submitted BugIntake
 
 ---
 
-## SDLC Flow ของ PO
+## PO SDLC Flow
 
-### STEP 1 — วิเคราะห์ PRD
+### STEP 1 — Analyse PRD
 
-**Trigger:** Upload PRD เข้า session หรือ confirm PRD จาก interview
+**Trigger:** Upload PRD to the session or confirm PRD from interview
 
-Claude จะ:
-- Summarise feature (2-3 ประโยค)
-- Score แต่ละ section (1-10)
-- List gaps ตาม severity: HIGH / MED / LOW
-- แยก tasks: UNBLOCKED vs BLOCKED (รอ PO ตัดสินใจ)
+Claude will:
+- Summarise the feature (2–3 sentences)
+- Score each section (1–10)
+- List gaps by severity: HIGH / MED / LOW
+- Separate tasks: UNBLOCKED vs BLOCKED (waiting for PO decision)
 
-### STEP 1.5 — ชี้แจง PRD
+### STEP 1.5 — Clarify PRD
 
-Claude ถามทีละคำถามสำหรับ ambiguity 3 ประเภท:
-- **Type A** — Ambiguous requirement (ตีความได้หลายทาง)
-- **Type B** — Contradictory requirement (ขัดแย้งกัน)
-- **Type C** — Missing critical detail (ขาดรายละเอียดสำคัญ)
+Claude asks one question at a time for 3 types of ambiguity:
+- **Type A** — Ambiguous requirement (multiple interpretations)
+- **Type B** — Contradictory requirement (conflicting)
+- **Type C** — Missing critical detail
 
-ตอบคำถามทีละข้อ หรือกด **Skip** เพื่อบันทึกเป็น TODO
+Answer questions one at a time, or press **Skip** to record as a TODO
 
-### STEP 1.6 — สแกน Business-risk keyword
+### STEP 1.6 — Scan for Business-risk keywords
 
-ก่อนสแกน ถ้ามี `PATTERN_LIBRARY.md` ให้ Claude อ่าน section `## Escalated Keywords` ก่อนเสมอ (keyword ที่เคย escalate มาก่อนหน้า) แล้วรวมเข้ากับ scan รอบนี้ด้วย — ดู `ai/PROJECT_INSTRUCTIONS.md` §STEP 1.6
+Before scanning, if `PATTERN_LIBRARY.md` exists Claude reads the `## Escalated Keywords` section first (previously escalated keywords) and includes them in this scan — see `ai/PROJECT_INSTRUCTIONS.md` §STEP 1.6
 
-หลัง STEP 1.5 Claude สแกน PRD หา business-risk keyword (payment, auth, PII, external API, encryption/compliance ฯลฯ — ดูรายการเต็มใน [CORE_POLICY.md](../CORE_POLICY.md) §1) แล้วแนบผลสแกนเป็น context ใน SA Handoff — **นี่ไม่ใช่การตัดสิน tier** เป็นแค่ raw flag ให้ SA ใช้ประกอบการตัดสินใจที่ STEP 1.5 Tier Triage ของ SA
+After STEP 1.5, Claude scans the PRD for business-risk keywords (payment, auth, PII, external API, encryption/compliance, etc. — see full list in [CORE_POLICY.md](../CORE_POLICY.md) §1) and attaches the scan results as context in the SA Handoff — **this is not a tier decision** — it is raw flags for SA to use when making the Tier decision at SA's STEP 1.5 Tier Triage
 
-### STEP 2 — กำหนด Epics
+### STEP 2 — Define Epics
 
-Claude จัดกลุ่มงานเป็น Epics (high-level เท่านั้น — Lead ทำ task breakdown)
+Claude groups work into Epics (high-level only — Lead does the task breakdown)
 
-**หลัง confirm STEP 2:** Claude สร้าง SA Handoff อัตโนมัติ (รวม business-risk flags จาก STEP 1.6)
-- ถ้ายังไม่มี `Security role` หรือ `UX/UI required` ใน PROJECT_CONTEXT.md → Claude ถามพร้อมกันก่อน (ดู `ai/PROJECT_INSTRUCTIONS.md` §Security role & UX/UI check)
+**After confirming STEP 2:** Claude automatically creates the SA Handoff (including business-risk flags from STEP 1.6)
+- If `Security role` or `UX/UI required` are not yet in PROJECT_CONTEXT.md → Claude asks for them first (see `ai/PROJECT_INSTRUCTIONS.md` §Security role & UX/UI check)
 
-**หลังส่ง SA Handoff:** แจ้ง QA ให้เริ่ม Phase 0 ได้เลยโดยไม่รอ SA
+**After sending SA Handoff:** notify QA to start Phase 0 without waiting for SA
 
-### STEP 3 — ตรวจ Stack + Triage Summary/Solution Doc
+### STEP 3 — Check Stack + Triage Summary/Solution Doc
 
-**Trigger:** SA ส่ง Triage Summary (Tier 1) หรือ Solution Doc + ADRs (Tier 2/3) + STACK_CONTEXT กลับมา
+**Trigger:** SA sends back Triage Summary (Tier 1) or Solution Doc + ADRs (Tier 2/3) + STACK_CONTEXT
 
-**บังคับเสมอ — ห้าม proceed ไป STEP 4 ถ้ายังไม่ได้รับผลจาก SA** ไม่ว่า tier ไหน (ดู [CORE_POLICY.md](../CORE_POLICY.md) §1) — ไม่มี soft-warning แล้วเดินหน้าต่ออีกต่อไป
+**Always mandatory — do not proceed to STEP 4 until SA's output is received** regardless of tier (see [CORE_POLICY.md](../CORE_POLICY.md) §1) — no soft-warning-then-proceed path
 
-Claude ตรวจ:
-- STACK_CONTEXT.md ครบถ้วนไหม
-- **STACK_CONTEXT.md version sync (hard gate):** เทียบ version header ของฉบับที่นี่กับฉบับล่าสุดใน SA Project Knowledge — ถ้าไม่ตรงกัน **block** ไม่สร้าง Lead Handoff จนกว่า PO จะ re-sync ไฟล์ (ดู `ai/PROJECT_INSTRUCTIONS.md` §STEP 3)
-- Tier 1: มี Triage Summary หรือยัง — Tier 2/3: Solution Doc ครบทุก section (9 sections required + section 10 ถ้ามี UX/UI) หรือยัง
-- ADR files ตรงกับที่ reference ใน Solution Doc หรือไม่ (ถ้ามี significant tech decision แต่ไม่มี ADR → PAUSE รอก่อน)
-- Security Requirements (ถ้า `Security role: yes` → รอ SEC ส่ง Security_Requirements ก่อน)
+Claude checks:
+- Is STACK_CONTEXT.md complete?
+- **STACK_CONTEXT.md version sync (hard gate):** compare the version header here against the latest version in SA Project Knowledge — if they don't match, **block** Lead Handoff generation until PO re-syncs the file (see `ai/PROJECT_INSTRUCTIONS.md` §STEP 3)
+- Tier 1: Is Triage Summary present? Tier 2/3: Is Solution Doc complete (all 9 required sections + section 10 if UX/UI present)?
+- Do ADR files match those referenced in the Solution Doc? (if there is a significant tech decision but no ADR → PAUSE and wait)
+- Security Requirements (if `Security role: yes` → wait for SEC to send Security_Requirements first)
 
-### STEP 4 — สร้าง Lead Handoff
+### STEP 4 — Create Lead Handoff
 
-Claude generate `LEAD_HANDOFF_[feature].md` อัตโนมัติ
+Claude automatically generates `LEAD_HANDOFF_[feature].md`
 
-ไฟล์นี้รวม: PRD + Solution Doc + Epics + STACK_CONTEXT summary + DECISION_LOG + PATTERN_LIBRARY + ADRs + Security Requirements
+This file includes: PRD + Solution Doc + Epics + STACK_CONTEXT summary + DECISION_LOG + PATTERN_LIBRARY + ADRs + Security Requirements
 
-ดาวน์โหลดแล้วส่งให้ Lead
-
----
-
-## การจัดการ DECISION_LOG
-
-Claude append DECISION_LOG อัตโนมัติหลังทุก confirmed answer
-
-**กฎ:**
-- `_TODO.md` — เฉพาะ items ที่ยังไม่ resolve → re-upload ทุก session ใหม่ที่มี TODO คงเหลือ
-- `_RESOLVED.md` — archive ที่ resolve แล้ว → upload ครั้งแรก แล้ว re-upload เฉพาะเมื่อมี resolved items เพิ่ม
-- ห้ามรวมสองไฟล์เป็นไฟล์เดียว
-
-เมื่อ resolve TODO item → Claude ย้าย entry จาก `_TODO` ไป `_RESOLVED` และ export ทั้งสองไฟล์
+Download and send to Lead
 
 ---
 
-## PATTERN_LIBRARY — บันทึก Patterns
+## Managing DECISION_LOG
 
-หลัง STEP 4 เสร็จ Claude จะ detect patterns ที่ใช้ซ้ำได้จาก feature นั้น และถาม PO ว่าต้องการบันทึกไหม
+Claude appends to DECISION_LOG automatically after every confirmed answer
 
-หลัง confirm → Claude append ลง `PATTERN_LIBRARY.md` → ดาวน์โหลด → อัปโหลดกลับ Project
+**Rules:**
+- `_TODO.md` — only unresolved items → re-upload every new session with remaining TODOs
+- `_RESOLVED.md` — archive of resolved items → upload once, re-upload only when new resolved items are added
+- Never merge the two files into one
+
+When a TODO item is resolved → Claude moves the entry from `_TODO` to `_RESOLVED` and exports both files
+
+---
+
+## PATTERN_LIBRARY — Recording Patterns
+
+After STEP 4 completes, Claude detects reusable patterns from that feature and asks PO whether to record them
+
+After confirming → Claude appends to `PATTERN_LIBRARY.md` → download → re-upload to Project
 
 ---
 
 ## Production Bug Intake
 
-Trigger: ใครก็ได้ (แคชเชียร์, Ops, Dev) แจ้ง PO ว่ามีปัญหาบน production — หรือ PO เลือก option 4 ใน Welcome Dialog
+Trigger: Anyone (cashier, Ops, Dev) reports a production issue to PO — or PO selects option 4 in the Welcome Dialog
 
-**กฎ:** PO คือจุดรับรายงานเสมอ — Dev ห้ามแจ้ง Lead โดยตรง
+**Rule:** PO is always the intake point — Dev must not report directly to Lead
 
-### PO ทำทันที (< 5 นาที)
+### PO actions immediately (< 5 min)
 
-1. สร้าง `BugIntake_BR-[NNN]_[title].md` บันทึกใน `docs/roles/po/` (Option B) หรือ download เก็บไว้ (Option A)
-2. แจ้ง Lead ทันที พร้อมส่งไฟล์ BugIntake
-3. **รอ Lead ยืนยัน severity** — PO ไม่ตัดสิน severity เอง ไม่สั่ง Dev เอง
+1. Create `BugIntake_BR-[NNN]_[title].md` and save in `docs/roles/po/` (Option B) or download and keep (Option A)
+2. Notify Lead immediately and send the BugIntake file
+3. **Wait for Lead to confirm severity** — PO does not decide severity, does not instruct Dev directly
 
-| Severity | ความหมาย | สิ่งที่ Lead จะทำ |
-|----------|---------|-----------------|
-| **P1** | Service down / data loss / security breach | ออก HotfixTask ทันที — ไม่รอ SA |
-| **P2** | Functional bug, มี workaround | ออก HotfixTask; SA review async หลัง merge |
-| **P3** | Minor bug, ไม่กระทบ user โดยตรง | ใส่ backlog — ใช้ normal pipeline |
+| Severity | Meaning | What Lead will do |
+|----------|---------|-------------------|
+| **P1** | Service down / data loss / security breach | Issue HotfixTask immediately — no SA wait |
+| **P2** | Functional bug, workaround available | Issue HotfixTask; SA reviews async after merge |
+| **P3** | Minor bug, no direct user impact | Add to backlog — use normal pipeline |
 
-### สิ่งที่ PO จะได้รับคืน
+### What PO receives back
 
-หลัง hotfix deploy สู่ Production และ QA smoke test ผ่าน → Lead ส่ง `HotfixNotification_HF-[NNN].md` ให้ PO บันทึกใน `docs/roles/po/` — ใช้เป็น audit trail ว่า bug นั้นได้รับการแก้ไขแล้ว
+After hotfix deploys to Production and QA smoke test passes → Lead sends `HotfixNotification_HF-[NNN].md` to PO to record in `docs/roles/po/` — used as an audit trail that the bug was resolved
 
 ---
 
 ## Re-entry Flows
 
-| สถานการณ์ | Action |
-|----------|--------|
-| SA ส่ง revised Solution Doc (หลัง PoC FAIL/PARTIAL) | กลับเข้า STEP 3 โดยตรง — ไม่ต้องรัน STEP 1-2 ซ้ำ |
-| Lead ส่ง Issue Report → SA แก้ → ส่งกลับ PO | กลับเข้า STEP 3 โดยตรง |
+| Situation | Action |
+|-----------|--------|
+| SA sends revised Solution Doc (after PoC FAIL/PARTIAL) | Re-enter STEP 3 directly — no need to re-run STEP 1-2 |
+| Lead sends Issue Report → SA revises → sends back to PO | Re-enter STEP 3 directly |
 
 ---
 
-## ไฟล์ BugIntake
+## BugIntake File
 
-Claude สร้างให้อัตโนมัติเมื่อ PO เลือก option 4 → รายงาน Bug ใหม่ และตอบคำถาม:
+Claude creates it automatically when PO selects option 4 → reports a new bug and answers the questions:
 
 ```markdown
-# BugIntake_BR-[NNN]_[ชื่อ bug สั้นๆ].md
+# BugIntake_BR-[NNN]_[short bug title].md
 
-Date     : [วันที่]
-Reporter : PO / [ผู้รายงาน]
-Severity : รอ Lead ยืนยัน
+Date     : [date]
+Reporter : PO / [reporter name]
+Severity : Pending Lead confirmation
 
-## อาการที่พบ
-[PO อธิบายจากสิ่งที่ได้รับแจ้ง — ไม่ต้องเป็น technical]
+## Observed symptoms
+[PO describes what was reported — no need to be technical]
 
-## สาขา / environment ที่พบปัญหา
-[Production เท่านั้น? หรือ SIT/Staging ด้วย?]
+## Branch / environment where issue was found
+[Production only? Or SIT/Staging as well?]
 
-## ขั้นตอนที่ reproduce ได้
-[ถ้าทราบ]
+## Steps to reproduce
+[If known]
 
-## ผลกระทบ
-[กี่สาขา / กี่ user / มี workaround ไหม]
+## Impact
+[How many branches / users affected / is there a workaround?]
 ```
 
 ---
 
 ## Hard Rules
 
-1. **One conversation per feature** — ใช้ thread เดิมตลอดอายุ feature
-2. STEP 1 และ STEP 2 ไม่ถูก block โดย STACK_CONTEXT.md ที่ยังไม่มี
-3. ห้าม generate Claude Code prompts — นั่นคืองานของ Lead
-4. ห้ามทำ task breakdown — PO ทำ Epics เท่านั้น
-5. ทุก session ที่เพิ่ม decisions ให้ remind PO download DECISION_LOG ก่อน session ถัดไป
-6. STACK_CONTEXT.md ต้องมาจาก SA เท่านั้น — ห้ามถาม PO เรื่อง tech stack
+1. **One conversation per feature** — use the same thread throughout the feature's lifetime
+2. STEP 1 and STEP 2 are never blocked by a missing STACK_CONTEXT.md
+3. Never generate Claude Code prompts — that is Lead's job
+4. Never do task breakdown — PO creates Epics only
+5. Every session where decisions are added, remind PO to download DECISION_LOG before the next session
+6. STACK_CONTEXT.md must come from SA only — never ask PO about tech stack
 
 ---
 
-## Checklist ก่อนเริ่ม Feature ใหม่
+## Pre-Feature Checklist
 
-- [ ] `PROJECT_CONTEXT.md` อยู่ใน Project Knowledge แล้ว — ต้องมี `Security role:`, `UX/UI required:` และ `Environment:` (`cli` หรือ `claude.ai`)
-- [ ] `STACK_CONTEXT.md` อยู่ใน Project Knowledge แล้ว (ถ้ามีจากโปรเจกต์ก่อน)
-- [ ] เปิด conversation thread ใหม่สำหรับ feature นี้โดยเฉพาะ
+- [ ] `PROJECT_CONTEXT.md` is in Project Knowledge — must have `Security role:`, `UX/UI required:` and `Environment:` (`cli` or `claude.ai`)
+- [ ] `STACK_CONTEXT.md` is in Project Knowledge (if carried over from a previous project)
+- [ ] A new conversation thread has been opened for this feature

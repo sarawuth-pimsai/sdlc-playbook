@@ -1,22 +1,22 @@
-คุณทำหน้าที่เป็น **Setup Assistant** สำหรับ SDLC Playbook (Option B)
+You are acting as **Setup Assistant** for the SDLC Playbook (Option B)
 
-## งานของคุณ
+## Your task
 
-สร้าง directory structure และ copy ไฟล์ที่จำเป็นสำหรับ Option B workflow ในโปรเจกต์นี้
+Create the directory structure and copy the necessary files for the Option B workflow in this project.
 
-## ขั้นตอน
+## Steps
 
-### STEP 1 — หา sdlc-playbook
+### STEP 1 — Find sdlc-playbook
 
-ค้นหา path ของ sdlc-playbook ตามลำดับ:
-1. ตรวจสอบ `~/.sdlc-playbook-path` (ถ้ามี ให้อ่าน path จากไฟล์นี้)
-2. ตรวจสอบ `~/Workspace/ai/sdlc-playbook`
-3. ตรวจสอบ `~/sdlc-playbook`
-4. ถ้าไม่พบ → ถาม user ว่า sdlc-playbook อยู่ที่ไหน แล้วบันทึก path นั้นลงใน `~/.sdlc-playbook-path`
+Search for the sdlc-playbook path in this order:
+1. Check `~/.sdlc-playbook-path` (if it exists, read the path from this file)
+2. Check `~/Workspace/ai/sdlc-playbook`
+3. Check `~/sdlc-playbook`
+4. If not found → ask the user where sdlc-playbook is located, then save that path to `~/.sdlc-playbook-path`
 
-### STEP 2 — สร้าง directory structure
+### STEP 2 — Create directory structure
 
-รัน bash commands ต่อไปนี้:
+Run the following bash commands:
 
 ```bash
 mkdir -p docs/roles/po
@@ -27,47 +27,47 @@ mkdir -p docs/shared/tasks
 mkdir -p .claude/commands
 ```
 
-### STEP 3 — Copy ไฟล์จาก sdlc-playbook
+### STEP 3 — Copy files from sdlc-playbook
 
 ```bash
 # Copy role instruction files
 cp -r <SDLC_PLAYBOOK_PATH>/ai ./ai
 
-# Copy slash commands (ยกเว้น setup.md ตัวเอง)
+# Copy slash commands (excluding setup.md itself)
 cp <SDLC_PLAYBOOK_PATH>/templates/option-b/commands/po.md .claude/commands/po.md
 cp <SDLC_PLAYBOOK_PATH>/templates/option-b/commands/sa.md .claude/commands/sa.md
 cp <SDLC_PLAYBOOK_PATH>/templates/option-b/commands/lead.md .claude/commands/lead.md
 cp <SDLC_PLAYBOOK_PATH>/templates/option-b/commands/qa.md .claude/commands/qa.md
 ```
 
-แทน `<SDLC_PLAYBOOK_PATH>` ด้วย path จริงที่หาได้ใน STEP 1
+Replace `<SDLC_PLAYBOOK_PATH>` with the actual path found in STEP 1.
 
-### STEP 4 — สร้าง CLAUDE.md เริ่มต้น
+### STEP 4 — Create initial CLAUDE.md
 
-สร้างไฟล์ `CLAUDE.md` ที่ root ของโปรเจกต์ (ถ้ายังไม่มี) ด้วย content:
+Create the file `CLAUDE.md` at the project root (if it doesn't already exist) with this content:
 
 ```markdown
 # CLAUDE.md
 
-คุณทำหน้าที่เป็น **Developer** สำหรับโปรเจกต์นี้
+You are acting as **Developer** for this project.
 
 ## Instructions
-อ่านและทำตาม `ai/DEV_PROJECT_INSTRUCTIONS.md` ทุกข้อ
+Read and follow every rule in `ai/DEV_PROJECT_INSTRUCTIONS.md`
 
-## Knowledge files ของคุณ
-อ่านไฟล์ต่อไปนี้ใน `docs/shared/` silently ก่อนเริ่ม task:
-- `tasks/Task_[ID]_[title].md` — task ที่ได้รับจาก Lead
-- `TASK_LOG.md` — ดู task ที่ทำแล้วและ done criteria
+## Your knowledge files
+Read the following files in `docs/shared/` silently before starting any task:
+- `tasks/Task_[ID]_[title].md` — the task received from Lead
+- `TASK_LOG.md` — see completed tasks and done criteria
 
-## กฎสำคัญ
-- Implement ตาม task spec เท่านั้น
-- อัปเดต `docs/shared/TASK_LOG.md` ทุกครั้งที่ task เสร็จ
-- ไม่ออกนอก scope ของ task ที่ได้รับ
+## Key rules
+- Implement only what is specified in the task
+- Update `docs/shared/TASK_LOG.md` every time a task is complete
+- Do not go outside the scope of the task you received
 ```
 
-### STEP 5 — สร้าง TASK_LOG.md เริ่มต้น
+### STEP 5 — Create initial TASK_LOG.md
 
-สร้างไฟล์ `docs/shared/TASK_LOG.md` ถ้ายังไม่มี:
+Create the file `docs/shared/TASK_LOG.md` if it doesn't already exist:
 
 ```markdown
 # Last updated: <TODAY_DATE> | Version: 1
@@ -78,17 +78,17 @@ cp <SDLC_PLAYBOOK_PATH>/templates/option-b/commands/qa.md .claude/commands/qa.md
 |---------|-------|--------|-------------------|-------|
 ```
 
-### STEP 6 — แสดงสรุป
+### STEP 6 — Show summary
 
-หลังจากทำเสร็จ แสดง:
-1. directory structure ที่สร้างแล้ว (ใช้ `find . -type d | sort`)
-2. ไฟล์ที่ copy มา
-3. Next steps สำหรับผู้ใช้:
+After completing the setup, display:
+1. The directory structure created (use `find . -type d | sort`)
+2. Files that were copied
+3. Next steps for the user:
 
 ```
-Setup เสร็จแล้ว ✓
+Setup complete ✓
 
 Next steps:
-1. พิมพ์ /po เพื่อเริ่ม PO session และวิเคราะห์ feature แรก
-2. หรือพิมพ์ /sa ถ้าต้องการออกแบบ architecture ก่อน
+1. Type /po to start a PO session and analyse your first feature
+2. Or type /sa if you want to design the architecture first
 ```

@@ -54,6 +54,6 @@ The system is a PO-centered handoff pipeline: **PO → SA → SEC (Option A only
 
 - Every shared knowledge file template (`STACK_CONTEXT.md`, `DECISION_LOG_*`, `PATTERN_LIBRARY.md`, `PROJECT_CONTEXT.md`) carries a `Last updated: YYYY-MM-DD | Version: N` header — keep this when touching templates.
 - `SA_STACK_SETUP_REQUEST_template.md` no longer exists — PO generates the Stack Setup Request automatically from `ai/PROJECT_INSTRUCTIONS.md`. Stack templates live in `docs/roles/sa/stack-templates/` instead.
-- `ai/*.md` files are written in English; the "ภาษาที่ใช้" section in each mandates that everything Claude *outputs* to that role (questions, warnings, summaries) is in Thai. Keep this split when editing.
+- `ai/*.md` files are written in English; the "Output language" section in each reads the `Output language` field from `STACK_CONTEXT.md` (`en` default, `th` for Thai teams) to determine the language Claude *outputs* to that role (questions, warnings, summaries). Keep this pattern when editing.
 - Each role file ends with an "Ask-human triggers" / "Golden rule" section defining STOP/PAUSE/CHECK levels and which role is the sole decision-maker for that domain (e.g. "SA is the technical decision maker", "QA sets the verdict"). Never let one role silently make another's decision when adding new logic.
 - `docs/guides/*.md` should stay in sync with the corresponding `ai/*.md` file whenever a workflow step changes — they're two audiences (human vs. Claude) for the same process, not independent documents.

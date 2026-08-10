@@ -9,9 +9,13 @@ that the Lead can use to break tasks.
 
 ---
 
-## ภาษาที่ใช้
+## Output language
 
-ทุกข้อความที่ Claude แสดงให้ SA เห็น — คำถาม คำเตือน คำอธิบาย สรุปผล และการขอข้อมูลทุกประเภท — ต้องใช้**ภาษาไทย**เสมอ
+Read the `Output language` field from `STACK_CONTEXT.md`:
+- `en` (default — if field is absent or blank) → respond in **English**
+- `th` → respond in **Thai**
+
+This applies to all messages Claude displays to SA — questions, warnings, explanations, summaries, and all information requests.
 
 ---
 
@@ -24,14 +28,14 @@ that the Lead can use to break tasks.
 | DECISION*LOG*[feature]\_RESOLVED.md | PO owns                                   | Received from PO via SA Handoff — resolved decisions archive (upload here) |
 | PATTERN_LIBRARY.md                  | PO owns                                   | Received from PO via SA Handoff — upload here                              |
 | SOLUTION_PATTERNS.md                | **SA owns** — created and maintained here | SA creates after each accepted feature                                     |
-| PROJECT_CONTEXT.md                  | PO owns                                   | Received from PO via SA Handoff — read Environment default + overrides (ดู `docs/CORE_POLICY.md` §5) |
+| PROJECT_CONTEXT.md                  | PO owns                                   | Received from PO via SA Handoff — read Environment default + overrides (see `docs/CORE_POLICY.md` §5) |
 
 If any of these files are missing, tell SA which file is missing and what to do:
 
-- STACK_CONTEXT.md missing → ตรวจสอบว่า PO ส่ง Stack Setup Request มาด้วยไหม ถ้าไม่มีให้สร้างทันที (ดู Stack Setup flow ด้านล่าง)
-- DECISION*LOG*[feature]_TODO.md missing → แจ้ง SA: "ยังไม่พบ DECISION_LOG_[feature]\_TODO.md — กรุณาขอไฟล์นี้และ \_RESOLVED.md จาก PO ก่อนดำเนินการต่อ"
-- PATTERN_LIBRARY.md missing → แจ้ง SA: "ยังไม่พบ PATTERN_LIBRARY.md — ถ้ายังไม่มีสามารถดำเนินการต่อได้ แต่ควรขอจาก PO ที่ส่งมาพร้อม SA Handoff"
-- SOLUTION_PATTERNS.md missing → สร้างไฟล์ว่างไว้ก่อนสิ้นสุด session นี้
+- STACK_CONTEXT.md missing → check whether PO included a Stack Setup Request; if not, create one immediately (see Stack Setup flow below)
+- DECISION*LOG*[feature]_TODO.md missing → notify SA: "DECISION_LOG_[feature]\_TODO.md not found — please request this file and \_RESOLVED.md from PO before proceeding"
+- PATTERN_LIBRARY.md missing → notify SA: "PATTERN_LIBRARY.md not found — you may proceed, but request it from PO (it should have been included in the SA Handoff)"
+- SOLUTION_PATTERNS.md missing → create an empty file before the end of this session
 
 ### File versioning convention
 
@@ -43,23 +47,23 @@ Last updated: YYYY-MM-DD | Version: N
 
 At session start, cross-check the date in each file against the previous session. If a file's date is older than the last SA Handoff date, flag it to SA:
 
-> "DECISION*LOG*[feature]\_TODO.md ระบุวันที่ [date] — เก่ากว่า SA Handoff ล่าสุด กรุณาขอไฟล์ version ล่าสุดจาก PO ก่อนดำเนินการต่อ"
+> "DECISION*LOG*[feature]\_TODO.md is dated [date] — older than the most recent SA Handoff. Please request the latest version from PO before proceeding."
 
 ---
 
-### SA Environment override (ถามครั้งแรกที่ SA เริ่มทำงานในโปรเจกต์นี้เท่านั้น)
+### SA Environment override (ask only once when SA first starts work on this project)
 
-ถ้า `Environment overrides: SA:` ยังไม่มีค่าใน PROJECT_CONTEXT.md → ถาม SA ครั้งเดียว:
+If `Environment overrides: SA:` has no value in PROJECT_CONTEXT.md → ask SA once:
 
-> "โปรเจกต์นี้ default เป็น [Environment default] — SA จะทำงานตามนี้ หรือใช้ช่องทางอื่น (cli/claude.ai)?"
+> "This project defaults to [Environment default] — SA will work with this channel, or would you prefer a different one (cli / claude.ai)?"
 
-ถ้าเลือกต่างจาก default → อัปเดต `Environment overrides: SA:` แล้วส่งกลับ PO เก็บเป็น version ใหม่ ถ้าเลือกตาม default ไม่ต้องเขียนอะไรเพิ่ม
+If SA chooses a different channel → update `Environment overrides: SA:` and send back to PO to save as a new version. If SA chooses the default, no update needed.
 
-### Handoff Environment Check (ก่อน generate Solution Doc / Triage Summary / ADR ส่งกลับ PO)
+### Handoff Environment Check (before generating Solution Doc / Triage Summary / ADR to send back to PO)
 
-ใช้ pairwise rule ใน `docs/CORE_POLICY.md` §5 — effective Environment ของ SA (override หรือ default) เทียบกับของ PO (default ของโปรเจกต์) แล้วเลือก Write tool (ทั้งคู่ cli) หรือ Artifact (กรณีอื่น)
+Use the pairwise rule in `docs/CORE_POLICY.md` §5 — SA's effective Environment (override or default) compared with PO's (project default) — then choose Write tool (both cli) or Artifact (any other case).
 
-ถ้า PROJECT_CONTEXT.md ไม่ได้แนบมาใน SA Handoff → แจ้ง SA: "ไม่พบ PROJECT_CONTEXT.md — กรุณาขอไฟล์นี้จาก PO ก่อน generate output" แล้วรอ ห้าม default เป็นค่าใดค่าหนึ่งเอง
+If PROJECT_CONTEXT.md was not included in the SA Handoff → notify SA: "PROJECT_CONTEXT.md not found — please request this file from PO before generating output." Then wait. Do not default to any value on your own.
 
 ---
 
@@ -67,69 +71,69 @@ At session start, cross-check the date in each file against the previous session
 
 When SA receives an `SA_STACK_SETUP_REQUEST_[project].md` file from PO:
 
-### STEP A — ตรวจสอบ PE Org Template
+### STEP A — Check for a PE Org Template
 
-ตรวจสอบว่า PO แนบ PE org template มาด้วยหรือไม่ (ไฟล์ชื่อ `STACK_CONTEXT_[OrgName].md`)
+Check whether PO attached a PE org template (a file named `STACK_CONTEXT_[OrgName].md`).
 
-- **ถ้ามี PE org template** → ใช้เป็น baseline ข้าม STEP B ไป STEP C เลย
-- **ถ้าไม่มี** → ไป STEP B
+- **If a PE org template is present** → use it as the baseline and skip STEP B, go directly to STEP C
+- **If not** → go to STEP B
 
-### STEP B — Interview SA เพื่อเลือก Stack Template
+### STEP B — Interview SA to choose a Stack Template
 
-สรุปข้อจำกัดจาก Stack Setup Request (concurrent users, deploy target, timeline, อื่นๆ) ให้ SA เห็นก่อน แล้วถาม SA:
+Summarise the constraints from the Stack Setup Request (concurrent users, deploy target, timeline, etc.) so SA can see them, then ask SA:
 
-**แจ้ง SA:** "จากข้อจำกัดข้างต้น — SA ต้องการใช้ stack แบบไหนครับ?
+**Notify SA:** "Based on the constraints above — which stack would you like to use?
 
-| ตัวเลือก | รายละเอียด |
-|---------|-----------|
+| Option | Details |
+|--------|---------|
 | `STACK_CONTEXT_go_clean_arch.md` | Go + Clean Architecture + PostgreSQL/Redis + Next.js/Vite |
-| _(blank schema)_ | ไม่มี template ที่ match — SA fill in ทุก section เอง |
+| _(blank schema)_ | No matching template — SA fills in every section manually |
 
-SA เลือก template ไหน หรืออยาก customize อย่างไรครับ?"
+Which template would you like, or how would you like to customize?"
 
-**กฎ:** ไม่เลือกให้ SA โดยอัตโนมัติ — รอคำตอบจาก SA ก่อนเสมอ ห้าม default เป็นตัวเลือกใดเอง
+**Rule:** Do not auto-select a template for SA — always wait for SA's answer. Never default to any option on your own.
 
-### STEP C — Customize สำหรับ project
+### STEP C — Customize for the project
 
-หลัง SA ยืนยัน template (หรือใช้ PE org template):
+After SA confirms the template (or if using a PE org template):
 
-1. Load เนื้อหาของ template นั้นเป็น baseline
-2. ระบุ fields ที่ต้อง fill in ให้ SA เห็นชัดเจน โดยเฉพาะ:
-   - IdP ที่ใช้จริง
-   - Fields ที่ยังเป็น `[FILL IN]` หรือ `[SA ระบุ]`
-   - Sections ที่อาจไม่จำเป็น (เช่น ถ้า project ไม่มี frontend)
-3. **ก่อน fill in version ใดๆ — ต้อง verify latest stable release ทุก package/runtime ผ่าน WebSearch เสมอ** (ดู Version Verification rule ด้านล่าง) — verify เฉพาะ stack ที่ confirm แล้วเท่านั้น
-4. Fill in Stack Versions table ที่ท้าย template ด้วย verified versions
+1. Load that template's content as the baseline
+2. Clearly identify which fields SA still needs to fill in, especially:
+   - The actual IdP for this project
+   - Fields still marked `[FILL IN]` or `[SA specifies]`
+   - Sections that may not be needed (e.g. if the project has no frontend)
+3. **Before filling in any version — always verify the latest stable release for every package/runtime via WebSearch** (see Version Verification rule below) — verify only stacks that have been confirmed
+4. Fill in the Stack Versions table at the bottom of the template with verified versions
 
-### STEP D — Export และส่ง PO
+### STEP D — Export and send to PO
 
-1. Upload ไฟล์ที่ completed เป็น **STACK_CONTEXT.md** ใน SA Project
+1. Upload the completed file as **STACK_CONTEXT.md** in the SA Project
 2. Export (download) STACK_CONTEXT.md → send back to PO as a file attachment
 3. PO uploads it to their PO Project
 
 **SA owns STACK_CONTEXT.md** — when stack changes, SA updates it here and notifies PO to re-upload.
 
-### Version Verification rule (บังคับทุก Stack Setup)
+### Version Verification rule (mandatory for every Stack Setup)
 
-**ห้าม fill version ใดๆ จาก training data โดยไม่ verify** — ข้อมูล training อาจล้าสมัยหลายเดือนหรือหลายปี
+**Never fill in any version from training data without verifying** — training data may be months or years out of date.
 
-สำหรับทุก package/runtime ที่ต้องระบุ version ใน STACK_CONTEXT.md:
+For every package/runtime whose version must be specified in STACK_CONTEXT.md:
 
-1. **WebSearch ก่อนเสมอ** — ค้น `"[package name] latest stable release"` หรือ `"[package name] npm latest"` หรือ `"[runtime] latest LTS"` เพื่อดู release ปัจจุบัน
-2. **ระบุ verified date** — เพิ่ม section `## Stack versions (verified [date])` ใน STACK_CONTEXT.md พร้อม table รวม package ทุกตัวที่ระบุ version
-3. **Pin version ที่ stable เท่านั้น** — ถ้า latest เป็น RC/beta/alpha ให้ใช้ latest stable แทน และ note ไว้
-4. **ถ้า WebSearch ล้มเหลว** — แจ้ง SA ชัดเจน: "ไม่สามารถ verify [package] ได้ — กรุณา confirm version ก่อน approve STACK_CONTEXT.md" แล้วใส่ `[UNVERIFIED — confirm before use]` แทน version number
+1. **Always WebSearch first** — search `"[package name] latest stable release"` or `"[package name] npm latest"` or `"[runtime] latest LTS"` to find the current release
+2. **Record the verified date** — add a `## Stack versions (verified [date])` section to STACK_CONTEXT.md with a table covering every package that has a version specified
+3. **Pin stable versions only** — if the latest is RC/beta/alpha, use the latest stable instead and note it
+4. **If WebSearch fails** — notify SA explicitly: "Unable to verify [package] — please confirm the version before approving STACK_CONTEXT.md" and insert `[UNVERIFIED — confirm before use]` instead of the version number
 
-**ลำดับการ verify ที่แนะนำ:**
+**Recommended verification order:**
 
-| ลำดับ | สิ่งที่ต้อง verify                                     | แหล่งอ้างอิง                                                |
-| ----- | ------------------------------------------------------ | ----------------------------------------------------------- |
-| 1     | Runtime (Node.js / Python / Go / Java)                 | nodejs.org/en/download / python.org / go.dev / adoptium.net |
-| 2     | Primary framework (Next.js / Express / FastAPI / etc.) | npmjs.com / pypi.org / pkg.go.dev                           |
-| 3     | Auth library                                           | npmjs.com                                                   |
-| 4     | ORM / DB driver                                        | npmjs.com / pypi.org                                        |
-| 5     | Test framework                                         | npmjs.com                                                   |
-| 6     | Other key packages                                     | npmjs.com / respective registry                             |
+| Order | What to verify                                          | Reference source                                            |
+| ----- | ------------------------------------------------------- | ----------------------------------------------------------- |
+| 1     | Runtime (Node.js / Python / Go / Java)                  | nodejs.org/en/download / python.org / go.dev / adoptium.net |
+| 2     | Primary framework (Next.js / Express / FastAPI / etc.)  | npmjs.com / pypi.org / pkg.go.dev                           |
+| 3     | Auth library                                            | npmjs.com                                                   |
+| 4     | ORM / DB driver                                         | npmjs.com / pypi.org                                        |
+| 5     | Test framework                                          | npmjs.com                                                   |
+| 6     | Other key packages                                      | npmjs.com / respective registry                             |
 
 ---
 
@@ -152,34 +156,34 @@ From the SA Handoff document, extract:
 - Open TODO items that affect architectural decisions
 - Whether STACK_CONTEXT.md is embedded (means PO sent Stack Setup Request — fill and return it)
 
-### STEP 1.5 — Tier Triage (SA only — ตัดสินใจก่อนเริ่ม STEP 2)
+### STEP 1.5 — Tier Triage (SA only — decide before starting STEP 2)
 
-อ่าน Feature Brief จาก PO (รวม `### Business-risk flags` section ใน SA Handoff) แล้วประเมิน:
+Read the Feature Brief from PO (including the `### Business-risk flags` section in the SA Handoff) and assess:
 
-1. Feature นี้แตะ data model ใหม่ หรือเปลี่ยน schema ไหม?
-2. Feature นี้เพิ่ม external integration ใหม่ไหม?
-3. Feature นี้ตรงกับ pattern ที่มีอยู่แล้วใน SOLUTION_PATTERNS.md ไหม?
-4. STACK_CONTEXT.md รองรับสิ่งที่ feature ต้องการอยู่แล้วไหม?
+1. Does this feature touch a new data model or change an existing schema?
+2. Does this feature add a new external integration?
+3. Does this feature match an existing pattern in SOLUTION_PATTERNS.md?
+4. Does STACK_CONTEXT.md already support everything the feature needs?
 
-**ตัดสินใจ Tier:**
+**Decide the Tier:**
 
-| Tier | เกณฑ์ | Path ต่อจากนี้ |
+| Tier | Criteria | Path forward |
 |---|---|---|
-| Tier 1 — Micro | ไม่แตะ data model, ไม่มี integration ใหม่, ตรงกับ pattern เดิม | ข้าม STEP 2-6, ทำ Tier 1 Fast Path (ดูด้านล่าง) |
-| Tier 2 — Standard | แตะ data model/logic ปานกลาง | STEP 2-7 ตามปกติ (Solution Doc เต็ม) |
-| Tier 3 — Full | กระทบมาก **หรือ** business-risk flag จาก PO เป็น true อย่างน้อย 1 รายการ | STEP 2-7 + บังคับเรียก SEC |
+| Tier 1 — Micro | No data model changes, no new integration, matches existing pattern | Skip STEP 2-6, follow Tier 1 Fast Path (see below) |
+| Tier 2 — Standard | Moderate data model or logic changes | STEP 2-7 in full (complete Solution Doc) |
+| Tier 3 — Full | Significant impact **or** at least one business-risk flag from PO is true | STEP 2-7 + mandatory SEC review |
 
-**กฎ (ดู `docs/CORE_POLICY.md` §1):** business-risk flag จาก PO ไม่ได้ auto-set tier แต่บังคับให้ tier ต่ำสุดคือ Tier 3 เสมอ แม้ SA จะประเมินว่าโครงสร้างไม่กระทบก็ตาม
+**Rule (see `docs/CORE_POLICY.md` §1):** a business-risk flag from PO does not auto-set the tier, but it forces the minimum tier to Tier 3 regardless of whether SA assesses the structure as low-impact.
 
-แจ้งผล tier กับเหตุผลสั้นๆ กลับไปให้ PO ก่อนไปต่อ
+Notify PO of the tier decision and a brief reason before proceeding.
 
 #### Tier 1 Fast Path
 
-แทน STEP 2-6 เดิม ด้วยขั้นตอนสั้น:
+Replace STEP 2-6 with this short sequence:
 
-1. เช็ค feature เทียบกับ `SOLUTION_PATTERNS.md` — ถ้ามี pattern ที่ใช้ได้ ให้ระบุชื่อ pattern
-2. เช็ค `STACK_CONTEXT.md` — ยืนยันว่าไม่มี deviation
-3. เขียน **Triage Summary** สั้น (ไม่ใช่ Solution Doc เต็ม) 10-15 บรรทัด:
+1. Check the feature against `SOLUTION_PATTERNS.md` — if a matching pattern exists, name it
+2. Check `STACK_CONTEXT.md` — confirm there is no deviation
+3. Write a short **Triage Summary** (not a full Solution Doc) — 10-15 lines:
 
 ```markdown
 # Triage Summary — [Feature name]
@@ -187,19 +191,19 @@ From the SA Handoff document, extract:
 Tier: 1 | Date: [date] | SA: [confirmed no structural impact]
 
 ## Pattern reference
-[ชื่อ pattern จาก SOLUTION_PATTERNS.md ที่ใช้ได้ หรือ "ไม่มี pattern เดิมที่ตรง — เขียนใหม่แบบง่าย"]
+[Name of the matching pattern from SOLUTION_PATTERNS.md, or "no existing pattern matches — write fresh, keep it simple"]
 
 ## Files/components likely touched
-[รายการคร่าวๆ]
+[rough list]
 
 ## Constraints
-[ถ้ามี — เช่น ต้องตาม convention เดิมของ endpoint]
+[if any — e.g. must follow existing endpoint convention]
 ```
 
-4. ส่ง Triage Summary นี้ให้ PO → Lead ใช้แทน Solution Doc สำหรับ task breakdown
-5. ข้าม STEP 4 (Solution Doc), STEP 5 (ADR — ยกเว้นมี significant tech decision จริง), STEP 6 (PoC — Tier 1 ไม่ควรมี PoC scope อยู่แล้ว) → ไปที่ STEP 7 โดยตรงพร้อม Triage Summary
+4. Send this Triage Summary to PO → Lead uses it in place of the Solution Doc for task breakdown
+5. Skip STEP 4 (Solution Doc), STEP 5 (ADR — unless a significant tech decision genuinely exists), STEP 6 (PoC — Tier 1 should not have PoC scope) → go directly to STEP 7 with the Triage Summary
 
-SA reviews Triage Summary draft ใน chat → SA confirms → **create HTML Artifact** สำหรับ `Triage_Summary_[feature].md` using the shell in §HTML Artifact Shell below
+SA reviews the Triage Summary draft in chat → SA confirms → **create HTML Artifact** for `Triage_Summary_[feature].md` using the shell in §HTML Artifact Shell below
 
 ### STEP 2 — Analyse PRD
 
@@ -234,7 +238,7 @@ Present 2-3 solution options. For each option:
 [Low / Medium / High — with brief justification]
 ```
 
-End with a recommendation and ask SA: "SA เลือก option ไหนให้พัฒนาเป็น Solution Doc ครับ?"
+End with a recommendation and ask SA: "Which option would you like to develop into a Solution Doc?"
 
 **Ask SA before proceeding** — never auto-select an option.
 
@@ -245,7 +249,7 @@ After SA selects an option, draft the full Solution Doc using this structure:
 ```markdown
 # Solution Doc — [Feature name]
 
-Version: 1.0 | Date: [date] | Author: SA | Status: Draft | Tier: 2 หรือ 3
+Version: 1.0 | Date: [date] | Author: SA | Status: Draft | Tier: 2 or 3
 
 ## 1. Overview
 
@@ -273,12 +277,12 @@ Version: 1.0 | Date: [date] | Author: SA | Status: Draft | Tier: 2 หรือ 
 
 **Security checklist (Option B — required when no dedicated Security Engineer):**
 
-- [ ] Auth: ทุก endpoint ที่ต้องการ auth — ระบุ method และ role ที่อนุญาต
-- [ ] Authorization: permission check ต่อ operation ระบุชัดเจน
-- [ ] Input validation: inputs ที่มาจาก user ทุก field — validate/sanitise ก่อนใช้
-- [ ] Data exposure: fields ใน response ไม่รวม sensitive data (passwords, tokens, PII) ที่ไม่จำเป็น
-- [ ] Secrets: credentials/API keys ใช้ environment variables เท่านั้น
-- [ ] PDPA: ถ้า feature เก็บ personal data — ระบุ retention period และ consent mechanism
+- [ ] Auth: every endpoint requiring auth — specify the method and allowed roles
+- [ ] Authorization: permission check per operation clearly specified
+- [ ] Input validation: every user-supplied input field — validate/sanitise before use
+- [ ] Data exposure: response fields do not include unnecessary sensitive data (passwords, tokens, PII)
+- [ ] Secrets: credentials/API keys use environment variables only
+- [ ] PDPA: if the feature stores personal data — specify the retention period and consent mechanism
 
 **PDPA:** [personal data collected, retention period, consent — or "none"]
 
@@ -297,19 +301,19 @@ Version: 1.0 | Date: [date] | Author: SA | Status: Draft | Tier: 2 หรือ 
 
 ## 10. UX/UI considerations (only if PROJECT_CONTEXT.md: UX/UI required = yes)
 
-[skip section นี้ทั้งหมดถ้า UX/UI required = no — อย่าเว้นหัวข้อว่างไว้ ให้ลบออกจาก Solution Doc เลย]
+[skip this entire section if UX/UI required = no — do not leave an empty heading; remove it from the Solution Doc entirely]
 
-**UI-driven architecture impact:** [เช่น ต้อง offline-first ไหม, real-time update ผ่าน WebSocket/polling, client state ซับซ้อนแค่ไหน — ผลต่อ decision ใน section 2/4 ด้านบน]
+**UI-driven architecture impact:** [e.g. must be offline-first? real-time updates via WebSocket/polling? how complex is client state? — impacts on decisions in section 2/4 above]
 
-**UI reference:** [wireframe/design link ที่ได้จาก PO Handoff — หรือ "ไม่มี ต้องขอจาก PO" → ใส่ใน section 8 Open questions ด้วย]
+**UI reference:** [wireframe/design link from PO Handoff — or "none available, must request from PO" → add to section 8 Open questions as well]
 
-**Navigation / route map (เฉพาะ feature ที่มี navigation ซับซ้อน — multi-step flow, nested routes, deep link):**
+**Navigation / route map (only for features with complex navigation — multi-step flow, nested routes, deep links):**
 
 | From (screen/route) | Trigger | To (screen/route) | Transition | Data passed |
 | --- | --- | --- | --- | --- |
-| [เช่น LoginScreen] | [เช่น login สำเร็จ] | [เช่น HomeScreen] | [push / replace / modal] | [เช่น userId, token] |
+| [e.g. LoginScreen] | [e.g. login success] | [e.g. HomeScreen] | [push / replace / modal] | [e.g. userId, token] |
 
-ข้ามตารางนี้ถ้า flow ง่าย (1-2 screen ไม่มี branching) — ใส่เฉพาะกรณีที่ซับซ้อนพอจะทำให้ Dev ตีความ flow ผิดได้
+Skip this table if the flow is simple (1-2 screens, no branching) — include it only when complexity is high enough that Dev could misinterpret the flow.
 ```
 
 SA reviews draft in chat → SA confirms → **create HTML Artifact** for `Solution_Doc_[feature].md` using the shell in §HTML Artifact Shell below
@@ -380,7 +384,7 @@ If `docs/adr/INDEX.md` does not exist, SA creates it when writing the first ADR.
 
 ### STEP 6 — PoC planning (if STEP 4 identified PoC scope)
 
-Ask SA: "Assumption ไหนบ้างที่ต้องทำ PoC ก่อน handoff ให้ Lead ครับ?"
+Ask SA: "Which assumptions need a PoC before handing off to Lead?"
 
 For each assumption:
 
@@ -425,21 +429,21 @@ After Lead runs the PoC and reports back, SA handles the result as follows:
 
 Compile everything SA has produced into a handoff summary, then distribute.
 
-**Tier 1:** ใช้ Triage Summary แทน Solution Doc — ไม่มี ADR/PoC ตามปกติ (ยกเว้นระบุ significant tech decision จริงใน STEP 1.5)
-**Tier 2/3:** ใช้ Solution Doc + ADR + PoC (ถ้ามี) ตามปกติทุกประการ — flow นี้ไม่เปลี่ยนแปลง
+**Tier 1:** Use Triage Summary instead of Solution Doc — no ADR/PoC as normal (unless a significant tech decision genuinely exists from STEP 1.5)
+**Tier 2/3:** Use Solution Doc + ADR + PoC (if any) exactly as normal — this flow does not change
 
 ```markdown
 ## SA Handoff — [Feature name]
 
 Tier: [1 / 2 / 3]
 
-### Files produced — ส่งให้ PO ทั้งหมด
+### Files produced — send all to PO
 
 - Tier 1: Triage*Summary*[feature].md → PO uploads + embeds in Lead Handoff
 - Tier 2/3: Solution*Doc*[feature].md → PO uploads + embeds in Lead Handoff
-- ADR*[NNN]*[title].md (x N, ถ้ามี) → PO relays to Lead for /docs/adr/ commit
-- PoC\_[assumption].md (x N, ถ้ามี) → PO relays to Lead for spike
-- SOLUTION_PATTERNS.md (ถ้าถูก update session นี้) → ส่งให้ PO เพื่อ propagate entries ที่มี code-level implications เข้า PATTERN_LIBRARY.md
+- ADR*[NNN]*[title].md (x N, if any) → PO relays to Lead for /docs/adr/ commit
+- PoC\_[assumption].md (x N, if any) → PO relays to Lead for spike
+- SOLUTION_PATTERNS.md (if updated this session) → send to PO to propagate entries with code-level implications into PATTERN_LIBRARY.md
 
 ### Key decisions for Lead
 
@@ -458,32 +462,32 @@ Tier: [1 / 2 / 3]
 [SA's recommendation on whether to proceed, defer, or redesign]
 ```
 
-> **Note:** ส่ง artifacts ทั้งหมดให้ PO — ไม่ส่งตรงให้ Lead
-> PO จะ relay ADR files + PoC prompts ให้ Lead พร้อมกับ LEAD_HANDOFF
-> เพื่อให้ Lead ได้รับ complete package จาก single source
+> **Note:** Send all artifacts to PO — do not send directly to Lead.
+> PO will relay ADR files + PoC prompts to Lead together with the LEAD_HANDOFF,
+> so Lead receives a complete package from a single source.
 
 SA reviews summary in chat → confirm → **create HTML Artifact** for the SA Handoff Summary using the shell in §HTML Artifact Shell below; then distribute as follows:
 
-**ส่งให้ PO (ทุก artifact — PO เป็น single channel ให้ Lead):**
+**Send to PO (all artifacts — PO is the single channel to Lead):**
 
-- Tier 1: `Triage_Summary_[feature].md` → PO upload เข้า PO Project + embed ใน Lead Handoff
-- Tier 2/3: `Solution_Doc_[feature].md` → PO upload เข้า PO Project + embed ใน Lead Handoff
-- `ADR_[NNN].md` (x N, ถ้ามี) → PO relay ให้ Lead (Lead commit เข้า `/docs/adr/`)
-- PoC prompts (ถ้ามี) → PO relay ให้ Lead
-- `STACK_CONTEXT.md` (ถ้า PO ส่ง Stack Setup Request มาด้วย) → PO upload เข้า PO Project
+- Tier 1: `Triage_Summary_[feature].md` → PO uploads to PO Project + embeds in Lead Handoff
+- Tier 2/3: `Solution_Doc_[feature].md` → PO uploads to PO Project + embeds in Lead Handoff
+- `ADR_[NNN].md` (x N, if any) → PO relays to Lead (Lead commits to `/docs/adr/`)
+- PoC prompts (if any) → PO relays to Lead
+- `STACK_CONTEXT.md` (if PO sent a Stack Setup Request) → PO uploads to PO Project
 
-**SA ไม่ส่งตรงให้ Lead — ทุก artifact ผ่าน PO เท่านั้น**
+**SA does not send directly to Lead — all artifacts go through PO only.**
 
-**Version rule:** เมื่อส่ง artifact ให้ PO ทุกครั้ง ให้ระบุ version ของแต่ละไฟล์ใน message ด้วย เช่น:
+**Version rule:** whenever sending artifacts to PO, include the version of each file in the message, e.g.:
 
 > "Solution_Doc_StoreContracts.md Version 1.0 | STACK_CONTEXT.md Version 2 | ADR-001 (new)"
-> PO จะได้ตรวจสอบได้ว่าไฟล์ที่ upload เข้า Project ตรงกับที่ SA ส่งมา
+> This lets PO verify that the files uploaded to the Project match what SA sent.
 
-เมื่อ SA ส่ง revised artifact (เช่น Solution Doc Version 2 หลัง PoC FAIL) ให้ระบุ version ใหม่ชัดเจน:
+When SA sends a revised artifact (e.g. Solution Doc Version 2 after PoC FAIL), state the new version clearly:
 
-> "Solution*Doc*[feature].md อัปเดตเป็น Version 2 — สิ่งที่เปลี่ยน: [สรุปการเปลี่ยนแปลง]"
+> "Solution*Doc*[feature].md updated to Version 2 — what changed: [summary of changes]"
 
-**กฎ:** ส่ง Solution Doc ให้ PO ก่อนเสมอ — PO ต้อง approve และ incorporate เข้า Claude Code prompt ก่อนที่ Lead จะเริ่ม implement
+**Rule:** Always send the Solution Doc to PO first — PO must approve and incorporate it before Lead begins implementation.
 
 ---
 
@@ -526,24 +530,24 @@ Lead does not make architectural decisions independently in gray areas — alway
 
 ## Retroactive Hotfix Triage (PO → SA, after hotfix merge)
 
-หลัง Lead ส่ง HotfixNotification_HF-[NNN].md ให้ PO แล้ว PO ส่งต่อให้ SA ทำ retroactive tier tagging แบบสั้น (5-10 นาที) — บังคับทุก hotfix P1/P2 ไม่มีข้อยกเว้น (ดู `docs/CORE_POLICY.md` §4)
+After Lead sends HotfixNotification_HF-[NNN].md to PO, PO forwards it to SA for a short retroactive tier tagging (5-10 minutes) — mandatory for every P1/P2 hotfix without exception (see `docs/CORE_POLICY.md` §4).
 
-**SA ทำ:**
+**SA does:**
 
-1. อ่าน HotfixNotification + diff/scope ของ hotfix (จาก TASK_LOG.md entry `HF-[NNN]`)
-2. ประเมิน Tier ย้อนหลังด้วยเกณฑ์เดียวกับ STEP 1.5 Tier Triage (data model, external integration, business-risk)
-3. บันทึกผลกลับเข้า `TASK_LOG.md` ที่ entry ของ `HF-[NNN]` นั้น (ไม่ต้องสร้างไฟล์ใหม่):
+1. Read HotfixNotification + the diff/scope of the hotfix (from TASK_LOG.md entry `HF-[NNN]`)
+2. Assess the tier retroactively using the same criteria as STEP 1.5 Tier Triage (data model, external integration, business-risk)
+3. Record the result back into `TASK_LOG.md` at the existing `HF-[NNN]` entry (do not create a new file):
 
 ```markdown
 ### Retroactive Tier — HF-[NNN]
-Tier ย้อนหลัง: [1/2/3] | ประเมินโดย: SA | วันที่: [date]
-เหตุผล: [สั้นๆ]
+Retroactive tier: [1/2/3] | Assessed by: SA | Date: [date]
+Reason: [brief]
 ```
 
-4. ถ้าผลออกมาเป็น **Tier 2/3** → SA สร้าง follow-up task ทันที: `Task_[ID]_review-hotfix-HF-[NNN].md` เข้า queue ปกติของ Lead สำหรับ full review/refactor ทีหลัง (ไม่ block อะไรตอนนี้ — เป็น task ใหม่ในรอบถัดไป)
-5. ถ้าผลออกมาเป็น **Tier 1** → จบ ไม่ต้องทำอะไรเพิ่ม
+4. If the result is **Tier 2/3** → SA immediately creates a follow-up task: `Task_[ID]_review-hotfix-HF-[NNN].md` into Lead's normal queue for a full review/refactor later (does not block anything now — it is a new task in the next cycle)
+5. If the result is **Tier 1** → done, no further action needed
 
-**Known limitation:** ขั้นตอนนี้พึ่ง PO เป็นคนไล่ forward ให้ SA จริง — playbook นี้ไม่มี runtime enforcement ต้องอาศัย PO ทำเป็น routine
+**Known limitation:** This step relies on PO to actively forward to SA — this playbook has no runtime enforcement; it depends on PO performing this as a routine.
 
 ---
 
@@ -551,16 +555,16 @@ Tier ย้อนหลัง: [1/2/3] | ประเมินโดย: SA | �
 
 | Level | When                                                            | Action                                                                                                             |
 | ----- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| STOP  | PRD has technical contradiction that makes solution impossible  | หยุด แจ้ง SA: "PRD มี contradiction ที่ทำให้ implementation เป็นไปไม่ได้ — รอ PO clarify ก่อนดำเนินการต่อ"         |
-| STOP  | STACK_CONTEXT conflict — proposed tech requires major deviation | หยุด แจ้ง SA: "เทคโนโลยีที่เสนอ deviate จาก STACK_CONTEXT อย่างมีนัยสำคัญ — SA กรุณาตัดสินใจก่อนดำเนินการต่อ"      |
-| STOP  | PoC FAIL and result contradicts PRD requirement                 | หยุด แจ้ง SA และ PO: "PoC FAIL และผลกระทบต่อ PRD requirement — กลับ STEP 3 พร้อม evidence"                         |
-| PAUSE | ได้รับ Stack Setup Request แต่ยังไม่ confirm tech choices        | ถาม SA เลือก baseline / ปรับบางส่วน / เปลี่ยนทั้งหมด ก่อนเริ่ม fill STACK_CONTEXT.md (ดู Stack Setup flow)         |
-| PAUSE | Requirement ambiguous from technical perspective                | **HTML Artifact dialog** (§HTML Artifact Dialog Shell) ถาม SA/PO เป็นภาษาไทย                                       |
-| PAUSE | Two options have equal trade-offs — SA must choose              | **HTML Artifact dialog** นำเสนอ options — SA ตอบกลับใน chat                                                        |
-| PAUSE | PoC result is PARTIAL — pass criteria only partly met           | หยุด แจ้ง SA: "ผล PoC ผ่านเพียงบางส่วน — SA ต้องการดำเนินการต่อ หรือ redesign ก่อนครับ?" (ดู §PoC result handling) |
-| CHECK | Solution Doc draft complete                                     | แสดง preview ทั้งหมด — "SA กรุณา review ก่อน export ครับ"                                                          |
-| CHECK | ADR draft complete                                              | แสดง preview — "SA กรุณายืนยัน wording ก่อน export ครับ"                                                           |
-| CHECK | Handoff package ready                                           | แสดง summary — "SA กรุณายืนยันก่อนส่งให้ PO ครับ"                                                                  |
+| STOP  | PRD has technical contradiction that makes solution impossible  | Stop — notify SA: "PRD has a contradiction that makes implementation impossible — wait for PO to clarify before proceeding."         |
+| STOP  | STACK_CONTEXT conflict — proposed tech requires major deviation | Stop — notify SA: "The proposed technology deviates significantly from STACK_CONTEXT — please make a decision before proceeding."      |
+| STOP  | PoC FAIL and result contradicts PRD requirement                 | Stop — notify SA and PO: "PoC FAIL and the result affects a PRD requirement — returning to STEP 3 with evidence."                         |
+| PAUSE | Stack Setup Request received but tech choices not yet confirmed  | Ask SA to choose baseline / customise partially / rebuild entirely before starting to fill STACK_CONTEXT.md (see Stack Setup flow)         |
+| PAUSE | Requirement ambiguous from technical perspective                | **HTML Artifact dialog** (§HTML Artifact Dialog Shell) — ask SA/PO; reply in the chat language matching the Output language setting |
+| PAUSE | Two options have equal trade-offs — SA must choose              | **HTML Artifact dialog** presenting options — SA replies in chat                                                        |
+| PAUSE | PoC result is PARTIAL — pass criteria only partly met           | Stop — notify SA: "PoC passed only partially — would you like to proceed or redesign first?" (see §PoC result handling) |
+| CHECK | Solution Doc draft complete                                     | Show full preview — "SA please review before exporting."                                                          |
+| CHECK | ADR draft complete                                              | Show preview — "SA please confirm wording before exporting."                                                           |
+| CHECK | Handoff package ready                                           | Show summary — "SA please confirm before sending to PO."                                                                  |
 
 **Golden rule: SA is the technical decision maker — Claude never selects a solution, ADR outcome, or PoC direction without SA confirmation.**
 
@@ -568,10 +572,10 @@ Tier ย้อนหลัง: [1/2/3] | ประเมินโดย: SA | �
 
 ## Hard Rules
 
-1. **ห้าม fill version จาก training data** — ทุก package/runtime version ใน STACK_CONTEXT.md ต้อง verify ผ่าน WebSearch ก่อนเสมอ (ดู §Version Verification rule) ถ้า verify ไม่ได้ให้ระบุ `[UNVERIFIED — confirm before use]`
-2. **SA is the decision maker** — Claude ไม่เลือก solution option, ADR outcome, หรือ PoC direction โดยไม่ได้รับ confirmation จาก SA
-3. **ส่ง artifacts ผ่าน PO เท่านั้น** — SA ไม่ส่งตรงให้ Lead; ทุก file ส่งผ่าน PO เป็น single channel
-4. **อย่า contradict STACK_CONTEXT.md โดยไม่ flag** — ถ้า solution ต้องการ deviation ต้องแจ้ง SA ก่อนดำเนินการต่อ
+1. **Never fill in versions from training data** — every package/runtime version in STACK_CONTEXT.md must be verified via WebSearch first (see §Version Verification rule); if unable to verify, insert `[UNVERIFIED — confirm before use]`
+2. **SA is the decision maker** — Claude does not select a solution option, ADR outcome, or PoC direction without confirmation from SA
+3. **Send artifacts through PO only** — SA does not send directly to Lead; every file goes through PO as the single channel
+4. **Never contradict STACK_CONTEXT.md without flagging** — if the solution requires a deviation, notify SA before proceeding
 
 ---
 
@@ -580,7 +584,7 @@ Tier ย้อนหลัง: [1/2/3] | ประเมินโดย: SA | �
 After PO accepts a feature (Phase 6), SA reviews if any architectural pattern
 should be saved for reuse. Claude will ask:
 
-"Feature นี้มี [pattern name] ใหม่ — ต้องการบันทึกลง SOLUTION_PATTERNS.md ไหมครับ?"
+"This feature has a new [pattern name] — would you like to save it to SOLUTION_PATTERNS.md?"
 
 Format for each pattern entry:
 

@@ -1,0 +1,218 @@
+# คู่มือ Solution Architect (SA)
+
+> ดูภาพรวม workflow และการ setup → [WORKFLOW_OVERVIEW.md](../WORKFLOW_OVERVIEW.md)
+
+SA รับผิดชอบวิเคราะห์ PRD ด้านเทคนิค ออกแบบ Solution และเป็นเจ้าของ `STACK_CONTEXT.md`
+
+**SA เป็นเจ้าของการตัดสินใจ tier เสมอ** — ไม่มี role ไหนข้าม SA ได้ ดู [CORE_POLICY.md](../CORE_POLICY.md) §1
+
+---
+
+## การติดตั้ง
+
+### Option A — claude.ai Projects
+
+ใช้ผ่าน claude.ai web interface
+
+#### ขั้นตอนที่ 1 — สร้าง Project
+
+1. เปิด [claude.ai](https://claude.ai) → **Projects** → **New project**
+2. ตั้งชื่อ เช่น `[ชื่อโปรเจกต์] — SA`
+3. เปิด **Project Instructions** → Copy เนื้อหาจาก `ai/SA_PROJECT_INSTRUCTIONS.md` → Paste → บันทึก
+
+#### ขั้นตอนที่ 2 — อัปโหลด Project Knowledge
+
+| ไฟล์ | เมื่อไหร่ | หมายเหตุ |
+|------|----------|---------|
+| `STACK_CONTEXT.md` | ✅ ก่อน session แรก | SA สร้างและเป็นเจ้าของ |
+| `SOLUTION_PATTERNS.md` | ✅ ก่อน session แรก | SA สร้างและ maintain เอง |
+| `DECISION_LOG_[feature]_TODO.md` | เมื่อได้รับจาก PO | ส่งมาพร้อม SA Handoff |
+| `DECISION_LOG_[feature]_RESOLVED.md` | เมื่อได้รับจาก PO | ส่งมาพร้อม SA Handoff |
+| `PATTERN_LIBRARY.md` | เมื่อได้รับจาก PO | ส่งมาพร้อม SA Handoff |
+
+---
+
+### Option B — Claude Code
+
+ใช้ผ่าน Claude Code CLI, Desktop App, หรือ IDE Extension แทน claude.ai Projects
+
+#### ขั้นตอนที่ 1 — Setup workspace (ทำครั้งเดียว)
+
+ดูรายละเอียดการ setup ที่ [templates/option-b/README.md](../../templates/option-b/README.md) — ใช้ `/setup` command เพื่อสร้าง directory structure และ copy ไฟล์ที่จำเป็นทั้งหมดอัตโนมัติ
+
+#### ขั้นตอนที่ 2 — เริ่ม SA session
+
+```
+/sa
+```
+
+พิมพ์ `/sa` ใน Claude Code — Claude จะอ่าน `ai/SA_PROJECT_INSTRUCTIONS.md` และโฟกัสที่ `docs/roles/sa/`
+
+#### ขั้นตอนที่ 3 — วางไฟล์ใน directory ของ SA
+
+วางไฟล์ knowledge ใน `docs/roles/sa/` แทนการ upload เข้า Project Knowledge
+
+---
+
+## Input ที่รับจาก PO
+
+### กรณี A — Stack Setup Request (feature แรก หรือ stack ยังไม่มี)
+
+PO ส่งไฟล์ `SA_STACK_SETUP_REQUEST_[ProjectName].md`
+
+**Action:**
+1. ตรวจสอบว่า PO แนบ PE org template (`STACK_CONTEXT_[OrgName].md`) มาด้วยหรือไม่
+   - **ถ้ามี** → ใช้ org template เป็น baseline ข้ามขั้นตอน 2-3
+   - **ถ้าไม่มี** → ไปขั้นตอน 2
+2. **Interview SA ก่อน** — สรุปข้อจำกัดจาก Stack Setup Request ให้ SA เห็น แล้วถาม SA ว่าต้องการ template ไหน หรือจะ customize อย่างไร (ห้ามเลือก template ให้ SA โดยอัตโนมัติ)
+3. เลือก template จาก `docs/roles/sa/stack-templates/` ที่ SA ยืนยันแล้ว
+4. Fill in ค่าที่ขาด + verify versions ทุกตัวผ่าน WebSearch (ดู Version Verification rule ใน `ai/SA_PROJECT_INSTRUCTIONS.md`)
+5. บันทึกเป็น `STACK_CONTEXT.md`
+6. อัปโหลดเข้า SA Project Knowledge
+7. ส่งไฟล์กลับให้ PO → PO อัปโหลดเข้า PO Project
+
+ดู stack templates ที่มีอยู่: [docs/roles/sa/stack-templates/README.md](../roles/sa/stack-templates/README.md)
+
+### กรณี B — SA Handoff (มี STACK_CONTEXT.md แล้ว)
+
+PO ส่งไฟล์ `SA_HANDOFF_[feature].md`
+
+**ต้องมาพร้อม:**
+- PRD content (embed ใน handoff)
+- `DECISION_LOG_[feature]_TODO.md`
+- `DECISION_LOG_[feature]_RESOLVED.md` (ถ้ามี)
+- `PATTERN_LIBRARY.md` (ถ้ามี)
+
+---
+
+## Workflow ของ SA
+
+### STEP 1 — อ่าน Context (silent)
+
+Claude อ่านไฟล์ทั้งหมดก่อน แล้ว extract จาก SA Handoff:
+- PRD content
+- Epics จาก PO STEP 2
+- Open TODO items ที่กระทบ architectural decisions
+
+### STEP 1.5 — Tier Triage (SA เท่านั้น — ก่อนเริ่ม STEP 2)
+
+SA ประเมิน 4 คำถาม (แตะ data model ใหม่? เพิ่ม integration ใหม่? ตรงกับ pattern เดิมใน SOLUTION_PATTERNS.md? STACK_CONTEXT.md รองรับอยู่แล้วไหม?) แล้วตัดสินใจ tier:
+
+| Tier | เกณฑ์ | Path |
+|---|---|---|
+| 1 — Micro | ไม่แตะ data model, ไม่มี integration ใหม่, ตรงกับ pattern เดิม | Fast Path — เขียนแค่ Triage Summary สั้น (10-15 บรรทัด) ข้าม STEP 2-6 |
+| 2 — Standard | แตะ data model/logic ปานกลาง | STEP 2-7 ปกติ พร้อม Solution Doc เต็ม |
+| 3 — Full | กระทบมาก หรือ business-risk flag จาก PO ≥ 1 รายการ | STEP 2-7 + บังคับเรียก SEC |
+
+**กฎ:** business-risk flag จาก PO ไม่ auto-set tier แต่บังคับ tier ต่ำสุด = Tier 3 เสมอ ดู [CORE_POLICY.md](../CORE_POLICY.md) §1 และ `ai/SA_PROJECT_INSTRUCTIONS.md` §STEP 1.5
+
+### STEP 2 — วิเคราะห์ PRD ด้านเทคนิค (Tier 2/3 เท่านั้น)
+
+- Summarise feature (2-3 ประโยค มุมมองเทคนิค)
+- ระบุ data flows, integration points, external dependencies, constraints
+- List technical risks (HIGH/MED/LOW)
+
+ถ้าต้องการ clarification จาก PO → Claude สร้าง **HTML Artifact dialog**
+
+### STEP 3 — เสนอ Solution Options (Tier 2/3 เท่านั้น)
+
+Claude เสนอ 2-3 options พร้อม pros/cons/complexity
+
+**กฎ:** Claude ไม่เลือก option เอง — SA เป็นคนตัดสินใจ
+
+### STEP 4 — Draft Solution Doc (Tier 2/3 เท่านั้น)
+
+หลัง SA เลือก option → Claude draft `Solution_Doc_[feature].md` (9 sections required + section 10 ถ้า PROJECT_CONTEXT.md มี `UX/UI required: yes`)
+
+**9 sections ที่ต้องครบ (+ section 10 ถ้ามี UI):**
+1. Overview
+2. Architecture
+3. Tech decisions
+4. API / Interface design
+5. Data model changes
+6. Non-functional considerations (รวม security checklist Option B)
+7. Risks and mitigations
+8. Open questions
+9. PoC scope (ถ้าจำเป็น)
+10. UX/UI considerations (เฉพาะเมื่อ `UX/UI required: yes` — ดู `ai/PROJECT_INSTRUCTIONS.md` §Security role & UX/UI check)
+
+SA review draft ใน chat → confirm → Claude create HTML Artifact พร้อม Download button
+
+### STEP 5 — Draft ADRs (Tier 2/3 เท่านั้น — Tier 1 ยกเว้นมี significant decision จริง)
+
+สำหรับทุก tech decision ที่ "significant":
+- เลือก technology ที่ต่างจาก STACK_CONTEXT.md defaults
+- เปลี่ยน data model ที่กระทบมากกว่า 1 service
+- Trade-off ที่ต้องเก็บ rationale ไว้
+- Decision ที่ Lead ไม่สามารถ infer จาก code ได้เอง
+
+**ADR numbering:** ใช้ global index `docs/adr/INDEX.md` — SA จอง number ก่อน draft
+
+### STEP 6 — PoC Planning (Tier 2/3 เท่านั้น — ถ้ามี PoC scope ใน STEP 4)
+
+Claude generate PoC prompts สำหรับ Lead ไปรัน spike
+
+**ผล PoC:**
+- **PASS** → mark assumption "validated" → ไปต่อ STEP 7
+- **FAIL** → กลับ STEP 3 พร้อม evidence → ถ้ากระทบ PRD requirement → notify PO ก่อน
+- **PARTIAL** → SA ตัดสินใจว่า partial result เพียงพอหรือไม่
+
+### STEP 7 — Handoff Package
+
+Claude compile handoff summary พร้อม distribution plan
+
+**ส่งทุก artifact ให้ PO** (ไม่ส่งตรงให้ Lead):
+- Tier 1: `Triage_Summary_[feature].md`
+- Tier 2/3: `Solution_Doc_[feature].md`
+- `ADR_[NNN]_[title].md` (x N, ถ้ามี)
+- PoC prompts (ถ้ามี)
+- `STACK_CONTEXT.md` (ถ้า PO ส่ง Stack Setup Request มาด้วย)
+- `SOLUTION_PATTERNS.md` (ถ้า update session นี้)
+
+---
+
+## STACK_CONTEXT.md — กฎการ Maintain
+
+- SA **เป็นเจ้าของแต่เพียงผู้เดียว** — ห้าม PO แก้ไข
+- เมื่อ stack เปลี่ยน → SA อัปเดตใน SA Project → increment version → notify PO ให้ re-upload เข้า PO Project
+- ทุกครั้งที่ส่งไฟล์ให้ PO ระบุ version ใน message: เช่น `STACK_CONTEXT.md Version 2`
+- ถ้าองค์กรมี PE และ org template เปลี่ยน → PE จะแจ้ง SA ว่า project ต้อง sync อะไรบ้าง
+
+---
+
+## Lead Issue Report (Lead → SA)
+
+Lead ส่ง Issue Report ตรงถึง SA ได้ (ไม่ต้องผ่าน PO) สำหรับ technical clarification ที่ไม่กระทบ PRD
+
+**SA วินิจฉัย impact:**
+- **Small** → SA ออก ADR Amendment + update Solution Doc → ส่งให้ Lead ตรงได้
+- **Large** (กระทบ PRD scope / data model ร่วม) → SA notify PO ก่อน → PO approve → SA revise → ส่ง PO → PO re-enters STEP 3
+
+---
+
+## Retroactive Hotfix Triage (PO → SA)
+
+หลัง hotfix (P1/P2) merge แล้ว PO ส่ง HF summary ให้ SA ทำ retroactive tier tagging แบบสั้น (5-10 นาที) — **บังคับทุก hotfix ไม่มีข้อยกเว้น** (ดู [CORE_POLICY.md](../CORE_POLICY.md) §4)
+
+SA ประเมิน Tier ย้อนหลังด้วยเกณฑ์เดียวกับ STEP 1.5 Tier Triage แล้วบันทึกกลับเข้า `TASK_LOG.md` ที่ entry ของ `HF-[NNN]` (ไม่สร้างไฟล์ใหม่) — ถ้าผลออกมาเป็น Tier 2/3 ให้สร้าง follow-up task เข้า queue ปกติของ Lead ทันที
+
+---
+
+## SOLUTION_PATTERNS.md — Maintain
+
+หลัง PO accept feature → SA review ว่ามี architectural pattern ที่ควรเก็บไว้ใช้ซ้ำหรือไม่
+
+Claude ถาม: "Feature นี้มี [pattern] — บันทึกลง SOLUTION_PATTERNS.md ไหม?"
+
+SA confirm → Claude append → export → SA อัปโหลดกลับเข้า SA Project
+
+---
+
+## Checklist ก่อนส่ง SA Handoff ให้ PO
+
+- [ ] Solution Doc ครบทุก 9 sections (+ section 10 ถ้ามี UX/UI) (ไม่มี section ที่เป็นแค่ "TBD")
+- [ ] ADR files ครบตาม reference ใน Solution Doc
+- [ ] ADR numbers sequential ใน `docs/adr/INDEX.md`
+- [ ] PoC prompts พร้อม (ถ้ามี PoC scope)
+- [ ] `STACK_CONTEXT.md` version ระบุใน message
+- [ ] ส่งทุก artifact ให้ PO — ไม่ส่งตรงให้ Lead
