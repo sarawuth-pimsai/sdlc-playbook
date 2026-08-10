@@ -128,6 +128,7 @@ Build ผ่านและ test ผ่าน ไม่ได้แปลว่�
 4. **Resource cleanup** — controller/stream/listener ที่เปิดใหม่ ต้อง dispose ชัดเจน
 5. **Self-review diff** — ไฟล์ที่แก้เกินขอบเขต task ไหม เพิ่ม dependency ใหม่โดยไม่จำเป็นไหม
 6. **Test assert ของจริง** — test ที่เขียนเองต้อง assertion ผูกกับ behavior จริง ไม่ใช่ placeholder (เช่น `expect(true, true)`)
+7. **Existing function check** — grep/search codebase หา function หรือ method ที่มี signature หรือ behavior คล้ายกับที่เพิ่งเขียน (เช่น validation, formatting, error building) — ถ้าเจอให้ reuse แทน ถ้าเลือกสร้างใหม่ต้องบันทึกเหตุผลใน TASK_LOG ใต้ "Deviations"
 
 ข้อใดไม่ผ่าน → กลับไปแก้ก่อน ไม่ raise PR
 
@@ -159,7 +160,7 @@ Lead อ่าน TASK_LOG ก่อน review PR ทุกครั้ง — �
 ก่อน raise PR ตรวจ:
 
 - [ ] Done criteria ทุกข้อผ่าน (รันแล้ว ไม่ใช่แค่ดู)
-- [ ] Self-check 6 ข้อผ่านครบ (static analysis, API verification, error handling, resource cleanup, self-review diff, real test assertions)
+- [ ] Self-check 7 ข้อผ่านครบ (static analysis, API verification, error handling, resource cleanup, self-review diff, real test assertions, existing function check)
 - [ ] `TASK_LOG.md` อัปเดตสำหรับ task นี้แล้ว
 - [ ] ตาม conventions ใน `CLAUDE.md` (error shape, logging, context passing)
 - [ ] ไม่มี hardcoded values ที่ควรมาจาก environment variables

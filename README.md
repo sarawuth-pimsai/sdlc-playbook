@@ -247,7 +247,7 @@ SA จะใช้ org template เป็น baseline — ลดเวลา set
 │     L-STEP 1 cross-check → L-STEP 1.5 Escalation Check              │
 │       (scope เกินเอกสาร → escalate ตรงไป SA ไม่ผ่าน PO)            │
 │     → L-STEP 2 task breakdown → L-STEP 2.5 Dependency Graph +       │
-│       Parallel Lane Assignment → generate Claude Code prompts       │
+│       Lane Assignment + Cross-lane Utility Scan → generate prompts │
 │     → CLAUDE.md → ส่ง task prompts ให้ Dev + setup files ให้ QA    │
 ├─────────────────────────────────────────────────────────────────────┤
 │  6. Dev implement (ทีละ task ตาม lane)                              │

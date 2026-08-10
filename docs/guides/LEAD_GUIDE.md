@@ -96,14 +96,17 @@ Claude แสดง task board preview → Lead review → confirm ก่อน�
 
 ### L-STEP 2.5 — Dependency Graph + Lane Assignment
 
-หลัง task board confirm แล้ว Claude สร้าง Dependency Graph จาก `Depends on`/`Blocks` แล้วเช็ค file overlap ระหว่างทุกคู่ task:
+หลัง task board confirm แล้ว Claude ทำ 3 ขั้นตอนก่อน generate prompts:
 
-- Task แตะไฟล์เดียวกัน → **บังคับ sequence เสมอ** แม้ไม่มี dependency ประกาศไว้
-- Task ไม่แตะไฟล์ซ้ำ + ไม่มี dependency → **แยก lane อิสระ** รันขนานกันได้
+1. **สร้าง Dependency Graph** — จาก `Depends on`/`Blocks` ของทุก task
+2. **เช็ค file overlap** — task แตะไฟล์เดียวกัน → บังคับ sequence เสมอ; task ไม่แตะไฟล์ซ้ำ + ไม่มี dependency → แยก lane อิสระ รันขนานกันได้
+3. **Cross-lane utility scan** — สำรวจ "What to create/modify" ข้าม lane ทั้งหมด ถ้ามี helper/utility ที่ 2 lane ขึ้นไปจะใช้ร่วมกัน (เช่น validation, formatting, error builder) → extract เป็น shared task แยก และตั้ง `Depends on` ให้ทุก lane ที่ใช้ — task นั้นต้อง merge ก่อน lane เหล่านั้นเริ่ม
 
 **Lane ตั้งชื่อตาม domain** (เช่น `lane-auth`, `lane-api-gateway`) — ไม่ผูกกับชื่อคน เพราะคนรับ lane เปลี่ยนได้
 
 Claude แสดง Dependency Graph + lane assignment → Lead review → confirm ก่อนไป L-STEP 3
+
+**PAUSE trigger:** ถ้า cross-lane scan พบ helper ที่หลาย lane น่าจะใช้ร่วมกัน แต่ Lead ไม่แน่ใจว่าควร extract → Claude ถาม Lead ก่อน: "พบ [utility name] ที่อาจใช้ร่วมกันใน [lane A] และ [lane B] — ต้องการ extract เป็น shared task ก่อน หรือให้แต่ละ lane implement แยกกันครับ?"
 
 ดูรายละเอียดใน `ai/LEAD_PROJECT_INSTRUCTIONS.md` §L-STEP 2.5 และ [CORE_POLICY.md](../CORE_POLICY.md) §3
 
@@ -150,6 +153,7 @@ Checklist ที่ review:
 3. Error handling — ครบทุก error code ใน spec ไหม
 4. Security (Option B) — hardcoded secrets, missing input validation, sensitive data in response, auth checks, error message leaks
 5. Test coverage — done criteria ถูก cover ด้วย tests ไหม
+6. Duplication — มี function/method ใหม่ที่ duplicate logic ที่มีอยู่แล้วในโปรเจกต์ไหม — เช็ค utility functions, validation helpers, formatters, error builders โดย grep ชื่อ/signature คล้ายกันในไฟล์อื่นก่อนยืนยันว่า code นี้ใหม่จริง
 
 Output format: Must fix / Should fix / Consider / Verdict: APPROVE or REQUEST CHANGES
 
@@ -233,3 +237,4 @@ Lead ส่ง Issue Report ตรงถึง SA ได้ (ไม่ต้อ�
 - [ ] ทุก task มี Lane assigned ใน Parallel metadata block
 - [ ] Task ที่แตะไฟล์ร่วมกันถูกทำเป็น sequence แล้ว — ไม่มีสอง task ในไฟล์เดียวกันที่ยัง mark เป็น parallel
 - [ ] Assigned Dev ระบุครบทุก lane (หรือ "unassigned")
+- [ ] Cross-lane utility scan ผ่านแล้ว — shared utility ที่พบถูก extract เป็น task แยก และ lane ที่ใช้มี dependency ชี้มาหา task นั้น
