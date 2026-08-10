@@ -137,6 +137,7 @@ Build ผ่านและ test ผ่าน ไม่ได้แปลว่�
 4. **Resource cleanup** — controller/stream/listener/subscription ที่เปิดใน code ที่เพิ่มเข้ามา ต้องมี dispose/cleanup ที่ชัดเจน (memory leak check)
 5. **Self-review diff** — สรุปให้ตัวเองเห็นชัด: ไฟล์ที่แก้ทั้งหมด, มีไฟล์ไหนเกินขอบเขต task ไหม, เพิ่ม dependency ใหม่โดยไม่จำเป็นไหม — ถ้าเกิน scope ให้กลับไปดู "Scope enforcement" ก่อน
 6. **Test ที่เขียนเอง assert ของจริง** — เช็คว่า test cases ที่เพิ่มมี assertion ที่ผูกกับ behavior จริง ไม่ใช่ placeholder (เช่น `expect(true, true)`, `assert 1 == 1`) — ถ้าเจอ ต้องแก้ก่อน raise PR
+7. **Existing function check** — grep/search codebase หา function หรือ method ที่มี signature หรือ behavior คล้ายกับที่เพิ่งเขียน (เช่น validation, formatting, error building) — ถ้าเจอให้ reuse แทน ถ้าเลือกสร้างใหม่ต้องบันทึกเหตุผลใน TASK_LOG ใต้ "Deviations"
 
 ข้อใดข้อหนึ่งไม่ผ่าน → กลับไปแก้ก่อน ไม่ raise PR จนกว่าจะผ่านครบ
 
