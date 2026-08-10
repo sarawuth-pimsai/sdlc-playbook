@@ -12,11 +12,24 @@
 
 ## ก่อนเริ่ม — Safety checks
 
-1. `git fetch origin --tags` — sync tags และ `origin/main` ล่าสุดก่อนเสมอ
-2. หา tag ล่าสุด: `git tag -l --sort=-v:refname | head -1` (ถ้าไม่มี tag เลย → นี่คือ release แรก ใช้ `v1.0.0` เป็นข้อเสนอ base)
-3. เช็คว่ามี commit ใหม่บน `origin/main` หลัง tag ล่าสุดไหม: `git log [last-tag]..origin/main --oneline`
+รันพร้อมกัน: `git fetch origin --tags` และ `gh auth status`
+
+> `git fetch origin --tags` ต้องรันก่อนทุกครั้ง — sync tags, `origin/main`, และ `origin/develop` ล่าสุดจาก remote ก่อนเปรียบเทียบ branch ใดๆ
+
+1. หา tag ล่าสุด: `git tag -l --sort=-v:refname | head -1` (ถ้าไม่มี tag เลย → นี่คือ release แรก ใช้ `v1.0.0` เป็นข้อเสนอ base)
+2. เช็คว่ามี commit ใหม่บน `origin/main` หลัง tag ล่าสุดไหม: `git log [last-tag]..origin/main --oneline`
    - **ถ้าไม่มี commit ใหม่เลย** → STOP แจ้ง user ว่า `origin/main` ไม่มีอะไรใหม่กว่า tag ล่าสุด (`[last-tag]`) ไม่ต้อง release
-4. เช็คว่า `gh` auth พร้อมใช้งาน (`gh auth status`) — ถ้าไม่พร้อม ดู §เมื่อเจอปัญหา
+3. **เช็ค `origin/develop` มี commit ที่ยังไม่เข้า `origin/main` ไหม**: `git log origin/main..origin/develop --oneline`
+   - **ถ้ามี commit** → STOP แจ้ง user ทันที:
+     ```
+     ⚠️  develop ยังมี [N] commit ที่ยังไม่ถูก merge เข้า main:
+     [รายการ commit จาก git log]
+
+     release จาก main ตอนนี้จะขาด commit เหล่านี้ไป
+     กรุณา merge develop → main ก่อน (ผ่าน /ship + merge PR) แล้วค่อย release
+     ```
+   - **ถ้าไม่มี** → `develop` และ `main` ตรงกัน ดำเนินการต่อได้
+4. เช็คว่า `gh` auth พร้อมใช้งาน — ถ้าไม่พร้อม ดู §เมื่อเจอปัญหา
 
 ---
 

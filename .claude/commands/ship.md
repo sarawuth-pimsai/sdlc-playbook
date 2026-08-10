@@ -10,12 +10,18 @@
 
 ## ก่อนเริ่ม — Safety checks
 
-รันพร้อมกัน: `git status`, `git diff`, `git log --oneline -5`, `git branch --show-current`
+รันพร้อมกัน: `git fetch origin`, `git status`, `git diff`, `git log --oneline -5`, `git branch --show-current`
+
+> `git fetch origin` ต้องรันก่อนทุกครั้ง — ดึงสถานะล่าสุดจาก remote เพื่อให้การเปรียบเทียบ branch ด้านล่างถูกต้อง โดยเฉพาะในทีมที่มีหลายคน push พร้อมกัน
 
 1. **ถ้า branch ปัจจุบันไม่ใช่ `develop`** → STOP แจ้ง user: "อยู่ผิด branch (ปัจจุบัน: [branch]) — `/ship` ออกแบบมาสำหรับ workflow บน `develop` เท่านั้น กรุณา checkout `develop` ก่อน"
-2. **ถ้าไม่มีทั้ง staged และ unstaged changes** → STOP แจ้ง user ว่าไม่มีอะไรให้ commit — ถ้า `develop` มี commit ที่ยัง unpushed อยู่แล้ว ข้ามไป STEP 2 ได้เลย
-3. **Review ไฟล์ที่จะ stage** — ถ้าเจอไฟล์ที่น่าสงสัยว่ามี secret/credential/token ปน (แม้ชื่อไฟล์จะดูปกติ) ให้เปิดดูเนื้อหาก่อน แล้วเตือน user ก่อน stage ไฟล์นั้น
-4. Repo นี้ไม่มี build/lint/test — ห้ามพยายามรันคำสั่งเหล่านั้นหรือเสนอให้เพิ่ม (ดู `CLAUDE.md` §ห้ามเพิ่ม tooling)
+2. **เช็ค local ตามหลัง `origin/develop` ไหม**: `git log develop..origin/develop --oneline`
+   - ถ้ามี commit → STOP: "`origin/develop` มี [N] commit ใหม่ที่ยังไม่ได้ pull — กรุณารัน `git pull origin develop` ก่อนเพื่อป้องกัน conflict และไม่ทับงานของคนอื่น"
+3. **เช็ค `origin/main` มี commit ที่ไม่มีใน `develop` ไหม**: `git log develop..origin/main --oneline`
+   - ถ้ามี commit → PAUSE: "`origin/main` มี [N] commit ที่ยังไม่ถูก merge เข้า `develop` (อาจเป็น hotfix หรือ merge โดยตรง) — แนะนำ merge `origin/main` เข้า `develop` ก่อนเพื่อไม่ให้ conflict ตอน PR — ดำเนินการต่อเลยหรือ merge ก่อนครับ?"
+4. **ถ้าไม่มีทั้ง staged และ unstaged changes** → STOP แจ้ง user ว่าไม่มีอะไรให้ commit — ถ้า `develop` มี commit ที่ยัง unpushed อยู่แล้ว ข้ามไป STEP 2 ได้เลย
+5. **Review ไฟล์ที่จะ stage** — ถ้าเจอไฟล์ที่น่าสงสัยว่ามี secret/credential/token ปน (แม้ชื่อไฟล์จะดูปกติ) ให้เปิดดูเนื้อหาก่อน แล้วเตือน user ก่อน stage ไฟล์นั้น
+6. Repo นี้ไม่มี build/lint/test — ห้ามพยายามรันคำสั่งเหล่านั้นหรือเสนอให้เพิ่ม (ดู `CLAUDE.md` §ห้ามเพิ่ม tooling)
 
 ---
 
