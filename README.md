@@ -148,6 +148,16 @@ Working alone and wearing multiple role hats? See [docs/guides/SOLO_GUIDE.md](do
 
 ---
 
+## Optional Companion Tools
+
+| Tool | What it adds | Works with |
+|------|-------------|------------|
+| [Ponytail](https://github.com/dietrichgebert/ponytail) | Code minimalism at generation time — seven-rung decision ladder that prevents over-engineering (YAGNI, stdlib-first, reuse-first) | Option B (Claude Code) |
+
+Ponytail operates at a different layer from this playbook (code generation discipline vs. workflow orchestration) and can be installed alongside it without conflict. Follow the install instructions in the Ponytail repo.
+
+---
+
 ## First-time Setup — Option A
 
 > This section describes **Option A** (claude.ai Projects). For **Option B** (Claude Code) see [templates/option-b/README.md](templates/option-b/README.md)
