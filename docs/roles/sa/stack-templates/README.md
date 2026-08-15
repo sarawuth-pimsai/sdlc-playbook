@@ -16,6 +16,7 @@ If PO attached a `STACK_CONTEXT_[OrgName].md` with the Stack Setup Request — u
 | Template | When to choose |
 |----------|-----------------|
 | [STACK_CONTEXT_go_clean_arch.md](STACK_CONTEXT_go_clean_arch.md) | Backend Go + Clean Architecture + PostgreSQL/Redis + Next.js or Vite frontend |
+| [STACK_CONTEXT_node_fastify.md](STACK_CONTEXT_node_fastify.md) | Backend Node.js + Fastify v5 + Prisma v7 + 5-layer Clean Architecture + PostgreSQL |
 | _(add more as the org adopts new stacks)_ | — |
 
 If no template matches — use the blank schema at `docs/roles/sa/STACK_CONTEXT.md` instead.
@@ -106,3 +107,4 @@ When the org starts using a new stack family (e.g. Python FastAPI or Node.js Nes
 | `README.md` | Guide | All usage instructions |
 | `STACK_CONTEXT_base_crosscutting.md` | Reference | Cross-cutting concerns (Auth protocol, OTel standard, PDPA) — no stack-specific packages |
 | `STACK_CONTEXT_go_clean_arch.md` | Template | Go + Clean Architecture + PostgreSQL + Redis + Next.js / Vite |
+| `STACK_CONTEXT_node_fastify.md` | Template | Node.js + Fastify v5 + Prisma v7 + 5-layer Clean Architecture + PostgreSQL |
